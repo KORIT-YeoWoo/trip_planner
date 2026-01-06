@@ -6,7 +6,8 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="itinerariesId">
         insert into itineraries
-        values (default, #{userId}, #{startDate}, #{endDate}, #{budget}, #{transport}, #{partyType}, #{total_cost}, now())
+        values (default, #{userId}, #{startDate}, #{endDate},
+        #{budget}, #{transport}, #{partyType}, #{total_cost}, now())
     </insert>
     
     <select id="selectById" resultType="itinerary">

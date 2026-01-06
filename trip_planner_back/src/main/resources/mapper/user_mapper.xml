@@ -47,7 +47,7 @@
             user_id,
             oauth2_id,
             name,
-            NULL, --nickname
+            nickname,
             age,
             gender,
             phone,

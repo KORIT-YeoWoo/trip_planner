@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korit.trip_planner_back.mapper.ItineraryMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="itinerariesId">
+        insert into itineraries
+        values (default, #{userId}, #{startDate}, #{endDate},
+        #{budget}, #{transport}, #{partyType}, #{total_cost}, now())
+    </insert>
+    
+    <select id="selectById" resultType="itinerary">
+        select
+            itineraries_id,
+            user_id,
+            start_date,
+            end_date,
+            budget,
+            transport,
+            party_type,
+            total_cost,
+            created_at
+        from
+            itineraries
+        where
+            itineraries_id = #{itinerariesId}
+    </select>
+    <select id="selectAll" resultType="itinerary">
+        select
+            itineraries_id,
+            user_id,
+            start_date,
+            end_date,
+            budget,
+            transport,
+            party_type,
+            total_cost,
+            created_at
+        from
+            itineraries
+    </select>
+    <update id="update">
+        update itineraries
+        set
+            start_date = #{startDate},
+            end_date = #{endDate},
+            budget = #{budget},
+            transport = #{transport},
+            party_type = #{partType},
+            total_cost = #{totalCost},
+        where
+            itineraries_id = #{itinerariesId}
+    </update>
+    <delete id="deleteById">
+        delete
+        from
+            itineraries
+        where
+            itineraries_id = #{itinerariesId}
+    </delete>
+
+</mapper>

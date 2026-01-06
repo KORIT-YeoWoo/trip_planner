@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: trip-planner
+
+server:
+  port: 8080
+
+# 스웨거 설정
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  packages-to-scan: com.korit.trip_planner_back.controller
+
+# MyBatis 설정
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.korit.trip_planner_back.entity

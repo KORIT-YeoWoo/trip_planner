@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korit.trip_planner_back.mapper.TouristSpotMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="spotId">
+        insert into tourist_spots
+        values(default, #{title}, #{category}, #{address}, #{latitude}, #{longitude},
+            #{duration}, #{price}, #{description}, #{openingHrs}, #{contact}, #{spotImg}, now())
+    </insert>
+    <select id="findById" resultType="touristSpot">
+        select
+            spot_id,
+            title,
+            category,
+            address,
+            latitude,
+            longitude,
+            duration,
+            price,
+            description,
+            opening_hrs,
+            spot_img,
+            created_at
+        from
+            tourist_spots
+        where
+            spot_id = #{spotId}
+    </select>
+    <select id="findByCategory" resultType="touristSpot">
+        select
+            spot_id,
+            title,
+            category,
+            address,
+            latitude,
+            longitude,
+            duration,
+            price,
+            description,
+            opening_hrs,
+            spot_img,
+            created_at
+        from
+            tourist_spots
+        <where>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+        </where>
+        order by
+            spot_id;
+    </select>
+    <select id="findByPage" resultType="touristSpot">
+        SELECT
+            spot_id AS spotId,
+            title,
+            category,
+            address,
+            latitude,
+            longitude,
+            createdAt
+        FROM
+            tourist_spots
+        ORDER BY
+            spot_id DESC
+        LIMIT
+            #{size}
+        OFFSET
+            #{offset}
+    </select>
+    <update id="updateBySpotImg">
+        update
+            tourist_spots
+        set
+            spot_img = #{spotImg}
+        where
+            spot_id = #{spotId}
+    </update>
+    <delete id="deleteById">
+        delete
+        from
+            tourist_spots
+        where
+            spot_id = #{spotId}
+    </delete>
+</mapper>

@@ -10,7 +10,7 @@
         #{budget}, #{transport}, #{partyType}, #{total_cost}, now())
     </insert>
     
-    <select id="selectById" resultType="itinerary">
+    <select id="findByItinerariesId" resultType="itinerary">
         select
             itineraries_id,
             user_id,
@@ -26,7 +26,7 @@
         where
             itineraries_id = #{itinerariesId}
     </select>
-    <select id="selectAll" resultType="itinerary">
+    <select id="findAll" resultType="itinerary">
         select
             itineraries_id,
             user_id,

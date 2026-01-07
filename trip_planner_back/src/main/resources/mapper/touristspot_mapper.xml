@@ -8,7 +8,7 @@
         values(default, #{title}, #{category}, #{address}, #{latitude}, #{longitude},
             #{duration}, #{price}, #{description}, #{openingHrs}, #{contact}, #{spotImg}, now())
     </insert>
-    <select id="findBySpotId" resultType="touristSpot">
+    <select id="findById" resultType="touristSpot">
         select
             spot_id,
             title,

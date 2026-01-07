@@ -9,5 +9,5 @@ public interface FavoriteMapper {
 
     Favorite findByUserId(int userId);
 
-    void deleteById(Favorite favorite);
+    void deleteById(Long itineraryId);
 }

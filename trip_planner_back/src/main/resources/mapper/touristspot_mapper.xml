@@ -51,6 +51,24 @@
         order by
             spot_id;
     </select>
+    <select id="findByPage" resultType="touristSpot">
+        SELECT
+            spot_id AS spotId,
+            title,
+            category,
+            address,
+            latitude,
+            longitude,
+            createdAt
+        FROM
+            tourist_spots
+        ORDER BY
+            spot_id DESC
+        LIMIT
+            #{size}
+        OFFSET
+            #{offset}
+    </select>
     <update id="updateBySpotImg">
         update
             tourist_spots

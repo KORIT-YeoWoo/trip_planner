@@ -43,8 +43,13 @@
             created_at
         from
             tourist_spots
-        where
-            category = #{category}
+        <where>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+        </where>
+        order by
+            spot_id;
     </select>
     <update id="updateBySpotImg">
         update

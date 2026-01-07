@@ -19,13 +19,32 @@
             duration,
             price,
             description,
-            openingHrs,
-            spotImg,
-            createdAt
+            opening_hrs,
+            spot_img,
+            created_at
         from
             tourist_spots
         where
             spot_id = #{spotId}
+    </select>
+    <select id="findByCategory" resultType="touristSpot">
+        select
+            spot_id,
+            title,
+            category,
+            address,
+            latitude,
+            longitude,
+            duration,
+            price,
+            description,
+            opening_hrs,
+            spot_img,
+            created_at
+        from
+            tourist_spots
+        where
+            category = #{category}
     </select>
     <update id="updateBySpotImg">
         update

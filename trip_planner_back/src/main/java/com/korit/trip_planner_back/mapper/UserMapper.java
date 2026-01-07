@@ -9,7 +9,7 @@ public interface UserMapper {
     void insert(User user);
 
     // 회원조회
-    User findByUserId(Long userId);
+    User findByUserId(int userId);
     User findByOauth2Id(Long oauth2Id);
     User findByNickname(String nickname);
 

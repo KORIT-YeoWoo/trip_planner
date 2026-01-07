@@ -12,9 +12,9 @@ public interface ItineraryMapper {
     // 기본 CRUD
     void insert(Itinerary itinerary);
 
-    Itinerary selectById(Long itineraryId);
+    Itinerary findByItinerariesId(Long itineraryId);
 
-    List<Itinerary> selectAll();
+    List<Itinerary> findAll();
 
     void update(Itinerary itinerary);
 

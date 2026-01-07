@@ -1,0 +1,29 @@
+import { css } from "@emotion/react";
+
+export const global = css`
+
+    @font-face {
+        font-family: 'SchoolSafetyNotification';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimAllimjangTTF-R.woff2')
+        format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'SchoolSafetyNotification';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimAllimjangTTF-B.woff2')
+        format('woff2');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+    }
+  
+    html, body, #root {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "SchoolSafetyNotification";
+    }
+`;

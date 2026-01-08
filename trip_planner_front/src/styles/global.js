@@ -2,6 +2,10 @@ import { css } from "@emotion/react";
 
 export const global = css`
 
+    html {
+        font-size: 125%;
+    }
+
     @font-face {
         font-family: 'SchoolSafetyNotification';
         src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimAllimjangTTF-R.woff2')

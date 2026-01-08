@@ -1,124 +1,125 @@
-const styles = {
-    page: {
-        minHeight: "100vh",
-        boxSizing: "border-box",
-        backgroundColor: "#fbf7f2",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "40px 20px"
-    },
+import { css } from "@emotion/react";
 
-    badge: {
-        padding: "8px 14px",
-        borderRadius: "999px",
-        backgroundColor: "#ffffff",
-        border: "1px solid #e9dfd6",
-        fontSize: "12px",
-        color: "#777",
-        boxShadow: "0 6px 18px rgba(0,0,0,0.04)",
-        cursor: "default"
-    },
+export const page = css`
+    min-height: 100vh;
+    box-sizing: border-box;
+    background-color: #fbf7f2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 80px 20px 40px;
+`;
 
-    fox: {
-        marginTop: "32px",
-        maxWidth: "960px",
-        width: "100%",
-        textAlign: "center",
-        cursor: "default"
-    },
+export const badge = css`
+    padding: 8px 14px;
+    border-radius: 999px;
+    background-color: #ffffff;
+    border: 1px solid #e9dfd6;
+    font-size: 12px;
+    color: #777;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+    cursor: default;
+`;
 
-    title: {
-        fontSize: "45px",
-        fontWeight: "900",
-        letterSpacing: "-0.03em",
-        margin: 0,
-        marginBottom: "20px",
-        color: "#111",
-        cursor: "default"
-    },
+export const fox = css`
+    margin-top: 32px;
+    max-width: 960px;
+    width: 100%;
+    text-align: center;
+    cursor: default;
+`;
 
-    foxText: {
-        color: "#FF8A00",
-        fontSize: "62px",
-        marginLeft: "10px"
-    },
+export const title = css`
+    font-size: 45px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin: 0;
+    margin-bottom: 20px;
+    color: #111;
+    cursor: default;
+`;
 
-    mascotWrap: {
-        margin: "20px auto"
-    },
+export const foxText = css`
+    color: #ff8a00;
+    font-size: 62px;
+    margin-left: 10px;
+`;
 
-    mascot: {
-        width: "120px",
-        height: "120px",
-        objectFit: "contain",
-        filter: "drop-shadow(0 10px 16px rgba(0,0,0,0.1))"
-    },
+export const mascotWrap = css`
+    margin: 20px auto;
+`;
 
-    subtitle: {
-        fontSize: "18px",
-        lineHeight: 1.6,
-        color: "#333",
-        marginBottom: "20px"
-    },
+export const mascot = css`
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.1));
+`;
 
-    accentText: {
-        color: "#f47a20",
-        fontWeight: "800"
-    },
-    foxAccent: {
-        color: "#FF8A00",
-        fontWeight: "800",
-    },
+export const subtitle = css`
+    font-size: 18px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 20px;
+`;
 
-    button: {
-        backgroundColor: "#f47a20",
-        color: "#fff",
-        border: "none",
-        borderRadius: "999px",
-        padding: "12px 20px",
-        fontSize: "14px",
-        fontWeight: "700",
-        cursor: "pointer",
-        boxShadow: "0 10px 22px rgba(244,122,32,0.3)",
-        transition: "all 0.2s ease",   
-    },
+export const accentText = css`
+    color: #f47a20;
+    font-weight: 800;
+`;
 
-    buttonHover: {
-        transform: "translateY(-2px)", 
-        backgroundColor: "#ff761bff",
-    },
+export const foxAccent = css`
+    color: #ff8a00;
+    font-weight: 800;
+`;
 
-    cards: {
-        marginTop: "36px",
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "20px"
-    },
+export const button = css`
+    background-color: #f47a20;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(244, 122, 32, 0.3);
+    transition: all 0.2s ease;
+`;
 
-    card: {
-        backgroundColor: "#ffffff",
-        borderRadius: "22px",
-        border: "1px solid #e9dfd6",
-        minHeight: "150px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: "540",
-        fontSize: "16px",
-        boxShadow: "0 14px 30px rgba(0,0,0,0.05)",
-        padding: "20px",
-        transition: "all 0.25s ease",   
-        cursor: "default",
-    },
+export const buttonHover = css`
+    transform: translatey(-2px);
+    background-color: #ff761bff;
+`;
 
-    cardHover: {
-        transform: "translateY(-6px)",  
-        boxShadow: "0 22px 44px rgba(0,0,0,0.12)",
-    },
-    cardText: {
-        textAlign: "center",
-    }
-}
+export const cards = css`
+    margin-top: 36px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+`;
 
-export default styles
+export const card = css`
+    background-color: #ffffff;
+    border-radius: 22px;
+    border: 1px solid #e9dfd6;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 540;
+    font-size: 16px;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    transition: all 0.25s ease;
+    cursor: default;
+`;
+
+export const cardHover = css`
+    transform: translatey(-6px);
+    box-shadow: 0 22px 44px rgba(0, 0, 0, 0.12);
+`;
+
+export const cardText = css`
+    text-align: center;
+`;
+

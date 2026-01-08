@@ -3,7 +3,7 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korit.trip_planner_back.mapper.UserMapper">
-    <insert id="insert" useGeneratedKeys="true" keyProperty="UserId">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="userId">
         insert into users
         values(default, #{oauth2_id}, #{name}, #{nickname}, #{age},
         #{gender}, #{phone}, #{email}, #{profile_img}, now())

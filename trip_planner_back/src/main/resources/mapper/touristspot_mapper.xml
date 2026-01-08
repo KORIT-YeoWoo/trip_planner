@@ -59,7 +59,7 @@
             address,
             latitude,
             longitude,
-            createdAt
+            created_at
         FROM
             tourist_spots
         ORDER BY
@@ -69,6 +69,7 @@
         OFFSET
             #{offset}
     </select>
+
     <update id="updateBySpotImg">
         update
             tourist_spots
@@ -77,6 +78,7 @@
         where
             spot_id = #{spotId}
     </update>
+
     <delete id="deleteById">
         delete
         from

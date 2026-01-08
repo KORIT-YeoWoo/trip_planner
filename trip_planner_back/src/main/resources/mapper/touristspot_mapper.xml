@@ -27,8 +27,10 @@
         where
             spot_id = #{spotId}
     </select>
-    <select id="findByCategory" resultType="touristSpot">
-        select
+    <select id="findByCategory"
+            parameterType="string"
+            resultType="TouristSpot">
+        SELECT
             spot_id,
             title,
             category,
@@ -41,16 +43,17 @@
             opening_hrs,
             spot_img,
             created_at
-        from
+        FROM
             tourist_spots
         <where>
             <if test="category != null and category != ''">
-                AND category = #{category}
+                category = #{category}
             </if>
         </where>
-        order by
-            spot_id;
+        ORDER BY
+            spot_id
     </select>
+
     <select id="findByPage" resultType="touristSpot">
         SELECT
             spot_id AS spotId,
@@ -69,6 +72,28 @@
         OFFSET
             #{offset}
     </select>
+    <select id="findBySearch" resultType="touristSpot">
+        select
+            spot_id,
+            title,
+            category,
+            address,
+            latitude,
+            longitude,
+            duration,
+            price,
+            description,
+            opening_hrs,
+            spot_img,
+            created_at
+        from
+            tourist_spots
+        where
+            title like concat(#{keyword}, %)
+        order by
+            rating desc
+    </select>
+
     <update id="updateBySpotImg">
         update
             tourist_spots

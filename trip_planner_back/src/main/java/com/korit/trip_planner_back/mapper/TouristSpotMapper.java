@@ -13,6 +13,8 @@ public interface TouristSpotMapper {
     TouristSpot findById(int spotId);
     TouristSpot updateBySpotImg(String spotImg);
     List<TouristSpot> findByPage(@Param("size") int size, @Param("offset") int offset);
+    List<TouristSpot> findByCategory(@Param("category") String category);
+    TouristSpot findBySearch(@Param("keyword") String keyword);
 
     void deleteById(TouristSpot touristSpot);
 }

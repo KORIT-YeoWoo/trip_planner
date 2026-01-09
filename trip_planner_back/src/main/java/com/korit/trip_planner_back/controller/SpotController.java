@@ -13,13 +13,22 @@ import java.util.List;
 
 
 @RestController
+@RequestMapping("/api/spots")
 @RequiredArgsConstructor
 public class SpotController {
 
     private final TouristSpotMapper touristSpotMapper;
 
-    @GetMapping(value = "/json", produces = "application/json; charset=UTF-8")
-    public List<TouristSpot> json() {
-        return touristSpotMapper.findByPage(1000, 0);
+    // GET /api/spots
+    @GetMapping
+    public List<TouristSpot> getSpots(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String search
+    ) {
+        // 페이지네이션 로직 추가 필요
+        int offset = (page - 1) * size;
+        return touristSpotMapper.findByPage(size, offset);
     }
 }

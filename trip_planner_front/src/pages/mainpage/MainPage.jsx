@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import * as styles from "./styles";
 import { useState } from "react";
-import foxImage from "../assets/기본.PNG";
+import foxImage from "../../assets/기본.PNG";
 
-export default function MainPage() {
+function MainPage() {
     const [isHover, setIsHover] = useState(false);
     const [hoveredCard, setHoveredCard] = useState(null);
 
@@ -69,3 +69,4 @@ export default function MainPage() {
         </div>
     );
 }
+export default MainPage;

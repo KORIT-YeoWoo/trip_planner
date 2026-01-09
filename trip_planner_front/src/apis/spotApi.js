@@ -32,7 +32,7 @@ export const getCategories = async () => {
     const response = await axios.get('/api/spots/categories');
     return response;
 };
-
+    
 export const getPopularSpots = async (limit = 6) => {
     const response = await axios.get('/api/spots/popular', {
         params: { limit },

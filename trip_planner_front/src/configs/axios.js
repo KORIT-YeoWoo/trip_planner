@@ -30,13 +30,14 @@ instance.interceptors.request.use(
 // 응답 인터셉터
 instance.interceptors.response.use(
     (response) => {
-        console.log(`[API 응답]  ${response.config.url}`, response.data);
+        console.log(`[API 응답] ${response.config.url}`, response.data);
 
-        // ApiResponse<T> 형식에서 data추출
-        if(response.data && response.data.success){
+        // ApiResponse<T> 형식 체크 후 data 추출
+        if(response.data && response.data.success !== undefined){
             return response.data; // { success, data, message }
         }
 
+        // 일반 응답은 그대로 반환
         return response.data;
     },
     (error) => {

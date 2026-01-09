@@ -8,13 +8,18 @@ import java.util.List;
 
 @Mapper
 public interface TouristSpotMapper {
-    void insert(TouristSpot touristSpot);
 
-    TouristSpot findById(int spotId);
-    TouristSpot updateBySpotImg(String spotImg);
+    int insert(TouristSpot touristSpot);
+
+    TouristSpot findById(@Param("spotId") int spotId);
+
+    List<TouristSpot> findByCategory(@Param("category") String category);
+
     List<TouristSpot> findByPage(@Param("size") int size, @Param("offset") int offset);
     List<TouristSpot> findByCategory(@Param("category") String category);
     TouristSpot findBySearch(@Param("keyword") String keyword);
 
-    void deleteById(TouristSpot touristSpot);
+    int updateBySpotImg(@Param("spotId") int spotId, @Param("spotImg") String spotImg);
+
+    int deleteById(@Param("spotId") int spotId);
 }

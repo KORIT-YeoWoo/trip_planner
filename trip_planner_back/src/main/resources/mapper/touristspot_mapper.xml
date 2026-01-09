@@ -62,7 +62,7 @@
             address,
             latitude,
             longitude,
-            createdAt
+            created_at
         FROM
             tourist_spots
         ORDER BY
@@ -71,27 +71,6 @@
             #{size}
         OFFSET
             #{offset}
-    </select>
-    <select id="findBySearch" resultType="touristSpot">
-        select
-            spot_id,
-            title,
-            category,
-            address,
-            latitude,
-            longitude,
-            duration,
-            price,
-            description,
-            opening_hrs,
-            spot_img,
-            created_at
-        from
-            tourist_spots
-        where
-            title like concat(#{keyword}, %)
-        order by
-            rating desc
     </select>
 
     <update id="updateBySpotImg">
@@ -102,6 +81,7 @@
         where
             spot_id = #{spotId}
     </update>
+
     <delete id="deleteById">
         delete
         from

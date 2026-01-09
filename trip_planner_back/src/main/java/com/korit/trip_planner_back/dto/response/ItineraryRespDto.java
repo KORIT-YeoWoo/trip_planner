@@ -23,4 +23,5 @@ public class ItineraryRespDto {
     private String partyType;
     private int totalCost;      // 총 비용
     private LocalDateTime createdAt;
+
 }

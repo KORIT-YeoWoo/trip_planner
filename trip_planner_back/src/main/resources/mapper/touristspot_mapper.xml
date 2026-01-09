@@ -72,6 +72,9 @@
         OFFSET
             #{offset}
     </select>
+    <select id="findBySearch" resultType="com.korit.trip_planner_back.entity.TouristSpot">
+
+    </select>
 
     <update id="updateBySpotImg">
         update

@@ -27,6 +27,7 @@ public class SecurityConfig {
             auth.requestMatchers("/swagger-ui.html").permitAll();
             auth.requestMatchers("/doc").permitAll();
             auth.requestMatchers("/json").permitAll();
+            auth.requestMatchers("/api/spots/**").permitAll();
             auth.anyRequest().authenticated();
         });
 

@@ -1,13 +1,19 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 import SpotListPage from './pages/SpotListPage';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import MainPage from './pages/MainPage'
+import { global } from './styles/global'
+import { Global } from '@emotion/react'
 
-createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
+    <Global styles={global} />
+    <MainPage />
     <Routes>
       <Route path="/jeju" element={<SpotListPage />} />
     </Routes>
   </BrowserRouter>
-);
+)

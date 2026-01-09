@@ -16,6 +16,8 @@ public interface TouristSpotMapper {
     List<TouristSpot> findByCategory(@Param("category") String category);
 
     List<TouristSpot> findByPage(@Param("size") int size, @Param("offset") int offset);
+    List<TouristSpot> findByCategory(@Param("category") String category);
+    TouristSpot findBySearch(@Param("keyword") String keyword);
 
     int updateBySpotImg(@Param("spotId") int spotId, @Param("spotImg") String spotImg);
 

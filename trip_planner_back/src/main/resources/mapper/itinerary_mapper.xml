@@ -47,8 +47,8 @@
             end_date = #{endDate},
             budget = #{budget},
             transport = #{transport},
-            party_type = #{partType},
-            total_cost = #{totalCost},
+            party_type = #{partyType},
+            total_cost = #{totalCost}
         where
             itineraries_id = #{itinerariesId}
     </update>

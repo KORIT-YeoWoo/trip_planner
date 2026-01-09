@@ -14,6 +14,7 @@ public class ApiResponse<T> {
     private ErrorResponse error;
 
     // 편의 메소드
+
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(true, data, "성공", null);
     }

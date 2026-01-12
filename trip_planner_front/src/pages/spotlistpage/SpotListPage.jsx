@@ -8,6 +8,9 @@ function SpotListPage() {
   const [selectedId, setSelectedId] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchTitle, setSearchTitle] = useState("");
+  const CATEGORY_OPTIONS = ["전체", "문화/시설·체험", "음식", "레포츠"];
+  const [selectedCategory, setSelectedCategory] = useState("전체");
 
   useEffect(() => {
     const fetchSpots = async () => {
@@ -34,6 +37,16 @@ function SpotListPage() {
     fetchSpots();
   }, []);
 
+  const filteredSpots = spots
+  .filter((s) => {
+    if(selectedCategory === "전체") return true;
+    return s.category === selectedCategory;
+  })
+  
+  .filter((spot) =>
+    (spot.title ?? "").toLowerCase().includes(searchTitle.trim().toLowerCase())
+  );
+
   const toggleSelect = (id) => {
     setSelectedId((prev) =>
       prev.includes(id)
@@ -51,11 +64,67 @@ function SpotListPage() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
+  <div css={s.layout}>
+    {/* ✅ 왼쪽: 선택된 여행지 */}
+    <div css={s.selectedSection}>
+      <h2>선택한 여행지</h2>
+
+      <div css={s.selectedListWrapper}>
+        <ul css={s.spotSelectList}>
+          {selectedId.map((id, index) => {
+            const spot = spots.find((s) => s.spotId === id);
+            if (!spot) return null;
+
+            return (
+              <li key={spot.spotId} css={s.spotSelectItem}>
+                <span css={s.spotSelectText}>
+                  {index + 1}. {spot.title}
+                </span>
+
+                <button
+                  type="button"
+                  css={s.removeBtn}
+                  onClick={() => toggleSelect(spot.spotId)}
+                  aria-label="선택 해제"
+                >
+                  ✕
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+
+    {/* 오른쪽: 전체 관광지 목록 (여기서 선택) */}
+    <div style={{ padding: 20, flex: 3 }}>
       <h1>관광지 목록</h1>
 
+      <div css={s.searchBar}>
+        <input
+          css={s.searchInput}
+          value={searchTitle}
+          onChange={(e) => setSearchTitle(e.target.value)}
+          placeholder="제목으로 검색"
+        />
+      </div>
+
+      {/* 카테고리 */}
+      <div css={s.categoryBar}>
+        {CATEGORY_OPTIONS.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            css={s.categoryBtn(cat === selectedCategory)}
+            onClick={() => setSelectedCategory(cat)}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
       <div css={s.grid}>
-        {spots.map((r) => {
+        {filteredSpots.map((r) => {
           const isSelected = selectedId.includes(r.spotId);
 
           return (
@@ -64,19 +133,15 @@ function SpotListPage() {
               css={s.card(isSelected)}
               onClick={() => toggleSelect(r.spotId)}
             >
-              <div css={s.title}>
-                {r.title}
-              </div>
-              <div>주소: {r.address}</div>
-              <div>
-                경도: {r.longitude} / 위도: {r.latitude}
-              </div>
+              <div css={s.title}>{r.title}</div>
             </div>
           );
         })}
       </div>
     </div>
-  );
+  </div>
+);
+
 }
 
 export default SpotListPage;

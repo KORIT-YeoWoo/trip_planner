@@ -9,6 +9,7 @@ import { global } from './styles/global'
 import { queryClient } from './configs/queryClient'
 import MainPage from './pages/mainpage/MainPage'
 import SpotListPage from './pages/spotlistpage/SpotListPage'
+import TravelInfoPage from './pages/travelInfoPage/TravelInfoPage'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -19,6 +20,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Routes>
           <Route path="/" element={<MainPage />} />
           <Route path="/jeju" element={<SpotListPage />} />
+          <Route path='/travelinfo' element={<TravelInfoPage />} />
         </Routes>
       </BrowserRouter>
 

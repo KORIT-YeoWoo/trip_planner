@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class Bookmark {
+public class  Bookmark {
     private int bookmarkId;
     private int userId;
     private int spotId;

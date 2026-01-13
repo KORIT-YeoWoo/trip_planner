@@ -20,7 +20,7 @@ function MainPage() {
     useEffect(() => {
         const intervalId = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % rotatingLines.length);
-        }, 2600);
+        }, 4000);
 
         return () => clearInterval(intervalId);
     }, [rotatingLines.length]);
@@ -40,18 +40,18 @@ function MainPage() {
                 <div css={s.mascotWrap}>
                     <img src={foxImage} alt="fox" css={s.mascot} />
                 </div>
-
-                {/* ✅ 여우 아래 문구만 교체 + 전환 애니메이션 재실행 */}
-                <p css={s.subtitle} key={currentIndex}>
-                    {line1} <br />
-                    {line2 === "여우에게 맡기세요" ? (
-                        <>
-                            <span css={s.foxAccent}>여우</span>에게 맡기세요
-                        </>
-                    ) : (
-                        <span css={s.accentText}>{line2}</span>
-                    )}
-                </p>
+                <div css={s.subtitleWrap}>
+                    <p css={s.subtitle} key={currentIndex}>
+                        {line1} <br />
+                        {line2 === "여우에게 맡기세요" ? (
+                            <>
+                                <span css={s.foxAccent}>여우</span>에게 맡기세요
+                            </>
+                        ) : (
+                            <span css={s.accentText}>{line2}</span>
+                        )}
+                    </p>
+                </div>
 
                 <button
                     css={[s.button, isHover && s.buttonHover]}

@@ -24,6 +24,7 @@ public class RouteSegmentDto {
     private Integer duration;
     private int order;
     private String transportType;
+    private Boolean isIslandSegment;
 
     public Double getDistanceRatio() {
         if (actualDistance == null || straightDistance == 0) {

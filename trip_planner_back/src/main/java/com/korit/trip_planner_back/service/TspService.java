@@ -14,18 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * TSP 서비스
- *
- * 여행 경로 최적화 비즈니스 로직:
- * 1. 관광지 조회
- * 2. TSP 알고리즘 실행
- * 3. 결과를 DTO로 변환
- * 4. 카카오 네비 API로 실제 거리/시간 계산
- *
- * 사용 예시:
- * TspResponseDto response = tspService.calculateOptimalRoute(request);
- */
 @Slf4j
 @Service
 public class TspService {
@@ -36,13 +24,6 @@ public class TspService {
     @Autowired
     private KakaoNaviService kakaoNaviService;
 
-    /**
-     * 최적 경로 계산
-     *
-     * @param request TSP 요청 (관광지 ID, 출발/도착 정보)
-     * @return 최적화된 경로 정보
-     * @throws IllegalArgumentException 유효하지 않은 요청
-     */
     public TspResponseDto calculateOptimalRoute(TspRequestDto request) {
         // 1. 요청 검증
         request.validate();
@@ -80,13 +61,6 @@ public class TspService {
         return response;
     }
 
-    /**
-     * TSP 결과를 응답 DTO로 변환
-     *
-     * @param request 원본 요청
-     * @param tspResult TSP 알고리즘 결과
-     * @return 응답 DTO
-     */
     private TspResponseDto buildResponse(TspRequestDto request, TspAlgorithm.TspResult tspResult) {
         List<TouristSpot> route = tspResult.getRoute();
 
@@ -134,15 +108,6 @@ public class TspService {
                 .build();
     }
 
-    /**
-     * 경로 구간 정보 생성
-     *
-     * 출발지 → 관광지1 → 관광지2 → ... → 도착지
-     *
-     * @param request 원본 요청
-     * @param route 최적화된 경로
-     * @return 구간 리스트
-     */
     private List<RouteSegmentDto> buildRouteSegments(TspRequestDto request, List<TouristSpot> route) {
         List<RouteSegmentDto> segments = new ArrayList<>();
 
@@ -172,6 +137,7 @@ public class TspService {
                     .duration(null)         // 카카오 API는 나중에
                     .order(i)
                     .transportType(request.getTransportType())
+                    .isIslandSegment(nextSpot.isIsland())  // 섬 여부 설정
                     .build();
 
             segments.add(segment);
@@ -203,6 +169,7 @@ public class TspService {
                 .duration(null)
                 .order(route.size())
                 .transportType(request.getTransportType())
+                .isIslandSegment(false)
                 .build();
 
         segments.add(lastSegment);
@@ -210,15 +177,6 @@ public class TspService {
         return segments;
     }
 
-    /**
-     * 두 지점 간 직선 거리 계산 (Haversine)
-     *
-     * @param lat1 지점1 위도
-     * @param lon1 지점1 경도
-     * @param lat2 지점2 위도
-     * @param lon2 지점2 경도
-     * @return 거리 (km)
-     */
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         // HaversineDistance를 직접 호출
         return com.korit.trip_planner_back.algorithm.HaversineDistance.calculate(
@@ -226,12 +184,6 @@ public class TspService {
         );
     }
 
-    /**
-     * 카카오 네비 API로 실제 거리/시간 보강
-     *
-     * @param response 응답 DTO
-     * @param request 원본 요청
-     */
     private void enrichWithKakaoApi(TspResponseDto response, TspRequestDto request) {
         List<RouteSegmentDto> segments = response.getRouteSegments();
 

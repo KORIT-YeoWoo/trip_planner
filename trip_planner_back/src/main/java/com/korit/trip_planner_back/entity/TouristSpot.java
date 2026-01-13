@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class TouristSpot {
     private int spotId;
     private String title;
@@ -24,5 +23,5 @@ public class TouristSpot {
     private String contact;     // 연락처
     private String spotImg;
     private LocalDateTime createdAt;
-
+    private boolean isIsland;
 }

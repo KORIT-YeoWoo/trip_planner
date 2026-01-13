@@ -62,16 +62,19 @@
             address,
             latitude,
             longitude,
+            spot_img AS spotImg,
             created_at
         FROM
             tourist_spots
         ORDER BY
-            spot_id DESC
+            spot_id
         LIMIT
             #{size}
         OFFSET
             #{offset}
     </select>
+
+
     <select id="findBySearch" resultType="com.korit.trip_planner_back.entity.TouristSpot">
 
     </select>

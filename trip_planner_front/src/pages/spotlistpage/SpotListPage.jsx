@@ -2,6 +2,9 @@
 import * as s from "./styles";
 import { useEffect, useState } from "react";
 import { getSpots } from "../../apis/spotApi"; // 민석님의 API 함수 import
+import { PiMountains } from "react-icons/pi";
+import { MdOutlineSurfing } from "react-icons/md";
+import { IoRestaurantOutline, IoCafeOutline } from "react-icons/io5"; 
 
 function SpotListPage() {
   const [spots, setSpots] = useState([]);
@@ -9,8 +12,16 @@ function SpotListPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTitle, setSearchTitle] = useState("");
-  const CATEGORY_OPTIONS = ["전체", "문화/시설·체험", "음식", "레포츠"];
+  const CATEGORY_OPTIONS=["전체","문화•체험","카페","식당"];
+  const CATEGORY_ICONS = {
+    "전체":null,
+    "문화•체험":<MdOutlineSurfing />  ,
+    "자연":<PiMountains />, 
+    "카페":<IoCafeOutline />, 
+    "식당":<IoRestaurantOutline />};
   const [selectedCategory, setSelectedCategory] = useState("전체");
+ 
+
 
   useEffect(() => {
     const fetchSpots = async () => {
@@ -55,6 +66,8 @@ function SpotListPage() {
     );
   };
 
+
+
   if (loading) {
     return <div style={{ padding: 20 }}>로딩 중...</div>;
   }
@@ -65,11 +78,12 @@ function SpotListPage() {
 
   return (
   <div css={s.layout}>
-    {/* ✅ 왼쪽: 선택된 여행지 */}
+    {/* 왼쪽: 선택된 여행지 */}
     <div css={s.selectedSection}>
-      <h2>선택한 여행지</h2>
+      
 
       <div css={s.selectedListWrapper}>
+        <h2>선택한 여행지</h2>
         <ul css={s.spotSelectList}>
           {selectedId.map((id, index) => {
             const spot = spots.find((s) => s.spotId === id);
@@ -118,6 +132,7 @@ function SpotListPage() {
             css={s.categoryBtn(cat === selectedCategory)}
             onClick={() => setSelectedCategory(cat)}
           >
+            {CATEGORY_ICONS[cat] && <span style={{ marginRight: '6px', display: 'inline-flex' }}>{CATEGORY_ICONS[cat]}</span>}
             {cat}
           </button>
         ))}
@@ -126,13 +141,27 @@ function SpotListPage() {
       <div css={s.grid}>
         {filteredSpots.map((r) => {
           const isSelected = selectedId.includes(r.spotId);
+          
 
           return (
             <div
               key={r.spotId}
               css={s.card(isSelected)}
               onClick={() => toggleSelect(r.spotId)}
-            >
+            > 
+              <div css={s.imageWrapper}>
+                {r.spotImg ? (
+                  <img
+                    css={s.image}
+                    src={r.spotImg}
+                    alt={r.title}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div css={s.emptyImage}>🦊</div>
+                )}
+              </div>
+
               <div css={s.title}>{r.title}</div>
             </div>
           );

@@ -34,6 +34,13 @@ export const selectedSection = css`
   height: 100vh;
   overflow-y: auto;
   background-color: ${colors.background};
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: ${colors.foreground};
+  }
 `;
 
 /* ✅ 왼쪽 리스트 */
@@ -44,7 +51,7 @@ export const spotSelectList = css`
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background-color: ${colors.background};
+  background-color: ${colors.card};
 `;
 
 export const spotSelectItem = css`
@@ -72,13 +79,17 @@ export const spotSelectText = css`
   white-space: nowrap;
 `;
 export const selectedListWrapper = css`
-  margin-top: 12px;
-
+  margin-top: 100px;
+  border-radius: ${colors.radius};
+  background-color: ${colors.card};
   /* ✅ 제목(h2) 제외한 영역만 스크롤 */
   max-height: calc(100vh - 80px); 
   overflow-y: auto;
-  border: 1px solid black;
+  min-height: 400px;
+  
   padding-right: 4px; /* 스크롤바 여백 */
+  box-shadow:  0 4px 8px rgba(0, 0, 0, 0.06);
+  border: 2px solid ${"transparent"};
 `;
 
 
@@ -104,14 +115,18 @@ export const card = (select) => css`
   background-color: ${colors.card};
   border: 2px solid ${select ? colors.primary : "transparent"};
   border-radius: ${colors.radius};
+  overflow: hidden;
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
   transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
   
+  
+ 
   height: 392px;
   gap:24px;
 
   &:hover {
+    
     transform: translateY(-4px);
     border-color: ${select ? colors.primary : colors.accent};
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
@@ -120,6 +135,8 @@ export const card = (select) => css`
     transform: translateY(0px) scale(0.98);
   }
 `;
+
+
 
 export const grid = css`
   display: grid;
@@ -164,6 +181,8 @@ export const categoryBar = css`
 `;
 
 export const categoryBtn = (active) => css`
+  display: inline-flex;
+  align-items: center;
   padding: 8px 16px;
   border-radius: 999px;
   border: 1px solid ${active ? colors.primary : colors.border};
@@ -173,9 +192,48 @@ export const categoryBtn = (active) => css`
   font-size: 13px;
   font-weight: 600;
   transition: all 0.2s;
-
+  gap: 6px;
+  
   &:hover {
     border-color: ${colors.primary};
     background: ${active ? colors.primary : colors.muted};
   }
+`;
+
+
+
+export const imageWrapper= css`
+  position: relative;
+  width: 100%;
+  
+  height: 280px;        /* 카드 상단 이미지 높이 */
+  overflow: hidden;
+  background-color: gray;
+  
+`;
+export const image = css`
+  position: absolute;
+  inset: 0;               /* top:0 left:0 right:0 bottom:0 */
+  width: 100%;
+  height: 100%;
+  
+  object-fit: cover;
+  transition: transform 0.3s ease;
+
+  
+`;
+export const emptyImage = css`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 64px;
+  background-color: ${colors.muted};
+  color: ${colors.mutedForeground};
+  user-select: none;
 `;

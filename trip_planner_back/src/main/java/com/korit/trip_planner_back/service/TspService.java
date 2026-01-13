@@ -1,0 +1,174 @@
+package com.korit.trip_planner_back.service;
+
+import com.korit.trip_planner_back.algorithm.TspAlgorithm;
+import com.korit.trip_planner_back.dto.tsp.RouteSegmentDto;
+import com.korit.trip_planner_back.dto.tsp.TspRequestDto;
+import com.korit.trip_planner_back.dto.tsp.TspResponseDto;
+import com.korit.trip_planner_back.entity.TouristSpot;
+import com.korit.trip_planner_back.mapper.TouristSpotMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class TspService {
+
+    @Autowired
+    private TouristSpotMapper touristSpotMapper;
+
+    public TspResponseDto calculateOptimalRoute(TspRequestDto request) {
+        // 1. 요청 검증
+        request.validate();
+
+        // 2. DB에서 관광지 조회
+        List<TouristSpot> spots = touristSpotMapper.findAllByIds(request.getSpotIds());
+
+        // 검증: 요청한 ID 개수와 조회된 관광지 개수 일치 확인
+        if (spots.size() != request.getSpotIds().size()) {
+            throw new IllegalArgumentException(
+                    String.format("일부 관광지를 찾을 수 없습니다. (요청: %d개, 조회: %d개)",
+                            request.getSpotIds().size(), spots.size())
+            );
+        }
+
+        // 3. 도착지 처리 (없으면 출발지로 설정)
+        double endLat = request.hasEndPoint() ? request.getEndLat() : request.getStartLat();
+        double endLon = request.hasEndPoint() ? request.getEndLon() : request.getStartLon();
+
+        // 4. TSP 알고리즘 실행
+        TspAlgorithm.TspResult tspResult = TspAlgorithm.optimize(
+                spots,
+                request.getStartLat(),
+                request.getStartLon(),
+                endLat,
+                endLon
+        );
+
+        // 5. 응답 DTO 생성
+        return buildResponse(request, tspResult);
+    }
+
+    private TspResponseDto buildResponse(TspRequestDto request, TspAlgorithm.TspResult tspResult) {
+        List<TouristSpot> route = tspResult.getRoute();
+
+        // 최적화된 관광지 ID 순서
+        List<Long> optimizedSpotIds = route.stream()
+                .map(spot -> (long) spot.getSpotId())
+                .collect(Collectors.toList());
+
+        // 경로 구간 정보 생성
+        List<RouteSegmentDto> routeSegments = buildRouteSegments(
+                request,
+                route
+        );
+
+        // LocationInfo 생성
+        TspResponseDto.LocationInfo startPoint = TspResponseDto.LocationInfo.builder()
+                .name(request.getStartName() != null ? request.getStartName() : "출발지")
+                .lat(request.getStartLat())
+                .lon(request.getStartLon())
+                .build();
+
+        TspResponseDto.LocationInfo endPoint = null;
+        if (request.hasEndPoint()) {
+            endPoint = TspResponseDto.LocationInfo.builder()
+                    .name(request.getEndName() != null ? request.getEndName() : "도착지")
+                    .lat(request.getEndLat())
+                    .lon(request.getEndLon())
+                    .build();
+        }
+
+        // 응답 DTO 구성
+        return TspResponseDto.builder()
+                .optimizedSpotIds(optimizedSpotIds)
+                .routeSegments(routeSegments)
+                .totalStraightDistance(tspResult.getOptimizedDistance())
+                .totalActualDistance(null)  // 카카오 API는 나중에
+                .totalDuration(null)         // 카카오 API는 나중에
+                .algorithm("Greedy + 2-Opt")
+                .improvementRate(tspResult.getImprovementRate())
+                .transportType(request.getTransportType())
+                .startPoint(startPoint)
+                .endPoint(endPoint)
+                .calculationTime(tspResult.getCalculationTime())
+                .spotCount(route.size())
+                .build();
+    }
+
+    private List<RouteSegmentDto> buildRouteSegments(TspRequestDto request, List<TouristSpot> route) {
+        List<RouteSegmentDto> segments = new ArrayList<>();
+
+        double currentLat = request.getStartLat();
+        double currentLon = request.getStartLon();
+        String currentName = request.getStartName() != null ? request.getStartName() : "출발지";
+        Long currentSpotId = 0L;
+
+        // 출발지 → 관광지들
+        for (int i = 0; i < route.size(); i++) {
+            TouristSpot nextSpot = route.get(i);
+
+            RouteSegmentDto segment = RouteSegmentDto.builder()
+                    .fromSpotId(currentSpotId)
+                    .fromSpotName(currentName)
+                    .fromLat(currentLat)
+                    .fromLon(currentLon)
+                    .toSpotId((long) nextSpot.getSpotId())
+                    .toSpotName(nextSpot.getTitle())
+                    .toLat(nextSpot.getLatitude())
+                    .toLon(nextSpot.getLongitude())
+                    .straightDistance(calculateDistance(
+                            currentLat, currentLon,
+                            nextSpot.getLatitude(), nextSpot.getLongitude()
+                    ))
+                    .actualDistance(null)  // 카카오 API는 나중에
+                    .duration(null)         // 카카오 API는 나중에
+                    .order(i)
+                    .transportType(request.getTransportType())
+                    .build();
+
+            segments.add(segment);
+
+            currentLat = nextSpot.getLatitude();
+            currentLon = nextSpot.getLongitude();
+            currentName = nextSpot.getTitle();
+            currentSpotId = (long) nextSpot.getSpotId();
+        }
+
+        // 마지막 관광지 → 도착지
+        double endLat = request.hasEndPoint() ? request.getEndLat() : request.getStartLat();
+        double endLon = request.hasEndPoint() ? request.getEndLon() : request.getStartLon();
+        String endName = request.hasEndPoint() && request.getEndName() != null
+                ? request.getEndName()
+                : "도착지";
+
+        RouteSegmentDto lastSegment = RouteSegmentDto.builder()
+                .fromSpotId(currentSpotId)
+                .fromSpotName(currentName)
+                .fromLat(currentLat)
+                .fromLon(currentLon)
+                .toSpotId(0L)
+                .toSpotName(endName)
+                .toLat(endLat)
+                .toLon(endLon)
+                .straightDistance(calculateDistance(currentLat, currentLon, endLat, endLon))
+                .actualDistance(null)
+                .duration(null)
+                .order(route.size())
+                .transportType(request.getTransportType())
+                .build();
+
+        segments.add(lastSegment);
+
+        return segments;
+    }
+
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        // HaversineDistance를 직접 호출
+        return com.korit.trip_planner_back.algorithm.HaversineDistance.calculate(
+                lat1, lon1, lat2, lon2
+        );
+    }
+}

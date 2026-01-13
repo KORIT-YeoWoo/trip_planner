@@ -75,7 +75,27 @@
     <select id="findBySearch" resultType="com.korit.trip_planner_back.entity.TouristSpot">
 
     </select>
-
+    <select id="findAllByIds" resultType="com.korit.trip_planner_back.entity.TouristSpot">
+        SELECT
+            spot_id,
+            title,
+            category,
+            address,
+            latitude,
+            longitude,
+            spot_duration,
+            price,
+            description,
+            opening_hrs,
+            contact,
+            spot_img,
+            created_at
+        FROM tourist_spots
+        WHERE spot_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
     <update id="updateBySpotImg">
         update
             tourist_spots

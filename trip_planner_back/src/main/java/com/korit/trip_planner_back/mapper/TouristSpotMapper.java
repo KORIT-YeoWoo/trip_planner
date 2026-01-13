@@ -19,4 +19,6 @@ public interface TouristSpotMapper {
     int updateBySpotImg(@Param("spotId") int spotId, @Param("spotImg") String spotImg);
 
     int deleteById(@Param("spotId") int spotId);
+
+    List<TouristSpot> findAllByIds(@Param("ids") List<Long> ids);
 }

@@ -1,13 +1,32 @@
-import { css } from "@emotion/react";
+import { css, keyframes } from "@emotion/react";
+
+const subtitleRoll = keyframes`
+    0% {
+        opacity: 0;
+        transform: translateY(18px) rotateX(70deg);
+        filter: blur(1px);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg);
+        filter: blur(0);
+    }
+`;
 
 export const page = css`
-    min-height: 100vh;
-    box-sizing: border-box;
+    width: 100%;
     background-color: #fbf7f2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 80px 20px 40px;
+    padding: 120px 20px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
 `;
 
 export const badge = css`
@@ -56,11 +75,23 @@ export const mascot = css`
     filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.1));
 `;
 
+export const subtitleWrap = css`
+    display: flex;
+    justify-content: center;
+    perspective: 900px;       /* 3D “뒤로 넘어감” 느낌 핵심 */
+    margin-bottom: 20px;
+`;
+
 export const subtitle = css`
-    font-size: 18px;
+    font-size: 25px;
     line-height: 1.6;
     color: #333;
-    margin-bottom: 20px;
+    margin: 0;
+
+    transform-origin: 50% 100%;
+    transform-style: preserve-3d;
+    animation: ${subtitleRoll} 5200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform, opacity, filter;
 `;
 
 export const accentText = css`
@@ -91,35 +122,6 @@ export const buttonHover = css`
     background-color: #ff761bff;
 `;
 
-export const cards = css`
-    margin-top: 36px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-`;
 
-export const card = css`
-    background-color: #ffffff;
-    border-radius: 22px;
-    border: 1px solid #e9dfd6;
-    min-height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 540;
-    font-size: 16px;
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-    transition: all 0.25s ease;
-    cursor: default;
-`;
 
-export const cardHover = css`
-    transform: translatey(-6px);
-    box-shadow: 0 22px 44px rgba(0, 0, 0, 0.12);
-`;
-
-export const cardText = css`
-    text-align: center;
-`;
 

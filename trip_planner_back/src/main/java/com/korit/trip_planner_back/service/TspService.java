@@ -6,6 +6,7 @@ import com.korit.trip_planner_back.dto.tsp.TspRequestDto;
 import com.korit.trip_planner_back.dto.tsp.TspResponseDto;
 import com.korit.trip_planner_back.entity.TouristSpot;
 import com.korit.trip_planner_back.mapper.TouristSpotMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +14,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * TSP 서비스
+ *
+ * 여행 경로 최적화 비즈니스 로직:
+ * 1. 관광지 조회
+ * 2. TSP 알고리즘 실행
+ * 3. 결과를 DTO로 변환
+ * 4. 카카오 네비 API로 실제 거리/시간 계산
+ *
+ * 사용 예시:
+ * TspResponseDto response = tspService.calculateOptimalRoute(request);
+ */
+@Slf4j
 @Service
 public class TspService {
 
     @Autowired
     private TouristSpotMapper touristSpotMapper;
 
+    @Autowired
+    private KakaoNaviService kakaoNaviService;
+
+    /**
+     * 최적 경로 계산
+     *
+     * @param request TSP 요청 (관광지 ID, 출발/도착 정보)
+     * @return 최적화된 경로 정보
+     * @throws IllegalArgumentException 유효하지 않은 요청
+     */
     public TspResponseDto calculateOptimalRoute(TspRequestDto request) {
         // 1. 요청 검증
         request.validate();
@@ -48,9 +72,21 @@ public class TspService {
         );
 
         // 5. 응답 DTO 생성
-        return buildResponse(request, tspResult);
+        TspResponseDto response = buildResponse(request, tspResult);
+
+        // 6. 카카오 네비 API로 실제 거리/시간 계산
+        enrichWithKakaoApi(response, request);
+
+        return response;
     }
 
+    /**
+     * TSP 결과를 응답 DTO로 변환
+     *
+     * @param request 원본 요청
+     * @param tspResult TSP 알고리즘 결과
+     * @return 응답 DTO
+     */
     private TspResponseDto buildResponse(TspRequestDto request, TspAlgorithm.TspResult tspResult) {
         List<TouristSpot> route = tspResult.getRoute();
 
@@ -98,6 +134,15 @@ public class TspService {
                 .build();
     }
 
+    /**
+     * 경로 구간 정보 생성
+     *
+     * 출발지 → 관광지1 → 관광지2 → ... → 도착지
+     *
+     * @param request 원본 요청
+     * @param route 최적화된 경로
+     * @return 구간 리스트
+     */
     private List<RouteSegmentDto> buildRouteSegments(TspRequestDto request, List<TouristSpot> route) {
         List<RouteSegmentDto> segments = new ArrayList<>();
 
@@ -165,10 +210,79 @@ public class TspService {
         return segments;
     }
 
+    /**
+     * 두 지점 간 직선 거리 계산 (Haversine)
+     *
+     * @param lat1 지점1 위도
+     * @param lon1 지점1 경도
+     * @param lat2 지점2 위도
+     * @param lon2 지점2 경도
+     * @return 거리 (km)
+     */
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         // HaversineDistance를 직접 호출
         return com.korit.trip_planner_back.algorithm.HaversineDistance.calculate(
                 lat1, lon1, lat2, lon2
         );
+    }
+
+    /**
+     * 카카오 네비 API로 실제 거리/시간 보강
+     *
+     * @param response 응답 DTO
+     * @param request 원본 요청
+     */
+    private void enrichWithKakaoApi(TspResponseDto response, TspRequestDto request) {
+        List<RouteSegmentDto> segments = response.getRouteSegments();
+
+        double totalActualDistance = 0.0;
+        int totalDuration = 0;
+
+        for (RouteSegmentDto segment : segments) {
+            try {
+                // 카카오 API 호출
+                KakaoNaviService.RouteInfo routeInfo = kakaoNaviService.getRouteInfo(
+                        segment.getFromLat(),
+                        segment.getFromLon(),
+                        segment.getToLat(),
+                        segment.getToLon()
+                );
+
+                if (routeInfo != null) {
+                    // 구간에 실제 거리/시간 설정
+                    segment.setActualDistance(routeInfo.getDistance());
+                    segment.setDuration(routeInfo.getDuration());
+
+                    totalActualDistance += routeInfo.getDistance();
+                    totalDuration += routeInfo.getDuration();
+
+                    log.debug("구간 {}: {}km, {}분",
+                            segment.getOrder(),
+                            routeInfo.getDistance(),
+                            routeInfo.getDuration());
+                } else {
+                    log.warn("구간 {} API 호출 실패: {} -> {}",
+                            segment.getOrder(),
+                            segment.getFromSpotName(),
+                            segment.getToSpotName());
+                }
+
+                // API 호출 간격 (과도한 호출 방지)
+                Thread.sleep(100);
+
+            } catch (Exception e) {
+                log.error("구간 {} 처리 중 오류: {}", segment.getOrder(), e.getMessage());
+            }
+        }
+
+        // 응답에 총 실제 거리/시간 설정
+        if (totalActualDistance > 0) {
+            response.setTotalActualDistance(totalActualDistance);
+            response.setTotalDuration(totalDuration);
+
+            log.info("카카오 API 완료 - 총 거리: {}km, 총 시간: {}분",
+                    String.format("%.1f", totalActualDistance),
+                    totalDuration);
+        }
     }
 }

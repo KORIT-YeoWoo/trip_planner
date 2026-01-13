@@ -6,7 +6,7 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="spotId">
         insert into tourist_spots
         values(default, #{title}, #{category}, #{address}, #{latitude}, #{longitude},
-            #{spotDuration}, #{price}, #{description}, #{openingHrs}, #{contact}, #{spotImg}, now())
+            #{spotDuration}, #{price}, #{description}, #{openingHrs}, #{contact}, #{spotImg}, now(), #{is_island})
     </insert>
     <select id="findById" resultType="touristSpot">
         select
@@ -21,7 +21,8 @@
             description,
             opening_hrs,
             spot_img,
-            created_at
+            created_at,
+            is_island
         from
             tourist_spots
         where
@@ -42,7 +43,8 @@
             description,
             opening_hrs,
             spot_img,
-            created_at
+            created_at,
+            is_island
         FROM
             tourist_spots
         <where>
@@ -63,7 +65,8 @@
             latitude,
             longitude,
             spot_img AS spotImg,
-            created_at
+            created_at,
+            is_island
         FROM
             tourist_spots
         ORDER BY
@@ -92,7 +95,8 @@
             opening_hrs,
             contact,
             spot_img,
-            created_at
+            created_at,
+            is_island
         FROM tourist_spots
         WHERE spot_id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">

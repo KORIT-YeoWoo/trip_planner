@@ -6,6 +6,7 @@ import com.korit.trip_planner_back.dto.tsp.TspRequestDto;
 import com.korit.trip_planner_back.dto.tsp.TspResponseDto;
 import com.korit.trip_planner_back.entity.TouristSpot;
 import com.korit.trip_planner_back.mapper.TouristSpotMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class TspService {
 
     @Autowired
     private TouristSpotMapper touristSpotMapper;
+
+    @Autowired
+    private KakaoNaviService kakaoNaviService;
 
     public TspResponseDto calculateOptimalRoute(TspRequestDto request) {
         // 1. 요청 검증
@@ -48,7 +53,12 @@ public class TspService {
         );
 
         // 5. 응답 DTO 생성
-        return buildResponse(request, tspResult);
+        TspResponseDto response = buildResponse(request, tspResult);
+
+        // 6. 카카오 네비 API로 실제 거리/시간 계산
+        enrichWithKakaoApi(response, request);
+
+        return response;
     }
 
     private TspResponseDto buildResponse(TspRequestDto request, TspAlgorithm.TspResult tspResult) {
@@ -127,6 +137,7 @@ public class TspService {
                     .duration(null)         // 카카오 API는 나중에
                     .order(i)
                     .transportType(request.getTransportType())
+                    .isIslandSegment(nextSpot.isIsland())  // 섬 여부 설정
                     .build();
 
             segments.add(segment);
@@ -158,6 +169,7 @@ public class TspService {
                 .duration(null)
                 .order(route.size())
                 .transportType(request.getTransportType())
+                .isIslandSegment(false)
                 .build();
 
         segments.add(lastSegment);
@@ -170,5 +182,59 @@ public class TspService {
         return com.korit.trip_planner_back.algorithm.HaversineDistance.calculate(
                 lat1, lon1, lat2, lon2
         );
+    }
+
+    private void enrichWithKakaoApi(TspResponseDto response, TspRequestDto request) {
+        List<RouteSegmentDto> segments = response.getRouteSegments();
+
+        double totalActualDistance = 0.0;
+        int totalDuration = 0;
+
+        for (RouteSegmentDto segment : segments) {
+            try {
+                // 카카오 API 호출
+                KakaoNaviService.RouteInfo routeInfo = kakaoNaviService.getRouteInfo(
+                        segment.getFromLat(),
+                        segment.getFromLon(),
+                        segment.getToLat(),
+                        segment.getToLon()
+                );
+
+                if (routeInfo != null) {
+                    // 구간에 실제 거리/시간 설정
+                    segment.setActualDistance(routeInfo.getDistance());
+                    segment.setDuration(routeInfo.getDuration());
+
+                    totalActualDistance += routeInfo.getDistance();
+                    totalDuration += routeInfo.getDuration();
+
+                    log.debug("구간 {}: {}km, {}분",
+                            segment.getOrder(),
+                            routeInfo.getDistance(),
+                            routeInfo.getDuration());
+                } else {
+                    log.warn("구간 {} API 호출 실패: {} -> {}",
+                            segment.getOrder(),
+                            segment.getFromSpotName(),
+                            segment.getToSpotName());
+                }
+
+                // API 호출 간격 (과도한 호출 방지)
+                Thread.sleep(100);
+
+            } catch (Exception e) {
+                log.error("구간 {} 처리 중 오류: {}", segment.getOrder(), e.getMessage());
+            }
+        }
+
+        // 응답에 총 실제 거리/시간 설정
+        if (totalActualDistance > 0) {
+            response.setTotalActualDistance(totalActualDistance);
+            response.setTotalDuration(totalDuration);
+
+            log.info("카카오 API 완료 - 총 거리: {}km, 총 시간: {}분",
+                    String.format("%.1f", totalActualDistance),
+                    totalDuration);
+        }
     }
 }

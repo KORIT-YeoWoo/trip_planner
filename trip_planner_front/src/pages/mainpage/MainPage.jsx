@@ -1,10 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import * as s from "./styles";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import foxImage from "../../assets/기본.PNG";
 
 function MainPage() {
+    const navigate = useNavigate();
+
     const [isHover, setIsHover] = useState(false);
+
 
     const rotatingLines = useMemo(
         () => [
@@ -57,6 +61,7 @@ function MainPage() {
                     css={[s.button, isHover && s.buttonHover]}
                     onMouseEnter={() => setIsHover(true)}
                     onMouseLeave={() => setIsHover(false)}
+                    onClick={() => navigate("/spots")}
                 >
                     시작하기
                 </button>

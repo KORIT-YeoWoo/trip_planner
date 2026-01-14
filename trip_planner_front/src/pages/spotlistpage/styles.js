@@ -16,10 +16,10 @@ const colors = {
 
 export const layout = css`
   display: grid;
-  gap: 0; /* 테두리 정렬을 위해 0으로 조정 */
+
   min-height: 100vh;
   align-items: stretch;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 320px 1fr 320px;
   background-color: ${colors.background};
 `;
 
@@ -236,4 +236,32 @@ export const emptyImage = css`
   background-color: ${colors.muted};
   color: ${colors.mutedForeground};
   user-select: none;
+`;
+export const heartBtn = (isSelected) => css`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10; /* 이미지나 여우 아이콘보다 위에 위치 */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  
+  /* 아이콘 색상 및 그림자 처리 */
+  color: ${isSelected ? "#ff4d4d" : "white"}; 
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
+  
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  &:active {
+    transform: scale(0.9);
+  }
 `;

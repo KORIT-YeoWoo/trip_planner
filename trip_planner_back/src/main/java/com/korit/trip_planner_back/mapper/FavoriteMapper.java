@@ -2,6 +2,7 @@ package com.korit.trip_planner_back.mapper;
 
 import com.korit.trip_planner_back.entity.Favorite;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface FavoriteMapper {
@@ -9,5 +10,5 @@ public interface FavoriteMapper {
 
     Favorite findByUserId(int userId);
 
-    void deleteById(Long itineraryId);
+    void deleteById(@Param("userId")int userId,@Param("spotId") int spotId);
 }

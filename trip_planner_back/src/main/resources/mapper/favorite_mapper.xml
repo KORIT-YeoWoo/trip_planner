@@ -24,6 +24,7 @@
         from
             favorites
         where
-            favorite_id = #{favoriteId}
+            user_id = #{userId}
+            and spot_id = #{spotId}
     </delete>
 </mapper>

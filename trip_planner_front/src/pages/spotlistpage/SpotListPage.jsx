@@ -1,14 +1,24 @@
 /** @jsxImportSource @emotion/react */
 import * as s from "./styles";
 import { useEffect, useState } from "react";
-import { getSpots } from "../../apis/spotApi"; // 민석님의 API 함수 import
+
+import { 
+  getSpots, 
+  addBookmark,    
+  removeBookmark, 
+  getMyBookmarks,  
+  removeFavorites,
+  addFavorites
+} from "../../apis/spotApi";// 민석님의 API 함수
+
 import { PiMountains } from "react-icons/pi";
 import { MdOutlineSurfing } from "react-icons/md";
 import { IoRestaurantOutline, IoCafeOutline } from "react-icons/io5"; 
-
+import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
 function SpotListPage() {
   const [spots, setSpots] = useState([]);
   const [selectedId, setSelectedId] = useState([]);
+  const [wishListId, setWishListId] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTitle, setSearchTitle] = useState("");
@@ -21,8 +31,10 @@ function SpotListPage() {
     "식당":<IoRestaurantOutline />};
   const [selectedCategory, setSelectedCategory] = useState("전체");
  
-
-
+  useEffect(()=>{
+    console.log("현재 찜 목록(wishList)",wishListId)
+  },[wishListId]);
+  
   useEffect(() => {
     const fetchSpots = async () => {
       try {
@@ -66,6 +78,28 @@ function SpotListPage() {
     );
   };
 
+
+  const toggleWish = async(id)=>{
+    const isWished = wishListId.includes(id);
+    
+    try{
+      if(isWished){
+        await removeFavorites(id);
+        setWishListId((prev)=> prev.filter((v)=> v !== id));
+        console.log(`${id}번 찜 삭제 완료`);
+      }else{
+        await addFavorites(id);
+        setWishListId((prev)=> [...prev,id]);
+        console.log(`${id}번 찜 등록 완료`);
+      }
+    }catch(error){
+      console.log("찜 에러");
+          
+    }
+  };
+
+  
+ 
 
 
   if (loading) {
@@ -141,7 +175,7 @@ function SpotListPage() {
       <div css={s.grid}>
         {filteredSpots.map((r) => {
           const isSelected = selectedId.includes(r.spotId);
-          
+          const isWished = wishListId.includes(r.spotId);
 
           return (
             <div
@@ -160,6 +194,16 @@ function SpotListPage() {
                 ) : (
                   <div css={s.emptyImage}>🦊</div>
                 )}
+                <button
+                  type="button"
+                  css={s.heartBtn(isWished)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // 카드 클릭 이벤트가 중복 발생하지 않도록 차단
+                    toggleWish(r.spotId);
+                  }}
+                >
+                  {isWished ? <IoMdHeart size={34} /> : <IoIosHeartEmpty size={34} />}
+                </button>
               </div>
 
               <div css={s.title}>{r.title}</div>
@@ -167,7 +211,9 @@ function SpotListPage() {
           );
         })}
       </div>
+      
     </div>
+    <div css={s.selectedSection} style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}></div>
   </div>
 );
 

@@ -25,7 +25,6 @@ public class ItineraryRespDto {
     private int totalCost;      // 총 비용
     private LocalDateTime createdAt;
 
-    // ========== 일정 상세 ==========
     private List<DayScheduleDto> days;  // Day별 일정 리스트
     private Double totalDistance;       // 총 이동 거리 (km)
     private Integer totalDuration;      // 총 이동 시간 (분)

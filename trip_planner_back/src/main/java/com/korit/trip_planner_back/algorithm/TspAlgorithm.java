@@ -73,7 +73,6 @@ public class TspAlgorithm {
             currentLat = nearest.getLatitude();
             currentLon = nearest.getLongitude();
         }
-
         return route;
     }
 

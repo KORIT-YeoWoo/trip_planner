@@ -47,7 +47,6 @@ public class ItineraryService {
         log.info("관광지 조회 완료: {}개", allSpots.size());
 
         // 3. GPT 1차: 필터링 + Day 그룹핑
-        log.info("--- GPT 1차: 필터링 + 그룹핑 ---");
         DayDistributionDto distribution = gptService.filterAndGroupSpots(
                 allSpots,
                 request.getTravelDays(),
@@ -60,16 +59,12 @@ public class ItineraryService {
                 distribution.getExcludedSpots().size());
 
         // 4. 각 Day별 TSP 계산
-        log.info("--- TSP 경로 최적화 ---");
         List<DayScheduleDto> days = calculateOptimalSchedules(request, distribution);
 
         log.info("TSP 계산 완료: {}일", days.size());
 
         // 5. GPT 2차: 최종 다듬기
-        log.info("--- GPT 2차: 최종 다듬기 ---");
         days = gptService.refineSchedule(days);
-
-        log.info("=== 일정 생성 완료 ===");
 
         // 6. 최종 응답 생성
         return buildFinalResponse(request, days);

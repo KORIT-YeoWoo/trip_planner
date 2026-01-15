@@ -184,26 +184,39 @@ public class GPTService {
 
         sb.append("\n### 요청사항\n");
         sb.append("1. 위 관광지를 ").append(travelDays).append("일로 그룹핑하세요\n");
-        sb.append("2. 너무 많으면 지역적으로 가까운 것만 선택하세요\n");
-        sb.append("3. 하루 8~10시간 기준으로 현실적인 개수만\n\n");
+        sb.append("2. 지역적으로 가까운 것을 우선 선택하세요\n");
+        sb.append("3. 하루 일정은 08:00~20:00 (12시간) 기준입니다\n\n");
 
         sb.append("### ⚠️ 중요 규칙 ⚠️\n");
         sb.append("❌ 관광지 방문 순서는 절대 정하지 마세요\n");
         sb.append("❌ 시간표를 만들지 마세요\n");
         sb.append("❌ \"효율적인 경로\"를 고려하지 마세요\n");
         sb.append("✅ Day별로 가까운 관광지를 묶기만 하세요\n");
-        sb.append("✅ 섬은 하루에 1개만\n");
         sb.append("✅ 숙소 위치를 참고하세요 (정확한 경로는 서버가 계산)\n\n");
+
+        // ✅ 추가: 관광지 개수 가이드
+        sb.append("### 📋 하루 관광지 개수 가이드\n");
+        sb.append("- 섬이 있는 날: 섬 1개 + 일반 관광지 1~2개 (총 2~3개)\n");
+        sb.append("  └─ 이유: 섬은 페리 포함 최소 6시간 소요\n");
+        sb.append("- 섬이 없는 날: 일반 관광지 4~5개\n");
+        sb.append("  └─ 이유: 관광지당 1~2시간, 이동 30분~1시간 가정\n");
+        sb.append("- 가능한 많이 선택하되, 현실적인 일정으로!\n\n");
+
+        // ✅ 추가: 제외 기준 명확화
+        sb.append("### ❌ 제외 기준\n");
+        sb.append("1. 숙소에서 너무 먼 관광지 (50km 이상)\n");
+        sb.append("2. 다른 관광지들과 방향이 정반대인 곳\n");
+        sb.append("3. Day별로 묶기 어려운 외딴 곳\n");
+        sb.append("⚠️ 단순히 개수가 많다는 이유로 제외하지 마세요!\n\n");
 
         sb.append("### 응답 형식 (JSON만)\n");
         sb.append("{\n");
-        sb.append("  \"selectedSpots\": [1, 3, 5, 7, 9],  // 선택된 관광지 ID만\n");
-        sb.append("  \"excludedSpots\": [2, 4],  // 제외된 관광지 ID만\n");
-        sb.append("  \"excludeReason\": \"너무 먼 관광지 제외\",\n");
+        sb.append("  \"selectedSpots\": [1, 3, 5, 7, 9, 11],  // 선택된 관광지 ID\n");
+        sb.append("  \"excludedSpots\": [2, 4],  // 제외된 관광지 ID\n");
+        sb.append("  \"excludeReason\": \"숙소에서 너무 먼 관광지 제외\",\n");
         sb.append("  \"dayDistribution\": {\n");
-        sb.append("    \"day1\": [1, 5],  // Day 1에 배치할 관광지 ID (순서 무관)\n");
-        sb.append("    \"day2\": [3, 7],  // Day 2에 배치할 관광지 ID (순서 무관)\n");
-        sb.append("    \"day3\": [9]      // Day 3에 배치할 관광지 ID (순서 무관)\n");
+        sb.append("    \"day1\": [1, 5],         // 섬 있음 → 2개\n");
+        sb.append("    \"day2\": [3, 7, 9, 11]   // 섬 없음 → 4개\n");
         sb.append("  }\n");
         sb.append("}\n\n");
         sb.append("**중요: JSON만 반환하세요. 순서/시간 정보 없이!**");

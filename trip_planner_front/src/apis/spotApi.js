@@ -54,3 +54,17 @@ export const getMyBookmarks = async () => {
     const response = await axios.get('/api/bookmarks');
     return response;
 };
+export const addFavorites = async(spotId) =>{
+    const response = await axios.post(`/api/favorites/${spotId}`);
+    return response;
+};
+
+export const removeFavorites = async(spotId)=>{
+    const response = await axios.delete(`/api/favorites/${spotId}`);
+    return response;
+};
+
+export const getMyFavorites = async() =>{
+    const response = await axios.delete(`/api/favorites`);
+    return response;
+};

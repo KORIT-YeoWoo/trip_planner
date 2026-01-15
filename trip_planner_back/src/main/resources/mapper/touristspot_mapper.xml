@@ -43,8 +43,8 @@
             description,
             opening_hrs,
             spot_img,
+            is_island,
             created_at,
-            is_island
         FROM
             tourist_spots
         <where>
@@ -65,8 +65,8 @@
             latitude,
             longitude,
             spot_img AS spotImg,
-            created_at,
-            is_island
+            is_island,
+            created_at
         FROM
             tourist_spots
         ORDER BY
@@ -95,8 +95,8 @@
             opening_hrs,
             contact,
             spot_img,
-            created_at,
-            is_island
+            is_island,
+            created_at
         FROM tourist_spots
         WHERE spot_id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">

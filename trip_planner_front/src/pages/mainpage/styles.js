@@ -109,8 +109,8 @@ export const button = css`
     color: #fff;
     border: none;
     border-radius: 999px;
-    padding: 12px 20px;
-    font-size: 14px;
+    padding: 13px 28px;
+    font-size: 17px;
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 10px 22px rgba(244, 122, 32, 0.3);

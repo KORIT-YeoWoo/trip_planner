@@ -73,7 +73,7 @@ public class KakaoNaviService {
             JsonNode root = objectMapper.readTree(responseBody);
             JsonNode routes = root.get("routes");
 
-            if (routes == null || routes.size() == 0) {
+            if (routes == null || routes.isEmpty()) {
                 log.warn("경로를 찾을 수 없습니다: {}", responseBody);
                 return null;
             }

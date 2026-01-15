@@ -19,7 +19,7 @@ public class FavoriteController {
     @PostMapping("/{spotId}")
 
     public ResponseEntity<?> addFavorite(@PathVariable Integer spotId){
-        Integer userId = 1;//테스트용
+        int userId = 1;//테스트용
         Favorite favorite = Favorite.builder()
                         .spotId(spotId).userId(userId).createdAt(LocalDateTime.now()).build();
 
@@ -28,13 +28,11 @@ public class FavoriteController {
         System.out.println("---------------------------");
         favoriteMapper.insert(favorite);
 
-
-
         return ResponseEntity.ok().body("성공");
     }
     @DeleteMapping("/{spotId}")
     public ResponseEntity<?> removeFavorite(@PathVariable Integer spotId){
-        Integer userId = 1;
+        int userId = 1;
         favoriteMapper.deleteById(userId,spotId);
         return ResponseEntity.ok().body("삭제성공");
     }

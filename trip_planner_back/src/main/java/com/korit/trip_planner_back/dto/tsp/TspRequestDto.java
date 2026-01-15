@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 public class TspRequestDto {
 
-    private List<Long> spotIds;
+    private List<Integer> spotIds;
     private double startLat;
     private double startLon;
     private Double endLat;

@@ -6,8 +6,8 @@ import com.korit.trip_planner_back.dto.tsp.TspRequestDto;
 import com.korit.trip_planner_back.dto.tsp.TspResponseDto;
 import com.korit.trip_planner_back.entity.TouristSpot;
 import com.korit.trip_planner_back.mapper.TouristSpotMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,13 +16,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TspService {
 
-    @Autowired
-    private TouristSpotMapper touristSpotMapper;
+    private final TouristSpotMapper touristSpotMapper;
 
-    @Autowired
-    private KakaoNaviService kakaoNaviService;
+    private final KakaoNaviService kakaoNaviService;
 
     public TspResponseDto calculateOptimalRoute(TspRequestDto request) {
         // 1. 요청 검증
@@ -65,8 +64,8 @@ public class TspService {
         List<TouristSpot> route = tspResult.getRoute();
 
         // 최적화된 관광지 ID 순서
-        List<Long> optimizedSpotIds = route.stream()
-                .map(spot -> (long) spot.getSpotId())
+        List<Integer> optimizedSpotIds = route.stream()
+                .map(spot -> (int) spot.getSpotId())
                 .collect(Collectors.toList());
 
         // 경로 구간 정보 생성
@@ -114,7 +113,7 @@ public class TspService {
         double currentLat = request.getStartLat();
         double currentLon = request.getStartLon();
         String currentName = request.getStartName() != null ? request.getStartName() : "출발지";
-        Long currentSpotId = 0L;
+        int currentSpotId = 0;
 
         // 출발지 → 관광지들
         for (int i = 0; i < route.size(); i++) {
@@ -125,7 +124,7 @@ public class TspService {
                     .fromSpotName(currentName)
                     .fromLat(currentLat)
                     .fromLon(currentLon)
-                    .toSpotId((long) nextSpot.getSpotId())
+                    .toSpotId(nextSpot.getSpotId())
                     .toSpotName(nextSpot.getTitle())
                     .toLat(nextSpot.getLatitude())
                     .toLon(nextSpot.getLongitude())
@@ -145,7 +144,7 @@ public class TspService {
             currentLat = nextSpot.getLatitude();
             currentLon = nextSpot.getLongitude();
             currentName = nextSpot.getTitle();
-            currentSpotId = (long) nextSpot.getSpotId();
+            currentSpotId = nextSpot.getSpotId();
         }
 
         // 마지막 관광지 → 도착지
@@ -160,7 +159,7 @@ public class TspService {
                 .fromSpotName(currentName)
                 .fromLat(currentLat)
                 .fromLon(currentLon)
-                .toSpotId(0L)
+                .toSpotId(0)
                 .toSpotName(endName)
                 .toLat(endLat)
                 .toLon(endLon)

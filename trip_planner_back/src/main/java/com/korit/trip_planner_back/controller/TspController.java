@@ -7,17 +7,17 @@ import com.korit.trip_planner_back.dto.tsp.TspResponseDto;
 import com.korit.trip_planner_back.service.TspService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "TSP", description = "여행 경로 최적화 API")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/tsp")
 public class TspController {
 
-    @Autowired
-    private TspService tspService;
+    private final TspService tspService;
 
     @Operation(
             summary = "최적 경로 계산",

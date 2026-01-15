@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class  Bookmark {
     private int bookmarkId;
     private int userId;

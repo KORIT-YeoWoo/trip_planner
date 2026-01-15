@@ -20,5 +20,5 @@ public interface TouristSpotMapper {
 
     int deleteById(@Param("spotId") int spotId);
 
-    List<TouristSpot> findAllByIds(@Param("ids") List<Long> ids);
+    List<TouristSpot> findAllByIds(@Param("ids") List<Integer> ids);
 }

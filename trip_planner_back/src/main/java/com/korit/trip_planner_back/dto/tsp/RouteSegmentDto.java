@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RouteSegmentDto {
 
-    private Long fromSpotId;
+    private Integer fromSpotId;
     private String fromSpotName;
     private double fromLat;
     private double fromLon;
-    private Long toSpotId;
+    private Integer toSpotId;
     private String toSpotName;
     private double toLat;
     private double toLon;

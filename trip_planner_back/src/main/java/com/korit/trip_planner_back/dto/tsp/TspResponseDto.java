@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 public class TspResponseDto {
 
-    private List<Long> optimizedSpotIds;
+    private List<Integer> optimizedSpotIds;
     private List<RouteSegmentDto> routeSegments;
     private double totalStraightDistance;
     private Double totalActualDistance;

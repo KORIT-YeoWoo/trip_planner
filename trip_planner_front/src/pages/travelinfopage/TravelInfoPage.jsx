@@ -4,12 +4,18 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import * as s from "./styles";
 
+// ⭐ 이미지 경로에 맞춘 LoadingPage 임포트
+import LoadingPage from "../loadingpage/LoadingPage";
+
 import { IoPeopleSharp } from "react-icons/io5";
 import { LuCalendarDays } from "react-icons/lu";
 import { MdOutlineWallet } from "react-icons/md";
 
 function TravelInfoPage() {
   const [단계, set단계] = useState(1);
+  const [로딩중, set로딩중] = useState(false);
+
+  // 데이터 상태
   const [카테고리, set카테고리] = useState(null);
   const [인원, set인원] = useState({ 성인: 0, 아동: 0 });
   const [선택된날짜범위, set선택된날짜범위] = useState(null);
@@ -18,10 +24,11 @@ function TravelInfoPage() {
   const [총예산, set총예산] = useState(1000000);
   const [세부예산, set세부예산] = useState({});
 
-  // --- [수정] 카테고리 선택: 어떤 상태에서든 모든 버튼 클릭 가능 ---
+  const 총인원수 = 인원.성인 + 인원.아동;
+
+  // 1. 카테고리 선택 (커플 눌러도 다른 카테고리 자유 이동)
   const 카테고리선택 = (cat) => {
     set카테고리(cat);
-    // 버튼 클릭 시 해당 카테고리에 맞는 인원으로 즉시 갱신
     if (cat === "혼자") set인원({ 성인: 1, 아동: 0 });
     else if (cat === "커플") set인원({ 성인: 2, 아동: 0 });
     else if (cat === "친구") set인원({ 성인: 2, 아동: 0 });
@@ -29,7 +36,6 @@ function TravelInfoPage() {
   };
 
   const 인원변경 = (type, delta) => {
-    // '혼자' 카테고리일 때만 수동 조절 막음 (1명 유지)
     if (카테고리 === "혼자") return;
     set인원((prev) => ({
       ...prev,
@@ -40,9 +46,7 @@ function TravelInfoPage() {
     }));
   };
 
-  const 총인원수 = 인원.성인 + 인원.아동;
-
-  // --- 일정 및 예산 로직 (동일) ---
+  // 2. 기간 계산
   const 기간 = useMemo(() => {
     if (!선택된날짜범위 || !선택된날짜범위[0] || !선택된날짜범위[1])
       return { 박: 0, 일: 1 };
@@ -59,6 +63,7 @@ function TravelInfoPage() {
       );
   }, [기간.일]);
 
+  // 3. 예산 계산 (인원 * 일수 연동)
   const 최소예산 = 총인원수 * 기간.일 * 100000;
   const 최대예산 = 총인원수 * 기간.일 * 500000;
 
@@ -79,11 +84,22 @@ function TravelInfoPage() {
     set세부예산(결과);
   }, [총예산, 이동수단]);
 
+  // 4. 계획 완료 핸들러
+  const 계획완료핸들러 = () => {
+    set로딩중(true);
+    setTimeout(() => {
+      set로딩중(false);
+      alert("여행 계획이 완성되었습니다!");
+    }, 3000);
+  };
+
   const 시간옵션들 = Array.from({ length: 24 }, (_, i) => (
     <option key={i} value={i}>
       {String(i).padStart(2, "0")}:00
     </option>
   ));
+
+  if (로딩중) return <LoadingPage />;
 
   return (
     <div css={s.전체페이지}>
@@ -110,7 +126,6 @@ function TravelInfoPage() {
                     key={cat}
                     css={s.카테고리버튼(카테고리 === cat)}
                     onClick={() => 카테고리선택(cat)}
-                    // ⭐ 이제 disabled 조건 삭제: 언제든 클릭 가능!
                   >
                     {cat}
                   </button>
@@ -120,9 +135,7 @@ function TravelInfoPage() {
             {카테고리 && (
               <div css={s.인원조절영역애니메이션}>
                 <p css={s.안내문구}>
-                  {카테고리 === "혼자"
-                    ? "나홀로 여행은 1인 고정입니다."
-                    : "인원을 조절하실 수 있습니다."}
+                  {카테고리 === "혼자" ? "나홀로 여행" : "인원을 설정해주세요"}
                 </p>
                 <div css={s.인원조절그룹}>
                   <div css={s.인원항목}>
@@ -167,7 +180,6 @@ function TravelInfoPage() {
           </div>
         )}
 
-        {/* 2, 3단계 UI 동일 */}
         {단계 === 2 && (
           <div css={s.콘텐츠가로배치}>
             <div css={s.달력영역}>
@@ -176,13 +188,12 @@ function TravelInfoPage() {
                 value={선택된날짜범위}
                 selectRange
                 locale="ko-KR"
-                // 요일 형식을 '월', '화' 처럼 한 글자 한글로 강제 지정 (깨짐 방지 핵심)
+                // ⭐ 요일을 '일월화수목금토' 한 글자로 고정
                 formatShortWeekday={(locale, date) =>
                   ["일", "월", "화", "수", "목", "금", "토"][date.getDay()]
                 }
-                // 일자 숫자 뒤의 '일' 제거 (숫자만 깔끔하게 표시)
                 formatDay={(locale, date) => date.getDate()}
-                calendarType="gregory"
+                calendarType="gregory" // 일요일부터 시작하는 달력 타입
               />
             </div>
             <div css={s.상세일정박스}>
@@ -225,7 +236,7 @@ function TravelInfoPage() {
                   </div>
                 </>
               ) : (
-                <div css={s.비어있는상태}>달력에서 날짜를 선택해주세요!</div>
+                <div css={s.비어있는상태}>날짜를 선택해주세요</div>
               )}
             </div>
           </div>
@@ -235,25 +246,25 @@ function TravelInfoPage() {
           <div css={s.통합페이지컨테이너}>
             <div css={s.왼쪽섹션}>
               <div css={s.그룹}>
-                <label>1. 이동수단</label>
+                <label>이동수단</label>
                 <div css={s.버튼그룹}>
                   <button
                     css={s.이동버튼(이동수단 === "렌터카")}
                     onClick={() => set이동수단("렌터카")}
                   >
-                    🚗 렌터카
+                    렌터카
                   </button>
                   <button
                     css={s.이동버튼(이동수단 === "대중교통")}
                     onClick={() => set이동수단("대중교통")}
                   >
-                    🚌 대중교통
+                    대중교통
                   </button>
                 </div>
               </div>
               <div css={s.그룹}>
                 <label>
-                  2. 총 예산 ({총인원수}인 / {기간.일}일)
+                  총 예산 ({총인원수}인/{기간.일}일)
                 </label>
                 <div css={s.슬라이더영역}>
                   <input
@@ -273,7 +284,7 @@ function TravelInfoPage() {
             </div>
             <div css={s.오른쪽섹션}>
               <div css={s.추천결과카드}>
-                <h4>💰 1인당 지출 가이드</h4>
+                <h4>1인당 지출 가이드</h4>
                 {Object.entries(세부예산).map(([항목, 금액]) => (
                   <div key={항목} css={s.결과줄}>
                     <span>{항목}</span>
@@ -283,8 +294,8 @@ function TravelInfoPage() {
                   </div>
                 ))}
                 <div css={s.총액바}>
-                  1인 합계:{" "}
-                  {Math.floor(총예산 / (총인원수 || 1)).toLocaleString()}원
+                  합계: {Math.floor(총예산 / (총인원수 || 1)).toLocaleString()}
+                  원
                 </div>
               </div>
             </div>
@@ -295,10 +306,10 @@ function TravelInfoPage() {
       <div css={s.네비버튼영역}>
         <button onClick={() => set단계((p) => Math.max(p - 1, 1))}>이전</button>
         <button
-          onClick={() => set단계((p) => Math.min(p + 1, 3))}
+          onClick={단계 === 3 ? 계획완료핸들러 : () => set단계((p) => p + 1)}
           disabled={단계 === 1 && !카테고리}
         >
-          다음
+          {단계 === 3 ? "계획 완료" : "다음"}
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 
 export const 전체페이지 = css`
+  font-family: "Pretendard", -apple-system, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8,7 +9,6 @@ export const 전체페이지 = css`
   min-height: calc(100vh - 80px);
   background-color: #f8f9fa;
   padding: 20px;
-  overflow: hidden;
 `;
 
 export const 단계진행바 = css`
@@ -16,7 +16,6 @@ export const 단계진행바 = css`
   gap: 10px;
   margin-bottom: 20px;
 `;
-
 export const 단계아이템 = (활성) => css`
   padding: 8px 18px;
   border-radius: 50px;
@@ -24,7 +23,6 @@ export const 단계아이템 = (활성) => css`
   color: ${활성 ? "white" : "#adb5bd"};
   font-weight: 700;
   font-size: 13px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 `;
 
 export const 메인카드 = css`
@@ -37,6 +35,75 @@ export const 메인카드 = css`
   min-height: 500px;
 `;
 
+export const 카테고리버튼 = (활성) => css`
+  flex: 1;
+  padding: 15px 0;
+  border-radius: 15px;
+  border: 2px solid ${활성 ? "#FF6B00" : "#eee"};
+  background: ${활성 ? "#FFF0E6" : "white"};
+  color: ${활성 ? "#FF6B00" : "#888"};
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+`;
+
+export const 달력영역 = css`
+  flex: 1.2;
+  min-width: 340px;
+
+  .react-calendar {
+    width: 100%;
+    border: none;
+    font-family: inherit;
+  }
+
+  /* 요일 레이아웃 및 폰트 */
+  .react-calendar__month-view__weekdays {
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    padding-bottom: 10px;
+
+    abbr {
+      text-decoration: none;
+    }
+  }
+
+  /* ⭐ 일요일(첫 번째 열) 빨간색 */
+  .react-calendar__month-view__weekdays__weekday:nth-of-type(1) {
+    color: #ff4d4d;
+  }
+
+  /* ⭐ 토요일(일곱 번째 열) 파란색 */
+  .react-calendar__month-view__weekdays__weekday:nth-of-type(7) {
+    color: #4d79ff;
+  }
+
+  /* 날짜 칸 스타일 */
+  .react-calendar__tile {
+    font-weight: 600;
+    padding: 12px 0;
+  }
+
+  /* ⭐ 토요일 날짜 숫자 파란색 */
+  .react-calendar__month-view__days__day--neighboringMonth:nth-of-type(7n),
+  .react-calendar__month-view__days__day:nth-of-type(7n) {
+    color: #4d79ff;
+  }
+
+  /* ⭐ 일요일 날짜 숫자 빨간색 (일요일 시작 기준 7n+1) */
+  .react-calendar__month-view__days__day--neighboringMonth:nth-of-type(7n + 1),
+  .react-calendar__month-view__days__day:nth-of-type(7n + 1) {
+    color: #ff4d4d;
+  }
+
+  /* 선택된 날짜는 흰색으로 유지 */
+  .react-calendar__tile--active {
+    background: #ff6b00 !important;
+    border-radius: 10px;
+    color: white !important;
+  }
+`;
 export const 인원설정컨테이너 = css`
   display: flex;
   flex-direction: column;
@@ -59,28 +126,11 @@ export const 카테고리영역 = css`
 export const 카테고리그룹 = css`
   display: flex;
   gap: 10px;
+  width: 100%;
 `;
-export const 카테고리버튼 = (활성) => css`
-  flex: 1;
-  padding: 15px 0;
-  border-radius: 15px;
-  border: 2px solid ${활성 ? "#FF6B00" : "#eee"};
-  background: ${활성 ? "#FFF0E6" : "white"};
-  color: ${활성 ? "#FF6B00" : "#888"};
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    filter: grayscale(1);
-  }
-`;
-
 export const 인원조절영역애니메이션 = css`
   width: 100%;
   max-width: 500px;
-  animation: fadeIn 0.3s;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -120,9 +170,6 @@ export const 카운터 = css`
     background: white;
     color: #ff6b00;
     cursor: pointer;
-    &:disabled {
-      opacity: 0.3;
-    }
   }
   span {
     font-weight: 700;
@@ -131,44 +178,9 @@ export const 카운터 = css`
     font-size: 18px;
   }
 `;
-
 export const 콘텐츠가로배치 = css`
   display: flex;
   gap: 30px;
-`;
-export const 달력영역 = css`
-  flex: 1.2;
-  min-width: 340px;
-
-  .react-calendar {
-    width: 100%;
-    border: none;
-    font-family: "Pretendard", "Malgun Gothic", sans-serif; /* 폰트 강제 지정 */
-  }
-
-  /* 요일(월화수목금) 레이아웃 및 폰트 설정 */
-  .react-calendar__month-view__weekdays {
-    text-align: center;
-    font-weight: 700;
-    font-size: 13px;
-    color: #444;
-    text-decoration: none;
-  }
-
-  .react-calendar__month-view__weekdays__weekday {
-    padding: 10px 0;
-    /* abbr 태그에 걸린 밑줄 제거 및 폰트 고정 */
-    abbr {
-      text-decoration: none;
-      cursor: default;
-    }
-  }
-
-  .react-calendar__tile--active {
-    background: #ff6b00 !important;
-    border-radius: 10px;
-    color: white !important;
-  }
 `;
 export const 상세일정박스 = css`
   flex: 1;
@@ -195,7 +207,6 @@ export const 일차항목박스 = css`
   border: 1px solid #eee;
   .일차텍스트 {
     font-weight: 700;
-    font-size: 14px;
   }
 `;
 export const 시간설정영역 = css`
@@ -210,7 +221,6 @@ export const 시간셀렉트 = css`
   font-weight: 600;
   padding: 2px 4px;
 `;
-
 export const 통합페이지컨테이너 = css`
   display: flex;
   gap: 30px;
@@ -246,6 +256,7 @@ export const 이동버튼 = (활성) =>
     color: ${활성 ? "#FF6B00" : "#888"};
     font-weight: 700;
     cursor: pointer;
+    font-family: inherit;
   `;
 export const 슬라이더영역 = css`
   input {
@@ -295,7 +306,6 @@ export const 총액바 = css`
   border-top: 2px dashed #ddd;
   font-size: 18px;
 `;
-
 export const 네비버튼영역 = css`
   display: flex;
   width: 100%;
@@ -310,30 +320,18 @@ export const 네비버튼영역 = css`
     font-weight: 800;
     font-size: 16px;
     cursor: pointer;
-  }
-  button:first-of-type {
-    background: #eee;
-    color: #888;
-  }
-  button:last-of-type {
-    background: #ff6b00;
-    color: white;
-    &:disabled {
-      background: #ccc;
-    }
+    font-family: inherit;
   }
 `;
 export const 기간요약헤더 = css`
-  font-size: 16px;
   font-weight: 800;
   color: #ff6b00;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 `;
 export const 비어있는상태 = css`
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
   color: #ccc;
-  font-weight: 600;
 `;

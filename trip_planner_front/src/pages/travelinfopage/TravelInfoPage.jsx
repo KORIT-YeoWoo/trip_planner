@@ -1,133 +1,172 @@
-"use client";
-
 /** @jsxImportSource @emotion/react */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import * as s from "./styles";
 
-export default function TravelInfoPage() {
-  const [step, setStep] = useState(0);
-  const [dateRange, setDateRange] = useState(null);
-  const [days, setDays] = useState([]);
-  const [isModal, setIsModal] = useState(false);
-  const [budget, setBudget] = useState(500000);
-  const [transport, setTransport] = useState("");
-  const [numPeople, setNumPeople] = useState(1);
-  const [companion, setCompanion] = useState("");
+// 아이콘 임포트
+import { LuCalendarDays } from "react-icons/lu";
+import { MdOutlineWallet } from "react-icons/md";
+import { FaCar } from "react-icons/fa6";
+import { IoPeopleSharp } from "react-icons/io5";
 
-  const steps = ["기간", "예산", "이동", "인원"];
-  const hours = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
+function TravelInfoPage() {
+  const [단계, set단계] = useState(1);
+  const [선택된날짜범위, set선택된날짜범위] = useState(null);
+  const [현재보여지는달, set현재보여지는달] = useState(new Date());
+  const [일정시간목록, set일정시간목록] = useState([]);
 
-  // 예산 계산 로직 (40%, 30%, 15%, 15%)
-  const stayCost = Math.floor(budget * 0.4);
-  const foodCost = Math.floor(budget * 0.3);
-  const transCost = Math.floor(budget * 0.15);
-  const tourCost = Math.floor(budget * 0.15);
+  // 1. 여행 기간 정밀 계산
+  const 여행기간계산함수 = () => {
+    if (!선택된날짜범위 || !선택된날짜범위[0] || !선택된날짜범위[1])
+      return null;
+    const 시작일 = new Date(
+      선택된날짜범위[0].getFullYear(),
+      선택된날짜범위[0].getMonth(),
+      선택된날짜범위[0].getDate()
+    );
+    const 종료일 = new Date(
+      선택된날짜범위[1].getFullYear(),
+      선택된날짜범위[1].getMonth(),
+      선택된날짜범위[1].getDate()
+    );
+    const 차이일수 = Math.floor((종료일 - 시작일) / (1000 * 60 * 60 * 24));
+    return { 박: 차이일수, 일: 차이일수 + 1 };
+  };
 
-  const handleDate = (v) => {
-    setDateRange(v);
-    if (v?.[0] && v?.[1]) {
-      const diff = Math.ceil((v[1] - v[0]) / (1000 * 60 * 60 * 24)) + 1;
-      setDays(Array.from({ length: diff }, (_, i) => ({ id: i + 1, start: "09:00", end: "21:00" })));
+  const 여행기간 = 여행기간계산함수();
+
+  // 2. 날짜 선택 시 시간 리스트 초기화
+  useEffect(() => {
+    if (여행기간) {
+      const 초기시간 = Array.from({ length: 여행기간.일 }, () => ({
+        시작: 9,
+        종료: 22,
+      }));
+      set일정시간목록(초기시간);
     }
+  }, [여행기간?.일]);
+
+  // 3. 드롭다운 시간 변경 핸들러
+  const 시간변경핸들러 = (인덱스, 종류, 값) => {
+    const 새시간목록 = [...일정시간목록];
+    새시간목록[인덱스][종류] = Number(값);
+    set일정시간목록(새시간목록);
   };
 
-  const updateTime = (id, field, val) => {
-    setDays(days.map(d => d.id === id ? { ...d, [field]: val } : d));
-  };
+  // 00:00 ~ 23:00 옵션 생성
+  const 시간옵션들 = Array.from({ length: 24 }, (_, i) => (
+    <option key={i} value={i}>
+      {String(i).padStart(2, "0")}:00
+    </option>
+  ));
+
+  const 오늘요일글자 = new Date().toLocaleDateString("ko-KR", {
+    weekday: "long",
+  });
 
   return (
-    <div css={s.page}>
-      <header css={s.header}><span css={s.logoText}>여우</span><span css={s.yeowooText}>YEOWOO</span></header>
-
-      <nav css={s.stepContainer}>
-        {steps.map((name, i) => (
-          <div key={i} css={s.stepItem(step === i)}>{name}</div>
-        ))}
-      </nav>
-
-      <main css={s.mainCard}>
-        {step === 0 && (
-          <>
-            <h3 css={s.sectionTitle}>언제 떠나시나요?</h3>
-            <div css={s.dateBox}><Calendar onChange={handleDate} value={dateRange} selectRange={true} calendarType="gregory" /></div>
-            {days.length > 0 && <button css={s.configBtn} onClick={() => setIsModal(true)}>{days.length}일간의 시간 설정하기 ⚙️</button>}
-          </>
-        )}
-
-        {step === 1 && (
-          <div css={s.budgetWrapper}>
-            <h3 css={s.sectionTitle}>총 예산 설정</h3>
-            <div className="price">{budget.toLocaleString()}원</div>
-            <input type="range" min="100000" max="2000000" step="50000" value={budget} onChange={(e) => setBudget(Number(e.target.value))} />
-            <div css={s.budgetRow}><span>🏨 숙박비 (40%)</span><b>{stayCost.toLocaleString()}원</b></div>
-            <div css={s.budgetRow}><span>🍱 식비 (30%)</span><b>{foodCost.toLocaleString()}원</b></div>
-            <div css={s.budgetRow}><span>🚌 교통비 (15%)</span><b>{transCost.toLocaleString()}원</b></div>
-            <div css={s.budgetRow}><span>🎟️ 관광/체험 (15%)</span><b>{tourCost.toLocaleString()}원</b></div>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div css={s.transportWrapper}>
-            <h3 css={s.sectionTitle} style={{textAlign:'center'}}>이동 수단</h3>
-            {[{id:'car', l:'렌트카/자차', i:'🚗'}, {id:'bus', l:'대중교통', i:'🚌'}, {id:'walk', l:'도보 여행', i:'👟'}].map(t => (
-              <div key={t.id} css={s.gridBtn(transport === t.id)} onClick={() => setTransport(t.id)}>
-                <span className="icon">{t.i}</span><span className="label">{t.l}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {step === 3 && (
-          <div style={{ width: '100%', display:'flex', flexDirection:'column', alignItems:'center' }}>
-            <h3 css={s.sectionTitle}>인원 및 동행</h3>
-            <div css={s.counterWrap}>
-              <button onClick={() => numPeople > 1 && setNumPeople(numPeople - 1)}>-</button>
-              <span className="num">{numPeople}명</span>
-              <button onClick={() => numPeople < 20 && setNumPeople(numPeople + 1)}>+</button>
-            </div>
-            <div css={s.grid2}>
-              {[{id:'s', l:'혼자', i:'👤'}, {id:'f', l:'친구', i:'🙌'}, {id:'c', l:'커플', i:'👩‍❤️‍👨'}, {id:'fa', l:'가족', i:'👨‍👩‍👧‍👦'}].map(c => (
-                <div key={c.id} css={s.gridBtn(companion === c.id)} onClick={() => setCompanion(c.id)}>
-                  <span className="icon">{c.i}</span><span className="label">{c.l}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* ⏰ 일차별 시간 설정 팝업 복구 */}
-      {isModal && (
-        <div css={s.modalOverlay}>
-          <div css={s.modalContent}>
-            <h4 style={{ margin: '0 0 20px', textAlign: 'center', fontWeight: 800 }}>일차별 시간 설정</h4>
-            {days.map(d => (
-              <div key={d.id} style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 0', borderBottom:'1px solid #eee'}}>
-                <span style={{ fontWeight: 700, color:'#ef6c22' }}>{d.id}일차</span>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <select style={{padding:'5px', borderRadius:'5px', border:'1px solid #ddd'}} value={d.start} onChange={(e) => updateTime(d.id, 'start', e.target.value)}>
-                    {hours.map(h => <option key={h} value={h}>{h}</option>)}
-                  </select>
-                  <span style={{fontSize:'12px', color:'#999'}}>~</span>
-                  <select style={{padding:'5px', borderRadius:'5px', border:'1px solid #ddd'}} value={d.end} onChange={(e) => updateTime(d.id, 'end', e.target.value)}>
-                    {hours.map(h => <option key={h} value={h}>{h}</option>)}
-                  </select>
-                </div>
-              </div>
-            ))}
-            <button style={{ width: '100%', marginTop: '25px', padding: '15px', background: '#ef6c22', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => setIsModal(false)}>설정 완료</button>
-          </div>
+    <div css={s.전체페이지}>
+      {/* 상단 단계 바: 높이를 줄이기 위해 패딩 축소 */}
+      <div css={s.단계진행바}>
+        <div css={s.단계아이템(단계 === 1)}>
+          여행 기간 <LuCalendarDays />
         </div>
-      )}
+        <div css={s.단계아이템(단계 === 2)}>
+          예산 <MdOutlineWallet />
+        </div>
+        <div css={s.단계아이템(단계 === 3)}>
+          이동수단 <FaCar />
+        </div>
+        <div css={s.단계아이템(단계 === 4)}>
+          인원 <IoPeopleSharp />
+        </div>
+      </div>
 
-      <div css={s.bottomBar}>
-        {step > 0 && <button onClick={() => setStep(step-1)} style={{ flex: 0.3, border: 'none', background: '#f0f0f0', borderRadius: '14px', color: '#888', cursor: 'pointer' }}>이전</button>}
-        <button css={s.nextBtn(step === 0 ? !dateRange : step === 3 ? !companion : false)} onClick={() => step < 3 ? setStep(step+1) : alert("일정 생성!")}>
-          {step === 3 ? "일정 생성하기" : "다음으로"}
+      <div css={s.메인카드}>
+        <div css={s.헤더안내}>
+          <h2>{단계 === 1 ? "여행 일정을 설정해주세요" : "준비 중"}</h2>
+        </div>
+
+        {단계 === 1 && (
+          <div css={s.콘텐츠가로배치}>
+            <div css={s.달력영역}>
+    <div css={s.오늘날짜표시}>오늘은 {오늘요일글자} 입니다 📅</div>
+    <Calendar
+      onChange={set선택된날짜범위}
+      value={선택된날짜범위}
+      selectRange={true}
+      locale="ko-KR"
+      calendarType="gregory"
+      activeStartDate={현재보여지는달}
+      onActiveStartDateChange={({ activeStartDate }) => set현재보여지는달(activeStartDate)}
+      formatDay={(locale, date) => date.getDate()}
+      formatShortWeekday={(locale, date) => 
+        ["일", "월", "화", "수", "목", "금", "토"][date.getDay()]
+      }
+    />
+    <div css={s.오늘버튼영역}>
+      <button onClick={() => set현재보여지는달(new Date())} css={s.오늘버튼}>오늘로 돌아가기</button>
+    </div>
+  </div>
+
+            <div css={s.상세일정박스}>
+              {여행기간 ? (
+                <>
+                  <div css={s.기간요약헤더}>
+                    {여행기간.박}박 {여행기간.일}일 일정
+                  </div>
+                  <div css={s.일차리스트컨테이너}>
+                    {일정시간목록.map((시간, 인덱스) => (
+                      <div key={인덱스} css={s.일차항목박스}>
+                        <span className="일차텍스트">{인덱스 + 1}일차</span>
+                        <div className="시간설정영역">
+                          <select
+                            css={s.시간셀렉트}
+                            value={시간.시작}
+                            onChange={(e) =>
+                              시간변경핸들러(인덱스, "시작", e.target.value)
+                            }
+                          >
+                            {시간옵션들}
+                          </select>
+                          <span>~</span>
+                          <select
+                            css={s.시간셀렉트}
+                            value={시간.종료}
+                            onChange={(e) =>
+                              시간변경핸들러(인덱스, "종료", e.target.value)
+                            }
+                          >
+                            {시간옵션들}
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div css={s.비어있는상태}>
+                  달력에서 여행 날짜를
+                  <br />
+                  선택해주세요!
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div css={s.네비버튼영역}>
+        <button onClick={() => set단계((이전) => Math.max(이전 - 1, 1))}>
+          이전
+        </button>
+        <button onClick={() => set단계((이전) => Math.min(이전 + 1, 4))}>
+          다음
         </button>
       </div>
     </div>
   );
 }
+
+export default TravelInfoPage;

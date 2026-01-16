@@ -36,7 +36,7 @@ export default function Header() {
             }}
             onMouseEnter={() => setIsButtonHover(true)}
             onMouseLeave={() => setIsButtonHover(false)}
-            onClick={()=> navigate("/spots")}
+            onClick={() => navigate("/spots")}
           >
             여행 계획 세우기
           </button>

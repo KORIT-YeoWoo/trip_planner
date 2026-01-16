@@ -19,71 +19,68 @@ const subtitleRoll = keyframes`
 `;
 
 export const page = css`
-    width: 100%;
     background-color: #fbf7f2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 120px 20px 80px;
-    max-width: 1200px;
+    padding: 12vh 1.25rem 8vh;
     margin: 0 auto;
 `;
 
 export const badge = css`
-    padding: 8px 14px;
+    padding: 0.5rem 0.875rem;
     border-radius: 999px;
     background-color: #ffffff;
     border: 1px solid #e9dfd6;
-    font-size: 12px;
+    font-size: 0.75rem;  
     color: #777;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+    box-shadow:  0 0.375rem 1.125rem rgba(0, 0, 0, 0.04);;
     cursor: default;
 `;
 
 export const fox = css`
-    margin-top: 32px;
-    max-width: 960px;
+    margin-top: 2rem;
+    max-width: 60rem;
     width: 100%;
     text-align: center;
     cursor: default;
 `;
 
 export const title = css`
-    font-size: 45px;
+    font-size: 2.8125rem;   
     font-weight: 900;
     letter-spacing: -0.03em;
-    margin: 0;
-    margin-bottom: 20px;
+    margin: 0 0 1.25rem;
     color: #111;
     cursor: default;
 `;
 
 export const foxText = css`
     color: #ff8a00;
-    font-size: 62px;
-    margin-left: 10px;
+    font-size: 3.875rem;   
+    margin-left: 0.625rem;
 `;
 
 export const mascotWrap = css`
-    margin: 20px auto;
+    margin: 1.25rem auto;
 `;
 
 export const mascot = css`
-    width: 120px;
-    height: 120px;
+    width: 7.5rem;
+    height: 7.5rem;
     object-fit: contain;
-    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 0.625rem 1rem rgba(0, 0, 0, 0.1));
 `;
 
 export const subtitleWrap = css`
     display: flex;
     justify-content: center;
-    perspective: 900px;       /* 3D “뒤로 넘어감” 느낌 핵심 */
-    margin-bottom: 20px;
+    perspective: 56.25rem;       /* 3D “뒤로 넘어감” 느낌 핵심 */
+    margin-bottom: 1.25rem;
 `;
 
 export const subtitle = css`
-    font-size: 25px;
+    font-size: 1.5rem;  
     line-height: 1.6;
     color: #333;
     margin: 0;
@@ -109,16 +106,16 @@ export const button = css`
     color: #fff;
     border: none;
     border-radius: 999px;
-    padding: 12px 20px;
-    font-size: 14px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;  
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 10px 22px rgba(244, 122, 32, 0.3);
+    box-shadow: 0 0.625rem 1.375rem rgba(244, 122, 32, 0.3);
     transition: all 0.2s ease;
 `;
 
 export const buttonHover = css`
-    transform: translatey(-2px);
+    transform: translatey(-0.125rem);
     background-color: #ff761bff;
 `;
 

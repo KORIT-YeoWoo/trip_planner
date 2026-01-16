@@ -2,9 +2,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import * as s from "./styles";
 
-import foxQuestion from "../../assets/물음표.PNG";
-import foxTrouble from "../../assets/곤란.PNG";
-import foxHappy from "../../assets/기쁨.PNG";
+import foxQuestion from "../../assets/물음표여우.PNG";
+import foxTrouble from "../../assets/곤란여우.PNG";
+import foxHappy from "../../assets/기쁜여우.PNG";
 
 function LoadingPage({ isComplete = false, onDone }) {
     const [progress, setProgress] = useState(1);

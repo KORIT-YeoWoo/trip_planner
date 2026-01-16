@@ -16,6 +16,12 @@ public class FavoriteController {
 
     private final FavoriteMapper favoriteMapper;
 
+    @GetMapping("")
+    public ResponseEntity<?>getFavorites(){
+        int userId = 1;
+        return ResponseEntity.ok().body(favoriteMapper.findByUserId(userId));
+    }
+
     @PostMapping("/{spotId}")
 
     public ResponseEntity<?> addFavorite(@PathVariable Integer spotId){

@@ -24,6 +24,7 @@ export const layout = css`
   background-color: ${colors.background};
 `;
 
+
 export const selectedSection = css`
   flex: 1;
   padding: 20px;
@@ -132,7 +133,8 @@ export const card = (select) => css`
     border-color: ${select ? colors.primary : colors.accent};
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
   }
-  &:active {
+  &:active:not(:has(button:active)) { 
+    /* 버튼이 active 상태가 아닐 때만 카드가 active 효과를 받음 */
     transform: translateY(0px) scale(0.98);
   }
 `;

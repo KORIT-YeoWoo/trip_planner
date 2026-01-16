@@ -7,6 +7,7 @@ import LoadingPage from './pages/loadingpage/LoadingPage';
 import ItineraryDetailPage from "./pages/itinerarydetailpage/ItineraryDetailPage";
 import MainLayout from "./components/common/layouts/MainLayout";
 import FullScreenLayout from "./components/common/layouts/FullScreenLayout";
+import FavoritePage from "./pages/favoritepage/FavoritePage";
 
 export default function App() {
   return <>
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/" element={<MainPage />} />
           <Route path="/spots" element={<SpotListPage />} />
           <Route path="/travelinfo" element={<TravelInfoPage />} />
+          <Route path="/favorites" element={<FavoritePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 

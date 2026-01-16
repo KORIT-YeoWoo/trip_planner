@@ -19,13 +19,13 @@ const subtitleRoll = keyframes`
 `;
 
 export const page = css`
+    flex: 1;
     width: 100%;
     background-color: #fbf7f2;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 120px 20px 80px;
-    max-width: 1200px;
     margin: 0 auto;
 `;
 

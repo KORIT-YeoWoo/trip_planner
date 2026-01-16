@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 
 export const page = css`
+  flex: 1;
   display: flex; flex-direction: column; min-height: 100vh;
   background-color: #fbf9f7; font-family: 'Pretendard', sans-serif;
   padding-bottom: 100px; box-sizing: border-box;

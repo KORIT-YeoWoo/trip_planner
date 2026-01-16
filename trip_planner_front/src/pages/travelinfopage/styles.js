@@ -2,95 +2,58 @@ import { css } from "@emotion/react";
 
 export const 전체페이지 = css`
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  height: 100vh; background-color: #f8f9fa; padding: 10px; overflow: hidden;
+  min-height: calc(100vh - 80px); background-color: #f8f9fa; padding: 20px; overflow: hidden;
 `;
 
-export const 단계진행바 = css` display: flex; gap: 10px; margin-bottom: 15px; `;
+export const 단계진행바 = css` display: flex; gap: 10px; margin-bottom: 20px; `;
 
 export const 단계아이템 = (활성) => css`
-  display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 50px;
-  background: ${활성 ? "#FF6B00" : "white"}; color: ${활성 ? "white" : "#adb5bd"};
-  font-weight: 700; font-size: 13px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 8px 18px; border-radius: 50px; background: ${활성 ? "#FF6B00" : "white"};
+  color: ${활성 ? "white" : "#adb5bd"}; font-weight: 700; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 `;
 
 export const 메인카드 = css`
-  background: white; border-radius: 25px; width: 95%; max-width: 920px;
-  padding: 25px 35px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  background: white; border-radius: 25px; width: 100%; max-width: 900px; padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); min-height: 500px;
 `;
 
-export const 헤더안내 = css` margin-bottom: 20px; h2 { font-size: 20px; font-weight: 800; margin: 0; color: #333; } `;
-
-export const 콘텐츠가로배치 = css` display: flex; gap: 35px; align-items: flex-start; `;
-
-export const 달력영역 = css`
-  flex: 1.3; min-width: 380px;
-  .react-calendar { width: 100%; border: none; font-size: 14px; }
-  .react-calendar__month-view__weekdays {
-    padding-bottom: 10px;
-    abbr { text-decoration: none; font-size: 14px; font-weight: 800; color: #bbb; }
-  }
-  .react-calendar__month-view__weekdays__weekday:nth-of-type(1) abbr { color: #e54d42; } /* 일요일 헤더 */
-  .react-calendar__month-view__weekdays__weekday:nth-of-type(7) abbr { color: #3973ac; } /* 토요일 헤더 */
-
-  .react-calendar__month-view__days__day:nth-of-type(7n+1) { color: #e54d42 !important; } /* 일요일 날짜 */
-  .react-calendar__month-view__days__day:nth-of-type(7n) { color: #3973ac !important; } /* 토요일 날짜 */
-
-  .react-calendar__tile { padding: 16px 0 !important; font-size: 15px; font-weight: 600; }
-
-  /* 오늘 날짜 (평상시 노란 동그라미) */
-  .react-calendar__tile--now {
-    background: transparent !important;
-    abbr {
-      display: flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; background: #FFD400; border-radius: 50%;
-      color: black !important; margin: 0 auto;
-    }
-  }
-
-  /* 선택된 날짜 (주황색 칸이 노랑을 덮음) */
-  .react-calendar__tile--active {
-    background: #FF6B00 !important; border-radius: 10px; color: white !important;
-    abbr { background: transparent !important; color: white !important; }
-  }
-
-  .react-calendar__month-view__days__day--neighboringMonth { color: #eee !important; }
+export const 인원설정컨테이너 = css` display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; gap: 30px; `;
+export const 카테고리영역 = css` width: 100%; max-width: 500px; label { display: block; text-align: center; font-weight: 800; margin-bottom: 20px; font-size: 18px; } `;
+export const 카테고리그룹 = css` display: flex; gap: 10px; `;
+export const 카테고리버튼 = (활성) => css`
+  flex: 1; padding: 15px 0; border-radius: 15px; border: 2px solid ${활성 ? "#FF6B00" : "#eee"};
+  background: ${활성 ? "#FFF0E6" : "white"}; color: ${활성 ? "#FF6B00" : "#888"};
+  font-weight: 700; cursor: pointer; transition: all 0.2s;
+  &:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
 `;
 
-export const 상세일정박스 = css`
-  flex: 1; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 18px;
-  padding: 20px; height: 410px; display: flex; flex-direction: column;
-`;
+export const 인원조절영역애니메이션 = css` width: 100%; max-width: 500px; animation: fadeIn 0.3s; display: flex; flex-direction: column; align-items: center; `;
+export const 안내문구 = css` font-weight: 700; color: #FF6B00; margin-bottom: 20px; `;
+export const 인원조절그룹 = css` display: flex; gap: 20px; width: 100%; `;
+export const 인원항목 = css` flex: 1; display: flex; justify-content: space-between; align-items: center; padding: 18px 25px; background: #fafafa; border-radius: 20px; border: 1px solid #f0f0f0; span { font-weight: 700; } `;
+export const 카운터 = css` display: flex; align-items: center; gap: 15px; button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #ddd; background: white; color: #FF6B00; cursor: pointer; &:disabled { opacity: 0.3; } } span { font-weight: 700; min-width: 25px; text-align: center; font-size: 18px; } `;
 
-export const 기간요약헤더 = css`
-  font-size: 16px; font-weight: 800; color: #FF6B00; padding-bottom: 12px;
-  border-bottom: 2px solid #FFF0E6; margin-bottom: 15px;
-`;
+export const 콘텐츠가로배치 = css` display: flex; gap: 30px; `;
+export const 달력영역 = css` flex: 1.2; .react-calendar { width: 100%; border: none; } .react-calendar__tile--active { background: #FF6B00 !important; border-radius: 8px; } `;
+export const 상세일정박스 = css` flex: 1; background: #fafafa; border-radius: 18px; padding: 20px; height: 400px; display: flex; flex-direction: column; `;
+export const 일차리스트컨테이너 = css` display: flex; flex-direction: column; gap: 10px; overflow-y: auto; `;
+export const 일차항목박스 = css` display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: white; border-radius: 12px; border: 1px solid #eee; .일차텍스트 { font-weight: 700; font-size: 14px; } `;
+export const 시간설정영역 = css` display: flex; gap: 5px; align-items: center; `;
+export const 시간셀렉트 = css` border: 1px solid #FF6B00; border-radius: 5px; color: #FF6B00; font-weight: 600; padding: 2px 4px; `;
 
-export const 일차리스트컨테이너 = css`
-  display: flex; flex-direction: column; gap: 8px; overflow-y: auto;
-  &::-webkit-scrollbar { width: 3px; }
-  &::-webkit-scrollbar-thumb { background: #eee; border-radius: 10px; }
-`;
+export const 통합페이지컨테이너 = css` display: flex; gap: 30px; `;
+export const 왼쪽섹션 = css` flex: 1; display: flex; flex-direction: column; gap: 25px; `;
+export const 오른쪽섹션 = css` flex: 1; `;
+export const 그룹 = css` label { display: block; font-weight: 700; margin-bottom: 10px; color: #555; } `;
+export const 버튼그룹 = css` display: flex; gap: 10px; `;
+export const 이동버튼 = (활성) => css` flex: 1; padding: 15px; border-radius: 12px; border: 2px solid ${활성 ? "#FF6B00" : "#eee"}; background: ${활성 ? "#FFF0E6" : "white"}; color: ${활성 ? "#FF6B00" : "#888"}; font-weight: 700; cursor: pointer; `;
+export const 슬라이더영역 = css` input { width: 100%; accent-color: #FF6B00; } `;
+export const 금액표시 = css` font-size: 28px; font-weight: 800; color: #FF6B00; text-align: center; margin: 15px 0 5px; `;
+export const 범위안내 = css` font-size: 12px; color: #bbb; text-align: center; `;
+export const 추천결과카드 = css` background: #fafafa; padding: 25px; border-radius: 20px; h4 { margin-top: 0; } `;
+export const 결과줄 = css` display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; span { color: #666; font-size: 14px; } strong { font-size: 15px; } `;
+export const 총액바 = css` margin-top: 20px; padding-top: 15px; text-align: right; font-weight: 800; color: #FF6B00; border-top: 2px dashed #ddd; font-size: 18px; `;
 
-export const 일차항목박스 = css`
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px; background: white; border: 1px solid #f0f0f0; border-radius: 12px;
-  .일차텍스트 { font-weight: 700; font-size: 14px; }
-  .시간설정영역 { display: flex; align-items: center; gap: 6px; }
-`;
-
-export const 시간셀렉트 = css`
-  padding: 4px 2px; border: 1px solid #FF6B00; border-radius: 6px;
-  color: #FF6B00; font-weight: 600; font-size: 12px; background: white; outline: none;
-`;
-
-export const 오늘날짜표시 = css` text-align: center; color: #FF6B00; font-weight: 600; font-size: 14px; margin-bottom: 12px; `;
-export const 오늘버튼영역 = css` display: flex; justify-content: center; margin-top: 20px; `;
-export const 오늘버튼 = css` background: #f8f9fa; border: 1px solid #eee; padding: 8px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; `;
-export const 비어있는상태 = css` flex: 1; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 14px; text-align: center; `;
-export const 네비버튼영역 = css`
-  display: flex; width: 95%; max-width: 920px; gap: 12px; margin-top: 15px;
-  button { flex: 1; padding: 14px; border-radius: 14px; border: none; font-weight: 700; font-size: 15px; cursor: pointer; }
-  button:first-of-type { background: white; color: #adb5bd; border: 1px solid #eee; }
-  button:last-of-type { background: #FF6B00; color: white; }
-`;
+export const 네비버튼영역 = css` display: flex; width: 100%; max-width: 900px; gap: 15px; margin-top: 25px; button { flex: 1; padding: 18px; border-radius: 15px; border: none; font-weight: 800; font-size: 16px; cursor: pointer; } button:first-of-type { background: #eee; color: #888; } button:last-of-type { background: #FF6B00; color: white; &:disabled { background: #ccc; } } `;
+export const 기간요약헤더 = css` font-size: 16px; font-weight: 800; color: #FF6B00; margin-bottom: 15px; `;
+export const 비어있는상태 = css` height: 100%; display: flex; align-items: center; justify-content: center; color: #ccc; font-weight: 600; `;

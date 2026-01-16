@@ -12,7 +12,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 
 
-@RestController
+@RestController // api 처리 컨트롤러
 @RequestMapping("/api/spots")
 @RequiredArgsConstructor
 public class SpotController {

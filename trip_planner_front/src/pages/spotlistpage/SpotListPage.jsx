@@ -15,25 +15,27 @@ import { PiMountains } from "react-icons/pi";
 import { MdOutlineSurfing } from "react-icons/md";
 import { IoRestaurantOutline, IoCafeOutline } from "react-icons/io5"; 
 import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
+
 function SpotListPage() {
-  const [spots, setSpots] = useState([]);
-  const [selectedId, setSelectedId] = useState([]);
-  const [wishListId, setWishListId] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [spots, setSpots] = useState([]); //여행지 상태관리
+  const [selectedId, setSelectedId] = useState([]); //여행지 선택 관리
+  const [wishListId, setWishListId] = useState([]); //찜 선택관리
+  const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null);
-  const [searchTitle, setSearchTitle] = useState("");
-  const CATEGORY_OPTIONS=["전체","문화•체험","카페","식당"];
+  const [searchTitle, setSearchTitle] = useState(""); //검색관리
+  const CATEGORY_OPTIONS=["전체","문화•체험","카페","식당"]; //카테고리 옵션
   const CATEGORY_ICONS = {
+    //카테고리 아이콘
     "전체":null,
     "문화•체험":<MdOutlineSurfing />  ,
     "자연":<PiMountains />, 
     "카페":<IoCafeOutline />, 
     "식당":<IoRestaurantOutline />};
-  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedCategory, setSelectedCategory] = useState("전체"); //카테고리 초기값 전체로 두기 (카테고리 선택 관리)
  
   useEffect(()=>{
     console.log("현재 찜 목록(wishList)",wishListId)
-  },[wishListId]);
+  },[wishListId]); //현재 찜 어떤거 선택되엇는지 콘솔 출력
   
   useEffect(() => {
     const fetchSpots = async () => {
@@ -64,11 +66,12 @@ function SpotListPage() {
   .filter((s) => {
     if(selectedCategory === "전체") return true;
     return s.category === selectedCategory;
-  })
+  }) //여행지의 카테고리가 전체면 모든 여행지 리턴 ,아니면 여행지의 카테고리와 맞는 걸 리턴
   
   .filter((spot) =>
-    (spot.title ?? "").toLowerCase().includes(searchTitle.trim().toLowerCase())
-  );
+    (spot.title ?? "")//제목이 빈 문자열이면 null로 취급
+  .toLowerCase().includes(searchTitle.trim().toLowerCase())
+  );// 제목 검색
 
   const toggleSelect = (id) => {
     setSelectedId((prev) =>
@@ -76,20 +79,22 @@ function SpotListPage() {
         ? prev.filter((v) => v !== id)
         : [...prev, id]
     );
-  };
+  };// 여행지 id를 받아서 선택된 id 에 넣는데 이전에 있던 아이디이면 제외하고 배열 만들기
+  //  없으면 기존 prev 에 추가
 
 
   const toggleWish = async(id)=>{
-    const isWished = wishListId.includes(id);
+    const isWished = wishListId.includes(id);// 클릭한 관광지가 찜 목록에 있는지 확인
     
     try{
-      if(isWished){
+      if(isWished){//있다면
         await removeFavorites(id);
-        setWishListId((prev)=> prev.filter((v)=> v !== id));
+        // removeFavorites는 api통신함수. 해당 id의 관광지를 찜 목록에서 삭제 -> db에서도 삭제
+        setWishListId((prev)=> prev.filter((v)=> v !== id)); //찜 목록에서 이전에 선택 되었던 id는 제외하고 배열 만들기
         console.log(`${id}번 찜 삭제 완료`);
       }else{
-        await addFavorites(id);
-        setWishListId((prev)=> [...prev,id]);
+        await addFavorites(id); //addFavorites은 api 통신함수. 해당 id의 관광지 찜 목록에 추가 (db에도 추가)
+        setWishListId((prev)=> [...prev,id]);//기존꺼에 선택된 여행지 추가
         console.log(`${id}번 찜 등록 완료`);
       }
     }catch(error){
@@ -145,21 +150,21 @@ function SpotListPage() {
     </div>
 
     {/* 오른쪽: 전체 관광지 목록 (여기서 선택) */}
-    <div style={{ padding: 20, flex: 3 }}>
+    <div style={{ padding:20, flex:3 }}>
       <h1>관광지 목록</h1>
 
       <div css={s.searchBar}>
         <input
           css={s.searchInput}
           value={searchTitle}
-          onChange={(e) => setSearchTitle(e.target.value)}
+          onChange={(e) => setSearchTitle(e.target.value)}  // 이벤트 일어나자마자 실행
           placeholder="제목으로 검색"
         />
       </div>
 
       {/* 카테고리 */}
       <div css={s.categoryBar}>
-        {CATEGORY_OPTIONS.map((cat) => (
+        {CATEGORY_OPTIONS.map((cat) => ( //옵션갑을 키로 사용해서 아이콘즈에서 매칭되는 아이콘 가져옴
           <button
             key={cat}
             type="button"
@@ -189,7 +194,7 @@ function SpotListPage() {
                     css={s.image}
                     src={r.spotImg}
                     alt={r.title}
-                    loading="lazy"
+                    
                   />
                 ) : (
                   <div css={s.emptyImage}>🦊</div>

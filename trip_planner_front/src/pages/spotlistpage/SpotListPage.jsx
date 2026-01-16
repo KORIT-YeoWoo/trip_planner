@@ -6,7 +6,7 @@ import {
   getSpots, 
   addBookmark,    
   removeBookmark, 
-  getMyBookmarks,  
+  getMyFavorites,
   removeFavorites,
   addFavorites
 } from "../../apis/spotApi";// 민석님의 API 함수
@@ -51,6 +51,17 @@ function SpotListPage() {
         const spotData = response.data || response;
         
         setSpots(spotData);
+
+
+        const fResponse = await getMyFavorites();
+        const fData = fResponse.data || fResponse;
+        
+        if(Array.isArray(fData)){
+          const ids = fData.map(item => item.spotId);// 찜 목록의 모든 데이터 중에서 장소id만 뽑아서 새 list만들기
+          setWishListId(ids)//그 리스트를 찜목록에 저장
+          // 새로고침하면 wishList는 초기화 되어서 db와 별개. 그래서 화면 초기 부를때 세팅해줘야함
+        }
+
       } catch (err) {
         console.error('관광지 목록 조회 실패:', err);
         setError('관광지 목록을 불러오는데 실패했습니다.');
@@ -102,6 +113,12 @@ function SpotListPage() {
           
     }
   };
+  
+  const totalPay = selectedId.reduce((plus,id)=>{//누적값, 선택된 여행지 id
+    const place = spots.find((s)=> s.spotId === id);//spot 객체에서 id랑 같은거를 찾음
+    const price = place?.price ?? 0;//price 없으면 0
+    return plus + price;// 누적
+  },0);//초기값 0
 
   
  
@@ -123,6 +140,10 @@ function SpotListPage() {
 
       <div css={s.selectedListWrapper}>
         <h2>선택한 여행지</h2>
+        <div>
+          <p>선택된 관광지 수: {selectedId.length}</p>
+          <p>예상 예산:{totalPay}원</p>
+        </div>
         <ul css={s.spotSelectList}>
           {selectedId.map((id, index) => {
             const spot = spots.find((s) => s.spotId === id);
@@ -146,6 +167,12 @@ function SpotListPage() {
             );
           })}
         </ul>
+        <button
+            type="button"
+            disabled={selectedId.length === 0}
+          >
+            {selectedId.length === 0 ? "여행지를 선택하세요" : "일정 만들기"}
+        </button>
       </div>
     </div>
 

@@ -6,6 +6,7 @@ import SpotListPage from "./pages/spotlistpage/SpotListPage";
 import NotFoundPage from "./pages/notfoundpage/NotFoundPage";
 import TravelInfoPage from "./pages/travelInfoPage/TravelInfoPage";
 import LoadingPage from './pages/loadingpage/LoadingPage';
+import FavoritePage from "./pages/favoritepage/FavoritePage";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/travelinfo" element={<TravelInfoPage />} />
         <Route path="/loading" element={<LoadingPage />} />
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/favorites" element={<FavoritePage />} />
       </Routes>
       <Footer />
     </>

@@ -18,18 +18,6 @@ export default function Header() {
 
         <nav css={s.nav}>
           <Link
-            to="/spots"
-            css={{
-              ...s.navLink,
-              ...(hoveredLink === "spots" ? s.navLinkHover : {}),
-            }}
-            onMouseEnter={() => setHoveredLink("spots")}
-            onMouseLeave={() => setHoveredLink(null)}
-          >
-            관광지 보기
-          </Link>
-
-          <Link
             to="/my"
             css={{
               ...s.navLink,
@@ -48,7 +36,7 @@ export default function Header() {
             }}
             onMouseEnter={() => setIsButtonHover(true)}
             onMouseLeave={() => setIsButtonHover(false)}
-            onClick={() => navigate("/itinerary/create")}
+            onClick={()=> navigate("/spots")}
           >
             여행 계획 세우기
           </button>

@@ -8,16 +8,19 @@
         values
             (default, #{userId}, #{spotId}, now())
     </insert>
-    <select id="findByUserId" resultType="favorite">
+    <select id="findByUserId" resultType="com.korit.trip_planner_back.entity.TouristSpot">
         select
-            favorite_id,
-            user_id,
-            spot_id,
-            created_at
+            ts.spot_id as spotId,
+            ts.title,
+            ts.category,
+            ts.spot_img as spotImg,
+            ts.price,
+            ts.address
         from
-            favorites
+            favorites f
+            inner join tourist_spots ts on f.spot_id = ts.spot_id
         where
-            user_id = #{userId}
+            f.user_id = #{userId}
     </select>
     <delete id="deleteById">
         delete

@@ -65,6 +65,6 @@ export const removeFavorites = async(spotId)=>{
 };
 
 export const getMyFavorites = async() =>{
-    const response = await axios.delete(`/api/favorites`);
+    const response = await axios.get(`/api/favorites`);
     return response;
 };

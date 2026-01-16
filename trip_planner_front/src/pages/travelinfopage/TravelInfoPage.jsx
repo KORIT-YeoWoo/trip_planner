@@ -14,26 +14,29 @@ function TravelInfoPage() {
   const [인원, set인원] = useState({ 성인: 0, 아동: 0 });
   const [선택된날짜범위, set선택된날짜범위] = useState(null);
   const [일정시간목록, set일정시간목록] = useState([]);
-  const [이동수단, set이동수단] = useState('렌터카'); 
-  const [총예산, set총예산] = useState(1000000); 
+  const [이동수단, set이동수단] = useState("렌터카");
+  const [총예산, set총예산] = useState(1000000);
   const [세부예산, set세부예산] = useState({});
 
   // --- [수정] 카테고리 선택: 어떤 상태에서든 모든 버튼 클릭 가능 ---
   const 카테고리선택 = (cat) => {
     set카테고리(cat);
     // 버튼 클릭 시 해당 카테고리에 맞는 인원으로 즉시 갱신
-    if (cat === '혼자') set인원({ 성인: 1, 아동: 0 });
-    else if (cat === '커플') set인원({ 성인: 2, 아동: 0 });
-    else if (cat === '친구') set인원({ 성인: 2, 아동: 0 });
-    else if (cat === '가족') set인원({ 성인: 2, 아동: 1 });
+    if (cat === "혼자") set인원({ 성인: 1, 아동: 0 });
+    else if (cat === "커플") set인원({ 성인: 2, 아동: 0 });
+    else if (cat === "친구") set인원({ 성인: 2, 아동: 0 });
+    else if (cat === "가족") set인원({ 성인: 2, 아동: 1 });
   };
 
   const 인원변경 = (type, delta) => {
     // '혼자' 카테고리일 때만 수동 조절 막음 (1명 유지)
-    if (카테고리 === '혼자') return; 
-    set인원(prev => ({
+    if (카테고리 === "혼자") return;
+    set인원((prev) => ({
       ...prev,
-      [type]: type === '성인' ? Math.max(1, prev[type] + delta) : Math.max(0, prev[type] + delta)
+      [type]:
+        type === "성인"
+          ? Math.max(1, prev[type] + delta)
+          : Math.max(0, prev[type] + delta),
     }));
   };
 
@@ -41,13 +44,19 @@ function TravelInfoPage() {
 
   // --- 일정 및 예산 로직 (동일) ---
   const 기간 = useMemo(() => {
-    if (!선택된날짜범위 || !선택된날짜범위[0] || !선택된날짜범위[1]) return { 박: 0, 일: 1 };
-    const 차이 = Math.floor((선택된날짜범위[1] - 선택된날짜범위[0]) / (1000 * 60 * 60 * 24));
+    if (!선택된날짜범위 || !선택된날짜범위[0] || !선택된날짜범위[1])
+      return { 박: 0, 일: 1 };
+    const 차이 = Math.floor(
+      (선택된날짜범위[1] - 선택된날짜범위[0]) / (1000 * 60 * 60 * 24)
+    );
     return { 박: 차이, 일: 차이 + 1 };
   }, [선택된날짜범위]);
 
   useEffect(() => {
-    if (기간.일 > 0) set일정시간목록(Array.from({ length: 기간.일 }, () => ({ 시작: 9, 종료: 22 })));
+    if (기간.일 > 0)
+      set일정시간목록(
+        Array.from({ length: 기간.일 }, () => ({ 시작: 9, 종료: 22 }))
+      );
   }, [기간.일]);
 
   const 최소예산 = 총인원수 * 기간.일 * 100000;
@@ -61,24 +70,33 @@ function TravelInfoPage() {
   }, [총인원수, 기간.일]);
 
   useEffect(() => {
-    const 비율 = 이동수단 === '렌터카' 
-      ? { 숙박: 0.35, 식비: 0.25, 교통: 0.15, 항공: 0.15, 체험: 0.1 }
-      : { 숙박: 0.4, 식비: 0.3, 교통: 0.05, 항공: 0.15, 체험: 0.1 };
+    const 비율 =
+      이동수단 === "렌터카"
+        ? { 숙박: 0.35, 식비: 0.25, 교통: 0.15, 항공: 0.15, 체험: 0.1 }
+        : { 숙박: 0.4, 식비: 0.3, 교통: 0.05, 항공: 0.15, 체험: 0.1 };
     const 결과 = {};
-    Object.keys(비율).forEach(k => 결과[k] = Math.floor(총예산 * 비율[k]));
+    Object.keys(비율).forEach((k) => (결과[k] = Math.floor(총예산 * 비율[k])));
     set세부예산(결과);
   }, [총예산, 이동수단]);
 
   const 시간옵션들 = Array.from({ length: 24 }, (_, i) => (
-    <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
+    <option key={i} value={i}>
+      {String(i).padStart(2, "0")}:00
+    </option>
   ));
 
   return (
     <div css={s.전체페이지}>
       <div css={s.단계진행바}>
-        <div css={s.단계아이템(단계 === 1)}>인원 <IoPeopleSharp /></div>
-        <div css={s.단계아이템(단계 === 2)}>기간 <LuCalendarDays /></div>
-        <div css={s.단계아이템(단계 === 3)}>예산 <MdOutlineWallet /></div>
+        <div css={s.단계아이템(단계 === 1)}>
+          인원 <IoPeopleSharp />
+        </div>
+        <div css={s.단계아이템(단계 === 2)}>
+          기간 <LuCalendarDays />
+        </div>
+        <div css={s.단계아이템(단계 === 3)}>
+          예산 <MdOutlineWallet />
+        </div>
       </div>
 
       <div css={s.메인카드}>
@@ -87,10 +105,10 @@ function TravelInfoPage() {
             <div css={s.카테고리영역}>
               <label>누구와 함께하시나요?</label>
               <div css={s.카테고리그룹}>
-                {['혼자', '커플', '친구', '가족'].map(cat => (
-                  <button 
-                    key={cat} 
-                    css={s.카테고리버튼(카테고리 === cat)} 
+                {["혼자", "커플", "친구", "가족"].map((cat) => (
+                  <button
+                    key={cat}
+                    css={s.카테고리버튼(카테고리 === cat)}
                     onClick={() => 카테고리선택(cat)}
                     // ⭐ 이제 disabled 조건 삭제: 언제든 클릭 가능!
                   >
@@ -101,22 +119,46 @@ function TravelInfoPage() {
             </div>
             {카테고리 && (
               <div css={s.인원조절영역애니메이션}>
-                <p css={s.안내문구}>{카테고리 === '혼자' ? '나홀로 여행은 1인 고정입니다.' : '인원을 조절하실 수 있습니다.'}</p>
+                <p css={s.안내문구}>
+                  {카테고리 === "혼자"
+                    ? "나홀로 여행은 1인 고정입니다."
+                    : "인원을 조절하실 수 있습니다."}
+                </p>
                 <div css={s.인원조절그룹}>
                   <div css={s.인원항목}>
                     <span>성인</span>
                     <div css={s.카운터}>
-                      <button onClick={() => 인원변경('성인', -1)} disabled={카테고리 === '혼자'}>-</button>
+                      <button
+                        onClick={() => 인원변경("성인", -1)}
+                        disabled={카테고리 === "혼자"}
+                      >
+                        -
+                      </button>
                       <span>{인원.성인}</span>
-                      <button onClick={() => 인원변경('성인', 1)} disabled={카테고리 === '혼자'}>+</button>
+                      <button
+                        onClick={() => 인원변경("성인", 1)}
+                        disabled={카테고리 === "혼자"}
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
                   <div css={s.인원항목}>
                     <span>아동</span>
                     <div css={s.카운터}>
-                      <button onClick={() => 인원변경('아동', -1)} disabled={카테고리 === '혼자'}>-</button>
+                      <button
+                        onClick={() => 인원변경("아동", -1)}
+                        disabled={카테고리 === "혼자"}
+                      >
+                        -
+                      </button>
                       <span>{인원.아동}</span>
-                      <button onClick={() => 인원변경('아동', 1)} disabled={카테고리 === '혼자'}>+</button>
+                      <button
+                        onClick={() => 인원변경("아동", 1)}
+                        disabled={카테고리 === "혼자"}
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -129,30 +171,62 @@ function TravelInfoPage() {
         {단계 === 2 && (
           <div css={s.콘텐츠가로배치}>
             <div css={s.달력영역}>
-              <Calendar onChange={set선택된날짜범위} value={선택된날짜범위} selectRange locale="ko-KR" formatDay={(l, d) => d.getDate()} />
+              <Calendar
+                onChange={set선택된날짜범위}
+                value={선택된날짜범위}
+                selectRange
+                locale="ko-KR"
+                // 요일 형식을 '월', '화' 처럼 한 글자 한글로 강제 지정 (깨짐 방지 핵심)
+                formatShortWeekday={(locale, date) =>
+                  ["일", "월", "화", "수", "목", "금", "토"][date.getDay()]
+                }
+                // 일자 숫자 뒤의 '일' 제거 (숫자만 깔끔하게 표시)
+                formatDay={(locale, date) => date.getDate()}
+                calendarType="gregory"
+              />
             </div>
             <div css={s.상세일정박스}>
-               {선택된날짜범위 ? (
-                 <>
-                   <div css={s.기간요약헤더}>{기간.박}박 {기간.일}일 일정</div>
-                   <div css={s.일차리스트컨테이너}>
-                     {일정시간목록.map((시간, i) => (
-                       <div key={i} css={s.일차항목박스}>
-                         <span className="일차텍스트">{i+1}일차</span>
-                         <div className="시간설정영역">
-                           <select css={s.시간셀렉트} value={시간.시작} onChange={(e) => {
-                             const n = [...일정시간목록]; n[i].시작 = Number(e.target.value); set일정시간목록(n);
-                           }}>{시간옵션들}</select>
-                           <span>~</span>
-                           <select css={s.시간셀렉트} value={시간.종료} onChange={(e) => {
-                             const n = [...일정시간목록]; n[i].종료 = Number(e.target.value); set일정시간목록(n);
-                           }}>{시간옵션들}</select>
-                         </div>
-                       </div>
-                     ))}
-                   </div>
-                 </>
-               ) : <div css={s.비어있는상태}>달력에서 날짜를 선택해주세요!</div>}
+              {선택된날짜범위 ? (
+                <>
+                  <div css={s.기간요약헤더}>
+                    {기간.박}박 {기간.일}일 일정
+                  </div>
+                  <div css={s.일차리스트컨테이너}>
+                    {일정시간목록.map((시간, i) => (
+                      <div key={i} css={s.일차항목박스}>
+                        <span className="일차텍스트">{i + 1}일차</span>
+                        <div className="시간설정영역">
+                          <select
+                            css={s.시간셀렉트}
+                            value={시간.시작}
+                            onChange={(e) => {
+                              const n = [...일정시간목록];
+                              n[i].시작 = Number(e.target.value);
+                              set일정시간목록(n);
+                            }}
+                          >
+                            {시간옵션들}
+                          </select>
+                          <span>~</span>
+                          <select
+                            css={s.시간셀렉트}
+                            value={시간.종료}
+                            onChange={(e) => {
+                              const n = [...일정시간목록];
+                              n[i].종료 = Number(e.target.value);
+                              set일정시간목록(n);
+                            }}
+                          >
+                            {시간옵션들}
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div css={s.비어있는상태}>달력에서 날짜를 선택해주세요!</div>
+              )}
             </div>
           </div>
         )}
@@ -160,36 +234,72 @@ function TravelInfoPage() {
         {단계 === 3 && (
           <div css={s.통합페이지컨테이너}>
             <div css={s.왼쪽섹션}>
-              <div css={s.그룹}><label>1. 이동수단</label>
+              <div css={s.그룹}>
+                <label>1. 이동수단</label>
                 <div css={s.버튼그룹}>
-                  <button css={s.이동버튼(이동수단 === '렌터카')} onClick={() => set이동수단('렌터카')}>🚗 렌터카</button>
-                  <button css={s.이동버튼(이동수단 === '대중교통')} onClick={() => set이동수단('대중교통')}>🚌 대중교통</button>
+                  <button
+                    css={s.이동버튼(이동수단 === "렌터카")}
+                    onClick={() => set이동수단("렌터카")}
+                  >
+                    🚗 렌터카
+                  </button>
+                  <button
+                    css={s.이동버튼(이동수단 === "대중교통")}
+                    onClick={() => set이동수단("대중교통")}
+                  >
+                    🚌 대중교통
+                  </button>
                 </div>
               </div>
-              <div css={s.그룹}><label>2. 총 예산 ({총인원수}인 / {기간.일}일)</label>
+              <div css={s.그룹}>
+                <label>
+                  2. 총 예산 ({총인원수}인 / {기간.일}일)
+                </label>
                 <div css={s.슬라이더영역}>
-                  <input type="range" min={최소예산} max={최대예산} step="10000" value={총예산} onChange={(e) => set총예산(Number(e.target.value))} />
+                  <input
+                    type="range"
+                    min={최소예산}
+                    max={최대예산}
+                    step="10000"
+                    value={총예산}
+                    onChange={(e) => set총예산(Number(e.target.value))}
+                  />
                   <div css={s.금액표시}>{총예산.toLocaleString()}원</div>
-                  <div css={s.범위안내}>최소 {(최소예산/10000)}만 ~ 최대 {(최대예산/10000)}만</div>
+                  <div css={s.범위안내}>
+                    최소 {최소예산 / 10000}만 ~ 최대 {최대예산 / 10000}만
+                  </div>
                 </div>
               </div>
             </div>
             <div css={s.오른쪽섹션}>
-               <div css={s.추천결과카드}>
-                 <h4>💰 1인당 지출 가이드</h4>
-                 {Object.entries(세부예산).map(([항목, 금액]) => (
-                   <div key={항목} css={s.결과줄}><span>{항목}</span><strong>{Math.floor(금액 / (총인원수 || 1)).toLocaleString()}원</strong></div>
-                 ))}
-                 <div css={s.총액바}>1인 합계: {Math.floor(총예산/(총인원수 || 1)).toLocaleString()}원</div>
-               </div>
+              <div css={s.추천결과카드}>
+                <h4>💰 1인당 지출 가이드</h4>
+                {Object.entries(세부예산).map(([항목, 금액]) => (
+                  <div key={항목} css={s.결과줄}>
+                    <span>{항목}</span>
+                    <strong>
+                      {Math.floor(금액 / (총인원수 || 1)).toLocaleString()}원
+                    </strong>
+                  </div>
+                ))}
+                <div css={s.총액바}>
+                  1인 합계:{" "}
+                  {Math.floor(총예산 / (총인원수 || 1)).toLocaleString()}원
+                </div>
+              </div>
             </div>
           </div>
         )}
       </div>
 
       <div css={s.네비버튼영역}>
-        <button onClick={() => set단계(p => Math.max(p - 1, 1))}>이전</button>
-        <button onClick={() => set단계(p => Math.min(p + 1, 3))} disabled={단계 === 1 && !카테고리}>다음</button>
+        <button onClick={() => set단계((p) => Math.max(p - 1, 1))}>이전</button>
+        <button
+          onClick={() => set단계((p) => Math.min(p + 1, 3))}
+          disabled={단계 === 1 && !카테고리}
+        >
+          다음
+        </button>
       </div>
     </div>
   );

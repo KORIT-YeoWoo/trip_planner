@@ -9,7 +9,7 @@ export const overlay = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 16px;
+    padding: 6vh 1rem;
 
     /* 스크롤바 유무로 화면 흔들림 방지(브라우저가 지원하면 자동 보정) */
     scrollbar-gutter: stable;
@@ -19,18 +19,21 @@ export const centerWrap = css`
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    width: 100%;
+    max-width: 42.5rem; /* 680px */
 `;
 
 const floatY = keyframes`
     0% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    50% { transform: translateY(-0.375rem); }
     100% { transform: translateY(0); }
 `;
 
 /* ✅ 핵심: 이미지 “박스”를 고정 */
 export const foxBox = css`
-    width: 160px;
-    height: 160px;
+    width: 10rem;
+    height: 10rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -47,25 +50,26 @@ export const foxImage = css`
 `;
 
 export const message = css`
-    margin-top: 18px;
-    font-size: 22px;
+    margin-top: 1.125rem;
+    font-size: 1.375rem;
     font-weight: 800;
     letter-spacing: -0.03em;
     color: #111;
 `;
 
 export const progressWrap = css`
-    margin-top: 26px;
-    width: min(680px, 78vw);
+    margin-top: 1.625rem;
+    width: 100%;
+    max-width: 42.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 0.625rem;
 `;
 
 export const progressTrack = css`
     width: 100%;
-    height: 10px;
+    height: 0.625rem;
     border-radius: 999px;
     background: rgba(0, 0, 0, 0.08);
     overflow: hidden;
@@ -80,7 +84,7 @@ export const progressFill = (progress) => css`
 `;
 
 export const percentText = css`
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     color: rgba(0, 0, 0, 0.45);
 `;

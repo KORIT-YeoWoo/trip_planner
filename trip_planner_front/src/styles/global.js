@@ -3,7 +3,7 @@ import { css } from "@emotion/react";
 export const global = css`
 
     html {
-        font-size: 125%;
+        font-size: 100%;
     }
 
     @font-face {

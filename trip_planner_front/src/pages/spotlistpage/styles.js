@@ -15,6 +15,7 @@ const colors = {
 };
 
 export const layout = css`
+  flex: 1;
   display: grid;
 
   min-height: 100vh;

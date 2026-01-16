@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 
 export const 전체페이지 = css`
+  flex: 1;
   font-family: "Pretendard", -apple-system, sans-serif;
   display: flex;
   flex-direction: column;

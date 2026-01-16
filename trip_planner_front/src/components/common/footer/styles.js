@@ -3,7 +3,7 @@ import { css } from "@emotion/react";
 export const footer = css`
   background-color: #1f2937;
   color: #d1d5db;
-  padding: 2rem;
+  padding: 1rem 2rem;
   margin-top: auto;
 `;
 

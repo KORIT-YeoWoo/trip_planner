@@ -65,6 +65,7 @@
             latitude,
             longitude,
             spot_img AS spotImg,
+            price,
             is_island,
             created_at
         FROM

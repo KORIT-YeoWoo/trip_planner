@@ -13,7 +13,7 @@ import {
 
 import { PiMountains } from "react-icons/pi";
 import { MdOutlineSurfing } from "react-icons/md";
-import { IoRestaurantOutline, IoCafeOutline } from "react-icons/io5"; 
+import { IoRestaurantOutline, IoCafeOutline, IoLogoWechat } from "react-icons/io5"; 
 import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
 
 function SpotListPage() {
@@ -245,7 +245,11 @@ function SpotListPage() {
       </div>
       
     </div>
-    <div css={s.selectedSection} style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}></div>
+    <div css={s.selectedSection} style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}>
+      <button type="button">
+        <IoLogoWechat size={28} />
+      </button>
+    </div>
   </div>
 );
 

@@ -31,6 +31,7 @@ public class ItineraryService {
     private final TspService tspService;
     private final TouristSpotMapper touristSpotMapper;
     private final GPTService gptService;
+    private final KakaoNaviService kakaoNaviService;
 
     public ItineraryRespDto createItinerary(ItineraryReqDto request) {
         log.info("=== 일정 생성 시작 ===");
@@ -419,4 +420,191 @@ public class ItineraryService {
                         totalDuration / 60.0))
                 .build();
     }
+
+    /**
+     * Day 일정 순서 변경
+     *
+     * ⚠️ 중요: 사용자가 지정한 순서 그대로 유지
+     * TSP 알고리즘은 사용하지 않음!
+     */
+    public DayScheduleDto reorderDaySchedule(
+            Integer itineraryId,
+            Integer day,
+            List<Integer> newItemIds) {
+
+        log.info("=== Day {} 순서 변경 시작 ===", day);
+        log.info("사용자 지정 순서: {}", newItemIds);
+
+        // 1. 검증
+        if (newItemIds == null || newItemIds.isEmpty()) {
+            throw new IllegalArgumentException("관광지 ID 리스트가 비어있습니다.");
+        }
+
+        // 2. 관광지 조회
+        List<TouristSpot> spots = touristSpotMapper.findAllByIds(newItemIds);
+
+        if (spots.size() != newItemIds.size()) {
+            throw new IllegalArgumentException("일부 관광지를 찾을 수 없습니다.");
+        }
+
+        // 3. 섬 개수 체크
+        long islandCount = spots.stream()
+                .filter(TouristSpot::isIsland)
+                .count();
+
+        if (islandCount > 1) {
+            throw new IllegalArgumentException(
+                    "하루에 섬은 1개만 방문 가능합니다. (현재: " + islandCount + "개)"
+            );
+        }
+
+        if (islandCount == 1 && newItemIds.size() > 3) {
+            throw new IllegalArgumentException(
+                    "섬이 있는 날은 최대 3개 관광지만 가능합니다."
+            );
+        }
+
+        // 4. 관광지를 사용자 지정 순서대로 정렬
+        Map<Integer, TouristSpot> spotMap = spots.stream()
+                .collect(Collectors.toMap(
+                        TouristSpot::getSpotId,
+                        spot -> spot
+                ));
+
+        List<TouristSpot> orderedSpots = newItemIds.stream()
+                .map(spotMap::get)
+                .collect(Collectors.toList());
+
+        // 5. 출발지/도착지 정보 (임시 하드코딩)
+        // TODO: DB에서 itineraryId로 실제 정보 조회
+        double startLat = 33.5066;  // 제주공항
+        double startLon = 126.4929;
+        double endLat = 33.5066;
+        double endLon = 126.4929;
+        String transport = "CAR";
+
+        // 6. 사용자 순서 그대로 일정 생성 (TSP 사용 안 함!)
+        DayScheduleDto reorderedSchedule = buildDayScheduleWithFixedOrder(
+                day,
+                LocalDate.now(),  // TODO: 실제 날짜
+                orderedSpots,
+                startLat,
+                startLon,
+                endLat,
+                endLon,
+                transport
+        );
+
+        log.info("=== Day {} 순서 변경 완료 ===", day);
+        log.info("총 거리: {}km, 총 시간: {}분",
+                reorderedSchedule.getTotalDistance(),
+                reorderedSchedule.getTotalDuration());
+
+        return reorderedSchedule;
+    }
+
+    /**
+     * 사용자 지정 순서로 일정 생성
+     *
+     * ⚠️ TSP 알고리즘 사용 안 함!
+     */
+    private DayScheduleDto buildDayScheduleWithFixedOrder(
+            int day,
+            LocalDate date,
+            List<TouristSpot> orderedSpots,
+            double startLat,
+            double startLon,
+            double endLat,
+            double endLon,
+            String transport) {
+
+        List<ScheduleItemDto> items = new ArrayList<>();
+        LocalTime currentTime = LocalTime.of(9, 0);
+
+        boolean hasIsland = false;
+        double totalDistance = 0.0;
+        int totalTravelDuration = 0;
+        int totalStayDuration = 0;
+        int totalCost = 0;
+
+        double currentLat = startLat;
+        double currentLon = startLon;
+
+        // 사용자가 지정한 순서대로 처리
+        for (int i = 0; i < orderedSpots.size(); i++) {
+            TouristSpot spot = orderedSpots.get(i);
+
+            if (spot.isIsland()) {
+                hasIsland = true;
+            }
+
+            // 이동 정보 계산 (카카오 API)
+            TravelInfoDto travelInfo = null;
+            KakaoNaviService.RouteInfo routeInfo = kakaoNaviService.getRouteInfo(
+                    currentLat,
+                    currentLon,
+                    spot.getLatitude(),
+                    spot.getLongitude()
+            );
+
+            if (routeInfo != null) {
+                currentTime = currentTime.plusMinutes(routeInfo.getDuration());
+                totalTravelDuration += routeInfo.getDuration();
+                totalDistance += routeInfo.getDistance();
+
+                travelInfo = TravelInfoDto.builder()
+                        .distance(routeInfo.getDistance())
+                        .duration(routeInfo.getDuration())
+                        .transportType(transport)
+                        .build();
+            }
+
+            int duration = spot.getSpotDuration() > 0 ? spot.getSpotDuration() : 60;
+
+            ScheduleItemDto item = ScheduleItemDto.builder()
+                    .order(i)
+                    .type("SPOT")
+                    .itemId(spot.getSpotId())
+                    .name(spot.getTitle())
+                    .category(spot.getCategory())
+                    .lat(spot.getLatitude())
+                    .lon(spot.getLongitude())
+                    .arrivalTime(currentTime)
+                    .duration(duration)
+                    .departureTime(currentTime.plusMinutes(duration))
+                    .cost(spot.getPrice())
+                    .isIsland(spot.isIsland())
+                    .description(spot.getDescription())
+                    .travelFromPrevious(travelInfo)
+                    .build();
+
+            items.add(item);
+
+            totalCost += spot.getPrice();
+            totalStayDuration += duration;
+            currentTime = currentTime.plusMinutes(duration);
+
+            // 다음 이동을 위해 현재 위치 업데이트
+            currentLat = spot.getLatitude();
+            currentLon = spot.getLongitude();
+        }
+
+        return DayScheduleDto.builder()
+                .day(day)
+                .date(date)
+                .startTime(LocalTime.of(9, 0))
+                .endTime(currentTime)
+                .items(items)
+                .totalDistance(totalDistance)
+                .totalDuration(totalTravelDuration + totalStayDuration)
+                .totalCost(totalCost)
+                .hasIsland(hasIsland)
+                .summary(String.format("Day %d: %d개 관광지, %.1fkm%s",
+                        day,
+                        orderedSpots.size(),
+                        totalDistance,
+                        hasIsland ? " (섬 포함)" : ""))
+                .build();
+    }
+
 }

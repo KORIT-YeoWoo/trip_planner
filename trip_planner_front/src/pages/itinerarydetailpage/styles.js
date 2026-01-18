@@ -57,6 +57,18 @@ export const dayTap = css`
     background-color: oklch(0.99 0.005 85);
 `;
 
+export const dayTab = (isActive) => css`
+    padding: 12px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid ${isActive ? '#FF6B35' : 'transparent'};
+    background-color: ${isActive ? '#FFF5F2' : 'transparent'};
+    transition: all 0.2s ease;
+    
+    &:hover {
+        background-color: #FFF5F2;
+    }
+`;
+
 export const daylist = css`
     width: 90%;
     display: flex;

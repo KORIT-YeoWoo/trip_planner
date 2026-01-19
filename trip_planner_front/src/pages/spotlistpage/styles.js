@@ -268,3 +268,39 @@ export const heartBtn = (isSelected) => css`
     transform: scale(0.9);
   }
 `;
+
+export const cardBody = css`
+  position: relative;          /* 상세보기 버튼 기준점 */
+  padding: 12px 14px 18px;
+  min-height: 80px;            /* 버튼 자리 확보 */
+`;
+
+export const detailBtn = css`
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+
+  height: 28px;
+  padding: 0 12px;
+
+  border: none;
+  border-radius: 999px;
+
+  background: rgba(244, 122, 32, 0.18);
+  color: #f47a20;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 28px;
+
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+
+  &:hover {
+    background: rgba(244, 122, 32, 0.26);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+`;

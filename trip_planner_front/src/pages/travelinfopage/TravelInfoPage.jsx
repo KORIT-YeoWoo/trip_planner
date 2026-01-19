@@ -10,8 +10,15 @@ import LoadingPage from "../loadingpage/LoadingPage";
 import { IoPeopleSharp } from "react-icons/io5";
 import { LuCalendarDays } from "react-icons/lu";
 import { MdOutlineWallet } from "react-icons/md";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function TravelInfoPage() {
+  //민석 - 추가한 내용이야
+  const navigate = useNavigate();
+  const location = useLocation();
+  const selectedSpotIds = location.state?.selectedSpotIds ?? 
+    JSON.parse(sessionStorage.getItem('selectedSpotIds') || '[]');
+
   const [단계, set단계] = useState(1);
   const [로딩중, set로딩중] = useState(false);
 
@@ -25,6 +32,7 @@ function TravelInfoPage() {
   const [세부예산, set세부예산] = useState({});
 
   const 총인원수 = 인원.성인 + 인원.아동;
+
 
   // 1. 카테고리 선택 (커플 눌러도 다른 카테고리 자유 이동)
   const 카테고리선택 = (cat) => {
@@ -85,14 +93,64 @@ function TravelInfoPage() {
   }, [총예산, 이동수단]);
 
   // 4. 계획 완료 핸들러
-  const 계획완료핸들러 = () => {
-    set로딩중(true);
-    setTimeout(() => {
-      set로딩중(false);
-      alert("여행 계획이 완성되었습니다!");
-    }, 3000);
-  };
 
+  // 기존 (혁이가 만든것)
+
+  // const 계획완료핸들러 = () => {
+  //   set로딩중(true);
+  //   setTimeout(() => {
+  //     set로딩중(false);
+  //     alert("여행 계획이 완성되었습니다!");
+  //   }, 3000);
+  // };
+
+
+  // 여기서부터 계획 유효성 검사하고 데이터 전달하는거
+  const 계획완료핸들러 = () => {
+      // 유효성 검사
+      if (!선택된날짜범위 || !선택된날짜범위[0] || !선택된날짜범위[1]) {
+          alert("날짜를 선택해주세요.");
+          return;
+      }
+
+      if (!selectedSpotIds || selectedSpotIds.length === 0) {
+          alert("관광지를 먼저 선택해주세요.");
+          navigate('/spots');
+          return;
+      }
+
+      // 전달할 데이터 구성
+      const travelData = {
+          selectedSpots: selectedSpotIds,
+          travelInfo: {
+              category: 카테고리,
+              people: 인원,
+              dateRange: [
+                  선택된날짜범위[0].toISOString().split('T')[0],
+                  선택된날짜범위[1].toISOString().split('T')[0]
+              ],
+              dailySchedules: 일정시간목록.map((시간, index) => {
+                  const 날짜 = new Date(선택된날짜범위[0]);
+                  날짜.setDate(날짜.getDate() + index);
+                  
+                  return {
+                      day: index + 1,
+                      date: 날짜.toISOString().split('T')[0],
+                      startTime: `${String(시간.시작).padStart(2, '0')}:00`,
+                      endTime: `${String(시간.종료).padStart(2, '0')}:00`
+                  };
+              }),
+              transport: 이동수단,
+              totalBudget: 총예산,
+              budgetBreakdown: 세부예산
+          }
+      };
+
+      // LoadingPage로 이동하면서 데이터 전달
+      navigate('/loading', { state: { travelData } });
+  };
+  // 여기까지 수정했어.
+  
   const 시간옵션들 = Array.from({ length: 24 }, (_, i) => (
     <option key={i} value={i}>
       {String(i).padStart(2, "0")}:00

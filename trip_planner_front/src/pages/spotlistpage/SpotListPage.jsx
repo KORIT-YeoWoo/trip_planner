@@ -15,6 +15,7 @@ import { PiMountains } from "react-icons/pi";
 import { MdOutlineSurfing } from "react-icons/md";
 import { IoRestaurantOutline, IoCafeOutline, IoLogoWechat } from "react-icons/io5"; 
 import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 
 function SpotListPage() {
   const [spots, setSpots] = useState([]); //여행지 상태관리
@@ -33,6 +34,32 @@ function SpotListPage() {
     "식당":<IoRestaurantOutline />};
   const [selectedCategory, setSelectedCategory] = useState("전체"); //카테고리 초기값 전체로 두기 (카테고리 선택 관리)
  
+  // navigate 추가 (민석)
+  const navigate = useNavigate();
+
+  const handleCreateItinerary = () => {
+    console.log("=== SpotListPage 디버깅 ===");
+    console.log("선택된 ID:", selectedId);
+    console.log("선택된 개수:", selectedId.length);
+
+    if (selectedId.length === 0) {
+      alert("관광지를 먼저 선택해주세요.");
+      return;
+    }
+
+
+    console.log("TravelInfoPage로 이동 시작");
+    console.log("전달할 데이터:", { selectedSpotIds: selectedId });
+    
+    sessionStorage.setItem('selectedSpotIds', JSON.stringify(selectedId));
+
+    navigate('/travelinfo',{
+      state: { selectedSpotIds: selectedId }
+    });
+  };
+
+  //
+
   useEffect(()=>{
     console.log("현재 찜 목록(wishList)",wishListId)
   },[wishListId]); //현재 찜 어떤거 선택되엇는지 콘솔 출력
@@ -170,6 +197,8 @@ function SpotListPage() {
         <button
             type="button"
             disabled={selectedId.length === 0}
+            // 온클릭 이벤트 이렇게 추가하면 될 것 같아
+            onClick={handleCreateItinerary}
           >
             {selectedId.length === 0 ? "여행지를 선택하세요" : "일정 만들기"}
         </button>

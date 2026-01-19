@@ -17,6 +17,7 @@ import { MdOutlineSurfing } from "react-icons/md";
 import { IoRestaurantOutline, IoCafeOutline, IoLogoWechat } from "react-icons/io5"; 
 import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import OpenaiModal from "../../components/openai/OpenaiModal";
 
 function SpotListPage() {
   const [spots, setSpots] = useState([]); //여행지 상태관리
@@ -34,7 +35,12 @@ function SpotListPage() {
     "카페":<IoCafeOutline />, 
     "식당":<IoRestaurantOutline />};
   const [selectedCategory, setSelectedCategory] = useState("전체"); //카테고리 초기값 전체로 두기 (카테고리 선택 관리)
- 
+  //chatbot 싱태관리
+  const [aiOpen, setAiOpen] = useState(false);
+
+
+
+
   // navigate 추가 (민석)
   const navigate = useNavigate();
 
@@ -74,6 +80,9 @@ function SpotListPage() {
   };
 
   //
+  useEffect(() => {
+  console.log("모달 열림 상태(aiOpen):", aiOpen);
+}, [aiOpen]);
 
   useEffect(()=>{
     console.log("현재 찜 목록(wishList)",wishListId)
@@ -302,7 +311,7 @@ function SpotListPage() {
       
     </div>
     <div css={s.selectedSection} style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}>
-      <button type="button">
+      <button type="button" onClick={() =>{console.log("버튼 클릭됨!");setAiOpen(true)}}>
         <IoLogoWechat size={28} />
       </button>
     </div>
@@ -311,6 +320,11 @@ function SpotListPage() {
       spot={detailSpot}
       onClose={closeDetail}
     />
+    <OpenaiModal 
+      open={aiOpen}
+      onClose={() => setAiOpen(false)}
+    />
+ 
   </div>
 );
 

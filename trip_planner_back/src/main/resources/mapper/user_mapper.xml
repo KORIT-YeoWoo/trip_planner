@@ -61,7 +61,7 @@
     </select>
     <update id="updateNickname">
         UPDATE
-            user
+            users
         SET
             nickname = #{nickname}
         WHERE

@@ -14,15 +14,19 @@ const colors = {
 };
 
 export const layout = css`
+
     display: grid;
-    height: 100vh;      /* 전체 높이 고정 */
+    width: 100%;
+    flex: 1;        /* 부모가 flex면 이 한 줄이 먹힘 */
+    min-width: 0; 
+    height: 100%;      /* 전체 높이 고정 */
     overflow: hidden;
     align-items: stretch;
     grid-template-columns: 320px 1fr 320px;
     background-color: ${colors.background};
 `;
 export const bar = css`
-    flex: 1;
+    
   
     height: 100vh;  
     background-color: ${colors.card};
@@ -37,7 +41,7 @@ export const content = css`//메인
 
     padding: 40px;
     overflow-y: auto;
-    height: 100vh;
+    height: 100%;
     
     h1 {
         font-size: 24px;

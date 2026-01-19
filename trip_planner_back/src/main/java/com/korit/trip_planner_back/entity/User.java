@@ -21,6 +21,8 @@ public class User {
     private String gender;
     private String phone;
     private String email;
+    private String provider;
+    private String role;
     private String profileImg;
     private LocalDateTime createdAt;
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.korit.trip_planner_back.dto.gpt.DayDistributionDto;
 import com.korit.trip_planner_back.dto.request.AccommodationDto;
+import com.korit.trip_planner_back.dto.request.StartLocationDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
 import com.korit.trip_planner_back.entity.TouristSpot;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * GPT API 연동 서비스
- *
- * 역할 분리:
- * 1. filterAndGroupSpots() - GPT 1차: 선택 + Day 그룹핑 (순서 ❌)
- * 2. refineSchedule() - GPT 2차: TSP 이후 다듬기 (순서 변경 ❌)
- */
+// GPT API 연동 서비스
 @Slf4j
 @Service
 public class GPTService {
@@ -38,31 +33,21 @@ public class GPTService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /**
-     * GPT 1차: 관광지 필터링 + Day 그룹핑
-     *
-     * ⚠️ 중요: 관광지 순서는 정하지 않음!
-     * - 지역적으로 가까운 것끼리 Day 묶기만
-     * - 순서는 TSP가 결정
-     *
-     * @param allSpots 전체 관광지
-     * @param travelDays 여행 일수
-     * @param accommodations 숙소 정보
-     * @param transport 교통수단
-     * @return 선택/제외 + Day 그룹
-     */
+    // GPT 1차: 관광지 필터링 + Day 그룹핑
     public DayDistributionDto filterAndGroupSpots(
             List<TouristSpot> allSpots,
             int travelDays,
             List<AccommodationDto> accommodations,
-            String transport) {
+            String transport,
+            StartLocationDto startLocation) {
 
         log.info("GPT 필터링 시작: 관광지 {}개 → {}박{}일",
                 allSpots.size(), travelDays - 1, travelDays);
+        log.info("출발지: {}", startLocation.getName());
 
         try {
             // 1. 프롬프트 생성
-            String prompt = buildFilteringPrompt(allSpots, travelDays, accommodations, transport);
+            String prompt = buildFilteringPrompt(allSpots, travelDays, accommodations, transport, startLocation );
 
             // 2. GPT API 호출
             String gptResponse = callGptApi(prompt);
@@ -151,7 +136,8 @@ public class GPTService {
             List<TouristSpot> allSpots,
             int travelDays,
             List<AccommodationDto> accommodations,
-            String transport) {
+            String transport,
+            StartLocationDto startLocation) {
 
         StringBuilder sb = new StringBuilder();
 

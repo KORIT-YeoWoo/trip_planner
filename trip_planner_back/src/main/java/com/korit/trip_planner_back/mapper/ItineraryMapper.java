@@ -12,15 +12,15 @@ public interface ItineraryMapper {
     // 기본 CRUD
     void insert(Itinerary itinerary);
 
-    Itinerary findByItinerariesId(Long itineraryId);
+    Itinerary findByItinerariesId(Integer itineraryId);
 
     List<Itinerary> findAll();
 
     void update(Itinerary itinerary);
 
-    void deleteById(Long itineraryId);
+    void deleteById(Integer itineraryId);
 
-//    // 사용자별 일정 조회
+    // 사용자별 일정 조회
 //    List<Itinerary> selectByUserId(
 //            @Param("userId") Long userId,
 //            @Param("offset") int offset,

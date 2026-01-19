@@ -3,7 +3,7 @@ import { IoTrashOutline } from "react-icons/io5";
 import * as s from "./styles";
 import { useDroppable } from '@dnd-kit/core';
 
-export default function DeleteZone({ isActive }) {
+function DeleteZone({ isActive }) {
     const {isOver, setNodeRef } = useDroppable({
         id: 'delete-zone',
     })
@@ -20,3 +20,5 @@ export default function DeleteZone({ isActive }) {
         </div>
     );
 }
+
+export default DeleteZone;

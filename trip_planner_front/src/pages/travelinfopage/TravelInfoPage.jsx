@@ -3,17 +3,17 @@ import { useState, useEffect, useMemo } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import * as s from "./styles";
+import LocationSearchInput from "../../components/locationsearchinput/LocationSearchInput";
 
-// ⭐ 이미지 경로에 맞춘 LoadingPage 임포트
 import LoadingPage from "../loadingpage/LoadingPage";
 
 import { IoPeopleSharp } from "react-icons/io5";
 import { LuCalendarDays } from "react-icons/lu";
 import { MdOutlineWallet } from "react-icons/md";
+import { FaMapMarkerAlt } from "react-icons/fa"; 
 import { useLocation, useNavigate } from "react-router-dom";
 
 function TravelInfoPage() {
-  //민석 - 추가한 내용이야
   const navigate = useNavigate();
   const location = useLocation();
   const selectedSpotIds = location.state?.selectedSpotIds ?? 
@@ -27,14 +27,15 @@ function TravelInfoPage() {
   const [인원, set인원] = useState({ 성인: 0, 아동: 0 });
   const [선택된날짜범위, set선택된날짜범위] = useState(null);
   const [일정시간목록, set일정시간목록] = useState([]);
+  const [위치정보, set위치정보] = useState([]);
+  
   const [이동수단, set이동수단] = useState("렌터카");
   const [총예산, set총예산] = useState(1000000);
   const [세부예산, set세부예산] = useState({});
 
   const 총인원수 = 인원.성인 + 인원.아동;
 
-
-  // 1. 카테고리 선택 (커플 눌러도 다른 카테고리 자유 이동)
+  // 1. 카테고리 선택
   const 카테고리선택 = (cat) => {
     set카테고리(cat);
     if (cat === "혼자") set인원({ 성인: 1, 아동: 0 });
@@ -71,7 +72,34 @@ function TravelInfoPage() {
       );
   }, [기간.일]);
 
-  // 3. 예산 계산 (인원 * 일수 연동)
+  // 3. 기간 선택 시 위치정보 초기화
+  useEffect(() => {
+    if (기간.일 > 0) {
+      const locations = Array.from({ length: 기간.일 }, (_, index) => ({
+        day: index + 1,
+        startLocation: index === 0 
+          ? { 
+              name: '제주국제공항', 
+              address: '제주특별자치도 제주시 공항로 2',
+              lat: 33.5066, 
+              lon: 126.4929 
+            }
+          : null,  // 전날 숙소로 자동 채워질 예정
+        endLocation: index === 기간.일 - 1
+          ? { 
+              name: '제주국제공항', 
+              address: '제주특별자치도 제주시 공항로 2',
+              lat: 33.5066, 
+              lon: 126.4929 
+            }
+          : null   // 사용자가 입력해야 함
+      }));
+      
+      set위치정보(locations);
+    }
+  }, [기간.일]);
+
+  // 4. 예산 계산
   const 최소예산 = 총인원수 * 기간.일 * 100000;
   const 최대예산 = 총인원수 * 기간.일 * 500000;
 
@@ -92,64 +120,72 @@ function TravelInfoPage() {
     set세부예산(결과);
   }, [총예산, 이동수단]);
 
-  // 4. 계획 완료 핸들러
-
-  // 기존 (혁이가 만든것)
-
-  // const 계획완료핸들러 = () => {
-  //   set로딩중(true);
-  //   setTimeout(() => {
-  //     set로딩중(false);
-  //     alert("여행 계획이 완성되었습니다!");
-  //   }, 3000);
-  // };
-
-
-  // 여기서부터 계획 유효성 검사하고 데이터 전달하는거
+  // 5. 계획 완료 핸들러 수정
   const 계획완료핸들러 = () => {
-      // 유효성 검사
-      if (!선택된날짜범위 || !선택된날짜범위[0] || !선택된날짜범위[1]) {
-          alert("날짜를 선택해주세요.");
-          return;
+    // 유효성 검사
+    if (!선택된날짜범위 || !선택된날짜범위[0] || !선택된날짜범위[1]) {
+      alert("날짜를 선택해주세요.");
+      return;
+    }
+
+    if (!selectedSpotIds || selectedSpotIds.length === 0) {
+      alert("관광지를 먼저 선택해주세요.");
+      navigate('/spots');
+      return;
+    }
+
+    // 위치 정보 유효성 검사
+    const 위치정보완료 = 위치정보.every(dayLoc => 
+      dayLoc.startLocation && dayLoc.endLocation
+    );
+    
+    if (!위치정보완료) {
+      alert('모든 출발지와 도착지/숙소를 입력해주세요!');
+      return;
+    }
+
+    // 전달할 데이터 구성 
+    const travelData = {
+      selectedSpots: selectedSpotIds,
+      travelInfo: {
+        category: 카테고리,
+        people: 인원,
+        dateRange: [
+          선택된날짜범위[0].toISOString().split('T')[0],
+          선택된날짜범위[1].toISOString().split('T')[0]
+        ],
+        dailySchedules: 일정시간목록.map((시간, index) => {
+          const 날짜 = new Date(선택된날짜범위[0]);
+          날짜.setDate(날짜.getDate() + index);
+          
+          return {
+            day: index + 1,
+            date: 날짜.toISOString().split('T')[0],
+            startTime: `${String(시간.시작).padStart(2, '0')}:00`,
+            endTime: `${String(시간.종료).padStart(2, '0')}:00`
+          };
+        }),
+        // Day별 위치 정보 추가
+        dailyLocations: 위치정보.map(dayLoc => ({
+          day: dayLoc.day,
+          startName: dayLoc.startLocation.name,
+          startAddress: dayLoc.startLocation.address,
+          startLat: dayLoc.startLocation.lat,
+          startLon: dayLoc.startLocation.lon,
+          endName: dayLoc.endLocation.name,
+          endAddress: dayLoc.endLocation.address,
+          endLat: dayLoc.endLocation.lat,
+          endLon: dayLoc.endLocation.lon
+        })),
+        transport: 이동수단,
+        totalBudget: 총예산,
+        budgetBreakdown: 세부예산
       }
+    };
 
-      if (!selectedSpotIds || selectedSpotIds.length === 0) {
-          alert("관광지를 먼저 선택해주세요.");
-          navigate('/spots');
-          return;
-      }
-
-      // 전달할 데이터 구성
-      const travelData = {
-          selectedSpots: selectedSpotIds,
-          travelInfo: {
-              category: 카테고리,
-              people: 인원,
-              dateRange: [
-                  선택된날짜범위[0].toISOString().split('T')[0],
-                  선택된날짜범위[1].toISOString().split('T')[0]
-              ],
-              dailySchedules: 일정시간목록.map((시간, index) => {
-                  const 날짜 = new Date(선택된날짜범위[0]);
-                  날짜.setDate(날짜.getDate() + index);
-                  
-                  return {
-                      day: index + 1,
-                      date: 날짜.toISOString().split('T')[0],
-                      startTime: `${String(시간.시작).padStart(2, '0')}:00`,
-                      endTime: `${String(시간.종료).padStart(2, '0')}:00`
-                  };
-              }),
-              transport: 이동수단,
-              totalBudget: 총예산,
-              budgetBreakdown: 세부예산
-          }
-      };
-
-      // LoadingPage로 이동하면서 데이터 전달
-      navigate('/loading', { state: { travelData } });
+    // LoadingPage로 이동하면서 데이터 전달
+    navigate('/loading', { state: { travelData } });
   };
-  // 여기까지 수정했어.
   
   const 시간옵션들 = Array.from({ length: 24 }, (_, i) => (
     <option key={i} value={i}>
@@ -161,6 +197,7 @@ function TravelInfoPage() {
 
   return (
     <div css={s.전체페이지}>
+      {/* ✅ 단계 진행바 수정 (4단계로) */}
       <div css={s.단계진행바}>
         <div css={s.단계아이템(단계 === 1)}>
           인원 <IoPeopleSharp />
@@ -169,11 +206,15 @@ function TravelInfoPage() {
           기간 <LuCalendarDays />
         </div>
         <div css={s.단계아이템(단계 === 3)}>
+          출발지/숙소 <FaMapMarkerAlt />
+        </div>
+        <div css={s.단계아이템(단계 === 4)}>
           예산 <MdOutlineWallet />
         </div>
       </div>
 
       <div css={s.메인카드}>
+        {/* Step 1: 인원 */}
         {단계 === 1 && (
           <div css={s.인원설정컨테이너}>
             <div css={s.카테고리영역}>
@@ -238,6 +279,7 @@ function TravelInfoPage() {
           </div>
         )}
 
+        {/* Step 2: 기간 */}
         {단계 === 2 && (
           <div css={s.콘텐츠가로배치}>
             <div css={s.달력영역}>
@@ -246,12 +288,11 @@ function TravelInfoPage() {
                 value={선택된날짜범위}
                 selectRange
                 locale="ko-KR"
-                // ⭐ 요일을 '일월화수목금토' 한 글자로 고정
                 formatShortWeekday={(locale, date) =>
                   ["일", "월", "화", "수", "목", "금", "토"][date.getDay()]
                 }
                 formatDay={(locale, date) => date.getDate()}
-                calendarType="gregory" // 일요일부터 시작하는 달력 타입
+                calendarType="gregory"
               />
             </div>
             <div css={s.상세일정박스}>
@@ -300,7 +341,73 @@ function TravelInfoPage() {
           </div>
         )}
 
+        {/*  Step 3: 출발지/숙소 */}
         {단계 === 3 && (
+          <div css={s.위치설정컨테이너}>
+            <h2 css={s.위치설정제목}>📍 출발지 및 숙소 설정</h2>
+            <p css={s.위치설정안내}>
+              각 날짜의 출발지와 숙소를 입력해주세요. 
+              기본값이 설정되어 있으며 자유롭게 변경 가능합니다.
+            </p>
+
+            {위치정보.length === 0 ? (
+              <div css={s.비어있는상태}>먼저 여행 기간을 선택해주세요.</div>
+            ) : (
+              <div css={s.일차위치목록}>
+                {위치정보.map((dayLoc, index) => (
+                  <div key={index} css={s.일차위치카드}>
+                    <h3 css={s.일차제목}>Day {dayLoc.day}</h3>
+                    
+                    {/* 출발지 */}
+                    <LocationSearchInput
+                      label={
+                        dayLoc.day === 1 
+                          ? '🛫 여행 시작 위치' 
+                          : `🏨 Day ${dayLoc.day} 출발지`
+                      }
+                      placeholder="장소를 검색하세요"
+                      defaultValue={dayLoc.startLocation}
+                      onSelect={(place) => {
+                        const updated = [...위치정보];
+                        updated[index].startLocation = place;
+                        set위치정보(updated);
+                      }}
+                    />
+
+                    {/* 도착지 */}
+                    <LocationSearchInput
+                      label={
+                        index === 위치정보.length - 1
+                          ? '🛬 여행 종료 위치'
+                          : `🏨 Day ${dayLoc.day} 숙소`
+                      }
+                      placeholder={
+                        index === 위치정보.length - 1
+                          ? '공항, 항구, 호텔 등'
+                          : '숙소를 검색하세요'
+                      }
+                      defaultValue={dayLoc.endLocation}
+                      onSelect={(place) => {
+                        const updated = [...위치정보];
+                        updated[index].endLocation = place;
+                        
+                        // 다음 날 출발지 자동 설정
+                        if (index < 위치정보.length - 1) {
+                          updated[index + 1].startLocation = place;
+                        }
+                        
+                        set위치정보(updated);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 4: 예산 (기존 Step 3) */}
+        {단계 === 4 && (
           <div css={s.통합페이지컨테이너}>
             <div css={s.왼쪽섹션}>
               <div css={s.그룹}>
@@ -361,13 +468,14 @@ function TravelInfoPage() {
         )}
       </div>
 
+      {/* ✅ 네비게이션 버튼 수정 (4단계 대응) */}
       <div css={s.네비버튼영역}>
         <button onClick={() => set단계((p) => Math.max(p - 1, 1))}>이전</button>
         <button
-          onClick={단계 === 3 ? 계획완료핸들러 : () => set단계((p) => p + 1)}
+          onClick={단계 === 4 ? 계획완료핸들러 : () => set단계((p) => p + 1)}
           disabled={단계 === 1 && !카테고리}
         >
-          {단계 === 3 ? "계획 완료" : "다음"}
+          {단계 === 4 ? "계획 완료" : "다음"}
         </button>
       </div>
     </div>

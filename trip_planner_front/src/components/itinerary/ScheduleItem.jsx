@@ -5,12 +5,11 @@ import { PiMapPinAreaFill } from "react-icons/pi";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS as dndCSS } from "@dnd-kit/utilities";
 
-function ScheduleItem({ data, order }) {
-    // ✅ 데이터 안전하게 추출
+function ScheduleItem({ data, order, isFixed = false }) {
     const time = data?.arrivalTime || "00:00";
     const title = data?.name || "관광지";
-    const duration = data?.duration || 60;
-    const price = data?.cost || 0;
+    const duration = data?.duration ?? 0;  // ✅ || 대신 ?? 사용
+    const price = data?.cost ?? 0;         // ✅ || 대신 ?? 사용
 
     const {
         attributes,
@@ -19,18 +18,18 @@ function ScheduleItem({ data, order }) {
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: data?.itemId || 0 });
+    } = useSortable({ 
+        id: data?.itemId || 0,
+        disabled: isFixed
+    });
 
     const style = {
         transform: dndCSS.Transform.toString(transform),
         transition,
     };
 
-    // ✅ 디버깅용 로그
-    console.log('ScheduleItem data:', data);
-
     return (
-        <li ref={setNodeRef} style={style}>
+        <li ref={!isFixed ? setNodeRef : undefined} style={!isFixed ? style : undefined}>
             <div css={s.scheduleItem(isDragging)}>
                 <div css={s.orderBadge}>{order}</div>
                 <div css={s.itemContent}>
@@ -39,17 +38,22 @@ function ScheduleItem({ data, order }) {
                         <div css={s.placeIcon}>
                             <PiMapPinAreaFill />
                         </div>
-                        <div css={s.place}>{title}</div>
+                        <div css={s.placeTitle}>{title}</div>
                     </div>
-                    <div css={s.detailInfo}>
-                        <span>{duration}분 소요</span>
-                        <span>•</span>
-                        <span>₩ {price?.toLocaleString()}원</span>
+                    {/* ✅ duration과 price가 모두 0이면 안 보이게 */}
+                    {(duration > 0 || price > 0) && (
+                        <div css={s.detailInfo}>
+                            <span>{duration}분 소요</span>
+                            <span>•</span>
+                            <span>₩ {price?.toLocaleString()}원</span>
+                        </div>
+                    )}
+                </div>
+                {!isFixed && (
+                    <div css={s.dragHandle} {...attributes} {...listeners}>
+                        <MdDragIndicator size={24} />
                     </div>
-                </div>
-                <div css={s.dragHandle} {...attributes} {...listeners}>
-                    <MdDragIndicator size={24} />
-                </div>
+                )}
             </div>
         </li>
     );

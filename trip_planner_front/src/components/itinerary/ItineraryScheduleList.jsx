@@ -2,7 +2,7 @@
 import * as s from "./styles"; 
 import foxFace from "../../assets/smile.png" 
 import ScheduleItem from "./ScheduleItem"; 
-import { useEffect, useState } from "react";
+import { act, useEffect, useState } from "react";
 import {
     DndContext,
     closestCenter,
@@ -17,8 +17,11 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
-function ItineraryScheduleList({ scheduleData, onReorder, aiComment }){ 
+import DeleteZone from "./DeleteZone";
+
+function ItineraryScheduleList({ scheduleData, onReorder, onDelete, aiComment, startTime, endTime}){ 
     const defaultScheduleData = [
         { 
             order: 0,
@@ -75,6 +78,7 @@ function ItineraryScheduleList({ scheduleData, onReorder, aiComment }){
 
 
     const [items, setItems] = useState(defaultScheduleData);
+    const [activeId, setActiveId] = useState(null); 
 
     // scheduleData가 있으면 사용, 없으면 임시 데이터
     useEffect(() => {
@@ -95,8 +99,41 @@ function ItineraryScheduleList({ scheduleData, onReorder, aiComment }){
         })
     );
 
+    const handleDragStart = (event) => {
+        setActiveId(event.active.id);
+    };
+
+
     const handleDragEnd = async (event) => {
         const { active, over } = event;
+
+        setActiveId(null); // 드래그 종료
+
+        // 삭제 영역에 드롭한 경우
+        if (over && over.id === 'delete-zone'){
+            const itemToDelete = items.find(item => item.itemId === active.id);
+
+            if (items.length <= 1){
+                alert('최소 1개 이상의 관광지가 필요합니다.');
+                return;
+            }
+
+            if (window.confirm(`"${itemToDelete?.name}"을(를) 삭제하시겠습니까?`)){
+                const newItems = items.filter(item => item.itemId !== active.id);
+                setItems(newItems);
+
+                if(onDelete){
+                    try {
+                        await onDelete(active.id);
+                    } catch (error) {
+                        console.error('삭제 실패:',error);
+                        alert(error.message || '삭제에 실패했습니다.');
+                        setItems(items);
+                    }
+                }
+            }
+            return;
+        }
 
         if (over && active.id !== over.id) {
             const oldIndex = items.findIndex(item => item.itemId === active.id);
@@ -133,6 +170,27 @@ function ItineraryScheduleList({ scheduleData, onReorder, aiComment }){
         }
     };
 
+    // ✅ 출발지/도착지 데이터 생성
+    const startPoint = {
+        itemId: 'start-point',
+        type: 'START',
+        name: '출발',
+        arrivalTime: startTime || '09:00',
+        duration: 0,
+        cost: 0,
+        isFixed: true  // 고정 아이템 표시
+    };
+
+    const endPoint = {
+        itemId: 'end-point',
+        type: 'END',
+        name: '도착',
+        arrivalTime: endTime || '18:15',
+        duration: 0,
+        cost: 0,
+        isFixed: true
+    };
+
     return <div css={s.container}> 
         <div css={s.aiComment}> 
             <img src={foxFace} alt="여우"/> 
@@ -142,13 +200,21 @@ function ItineraryScheduleList({ scheduleData, onReorder, aiComment }){
         <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
+            onDragStart={handleDragStart}  
             onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]} 
         >
             <SortableContext
                 items={items.map(item => item.itemId)}
                 strategy={verticalListSortingStrategy}
             >
                 <ul css={s.scheduleItems}> 
+                    <ScheduleItem 
+                        data={startPoint}
+                        order="🏠"
+                        isFixed={true}
+                    />
+
                     {items.map((item, index) => ( 
                         <ScheduleItem
                             key={item.itemId}
@@ -156,8 +222,14 @@ function ItineraryScheduleList({ scheduleData, onReorder, aiComment }){
                             order={index + 1}
                         /> 
                     ))} 
+                    <ScheduleItem 
+                        data={endPoint}
+                        order="🏠"
+                        isFixed={true}
+                    />
                 </ul>
             </SortableContext>
+            <DeleteZone isActive={activeId !== null} />
         </DndContext>
     </div> 
 } 

@@ -69,10 +69,43 @@ function ItineraryDetailPage(){
         itineraryData?.days || defaultItineraryData.days
     );
     
+    const [isDragging, setIsDragging] = useState(false);
+
     const currentItineraryId = itineraryData?.itinerariesId || defaultItineraryData.itinerariesId;
     const currentBudget = itineraryData?.budget || defaultItineraryData.budget;
 
     const currentDayData = scheduleData[currentDay];
+
+        const handleDelete = async (itemId) => {
+        if (!currentDayData) return;
+
+        try {
+            const response = await fetch(
+                `http://localhost:8080/api/itinerary/${currentItineraryId}/days/${currentDayData.day}/items/${itemId}`,
+                {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('삭제 실패');
+            }
+
+            const updatedDayData = await response.json();
+
+            setScheduleData(prev => {
+                const newData = [...prev];
+                newData[currentDay] = updatedDayData;
+                return newData;
+            });
+
+            console.log('삭제 성공:', updatedDayData);
+        } catch (error) {
+            console.error('삭제 실패:', error);
+        }
+    };
+
 
     const handleReorder = async (newItemIds) => {
         // ✅ 안전하게 접근
@@ -151,11 +184,12 @@ function ItineraryDetailPage(){
                     <ItineraryScheduleList 
                         scheduleData={currentDayData?.items || []}
                         onReorder={handleReorder}
+                        onDelete={handleDelete}
+                        onDragStart={() => setIsDragging(true)} 
+                        onDragEnd={() => setIsDragging(false)}
                         aiComment={currentDayData?.summary}
-                        dailySchedule={{
-                            startTime: currentDayData?.startTime,
-                            endTime: currentDayData?.endTime
-                        }}
+                        startTime={currentDayData?.startTime} 
+                        endTime={currentDayData?.endTime}   
                     />
                 </div>
                 <div css={s.summary}>

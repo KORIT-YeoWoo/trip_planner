@@ -3,13 +3,18 @@ package com.korit.trip_planner_back.service;
 import com.korit.trip_planner_back.dto.gpt.DayDistributionDto;
 import com.korit.trip_planner_back.dto.request.AccommodationDto;
 import com.korit.trip_planner_back.dto.request.ItineraryReqDto;
+import com.korit.trip_planner_back.dto.request.StartLocationDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
 import com.korit.trip_planner_back.dto.response.ItineraryRespDto;
 import com.korit.trip_planner_back.dto.response.ScheduleItemDto;
 import com.korit.trip_planner_back.dto.response.TravelInfoDto;
 import com.korit.trip_planner_back.dto.tsp.TspRequestDto;
 import com.korit.trip_planner_back.dto.tsp.TspResponseDto;
+import com.korit.trip_planner_back.entity.Accommodation;
+import com.korit.trip_planner_back.entity.Itinerary;
 import com.korit.trip_planner_back.entity.TouristSpot;
+import com.korit.trip_planner_back.mapper.AccommodationMapper;
+import com.korit.trip_planner_back.mapper.ItineraryMapper;
 import com.korit.trip_planner_back.mapper.TouristSpotMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +34,8 @@ public class ItineraryService {
     private final TouristSpotMapper touristSpotMapper;
     private final GPTService gptService;
     private final KakaoNaviService kakaoNaviService;
+    private final ItineraryMapper itineraryMapper;
+    private final AccommodationMapper accommodationMapper;
 
     public ItineraryRespDto createItinerary(ItineraryReqDto request) {
         log.info("=== 일정 생성 시작 ===");
@@ -44,12 +51,20 @@ public class ItineraryService {
         List<TouristSpot> allSpots = touristSpotMapper.findAllByIds(request.getSpotIds());
         log.info("관광지 조회 완료: {}개", allSpots.size());
 
+        StartLocationDto startLoc = request.getStartLocationOrDefault();
+        log.info("출발지: {} ({}, {})",
+                startLoc.getName(),
+                startLoc.getLat(),
+                startLoc.getLon());
+
+
         // 3. GPT 1차: 필터링 + Day 그룹핑
         DayDistributionDto distribution = gptService.filterAndGroupSpots(
                 allSpots,
                 request.getTravelDays(),
                 request.getAccommodations(),
-                request.getTransport()
+                request.getTransport(),
+                startLoc
         );
 
         log.info("선택: {}개, 제외: {}개",
@@ -191,10 +206,14 @@ public class ItineraryService {
 
     private LocationInfo getDayStartLocation(int day, ItineraryReqDto request) {
         if (day == 1) {
-            // 첫날: 제주공항
-            return new LocationInfo("제주국제공항", 33.5066, 126.4929);
+            StartLocationDto startLoc = request.getStartLocationOrDefault();
+            return new LocationInfo(
+                    startLoc.getName(),
+                    startLoc.getLat(),
+                    startLoc.getLon()
+            );
         } else {
-            // 둘째날 이후: 전날 숙소
+            // 전날 숙소 (기존 코드 유지)
             AccommodationDto accommodation = request.getAccommodations().get(day - 2);
             return new LocationInfo(
                     accommodation.getName() != null ? accommodation.getName() : "숙소",
@@ -208,10 +227,13 @@ public class ItineraryService {
         int travelDays = request.getTravelDays();
 
         if (day == travelDays) {
-            // 마지막 날: 제주공항
-            return new LocationInfo("제주국제공항", 33.5066, 126.4929);
+            StartLocationDto startLoc = request.getStartLocationOrDefault();
+            return new LocationInfo(
+                    startLoc.getName() + " (복귀)",
+                    startLoc.getLat(),
+                    startLoc.getLon()
+            );
         } else {
-            // 그 외: 당일 숙소
             AccommodationDto accommodation = request.getAccommodations().get(day - 1);
             return new LocationInfo(
                     accommodation.getName() != null ? accommodation.getName() : "숙소",
@@ -472,24 +494,30 @@ public class ItineraryService {
                 .map(spotMap::get)
                 .collect(Collectors.toList());
 
-        // 5. 출발지/도착지 정보 (임시 하드코딩)
-        // TODO: DB에서 itineraryId로 실제 정보 조회
-        double startLat = 33.5066;  // 제주공항
-        double startLon = 126.4929;
-        double endLat = 33.5066;
-        double endLon = 126.4929;
-        String transport = "CAR";
+        // ✅ 5. DB에서 일정 정보 조회
+        Itinerary itinerary = itineraryMapper.findByItinerariesId(itineraryId);
 
-        // 6. 사용자 순서 그대로 일정 생성 (TSP 사용 안 함!)
+        if (itinerary == null) {
+            throw new IllegalArgumentException("일정을 찾을 수 없습니다: " + itineraryId);
+        }
+
+        // ✅ 6. Day별 출발지/도착지 결정
+        LocationInfo start = getDayStartLocationForReorder(day, itinerary, itineraryId);
+        LocationInfo end = getDayEndLocationForReorder(day, itinerary, itineraryId);
+
+        log.info("Day {} 출발지: {} ({}, {})", day, start.name, start.lat, start.lon);
+        log.info("Day {} 도착지: {} ({}, {})", day, end.name, end.lat, end.lon);
+
+        // 7. 사용자 순서 그대로 일정 생성 (TSP 사용 안 함!)
         DayScheduleDto reorderedSchedule = buildDayScheduleWithFixedOrder(
                 day,
-                LocalDate.now(),  // TODO: 실제 날짜
+                itinerary.getStartDate().plusDays(day - 1),  // ✅ 실제 날짜
                 orderedSpots,
-                startLat,
-                startLon,
-                endLat,
-                endLon,
-                transport
+                start.lat,
+                start.lon,
+                end.lat,
+                end.lon,
+                itinerary.getTransport()  // ✅ 실제 교통수단
         );
 
         log.info("=== Day {} 순서 변경 완료 ===", day);
@@ -500,6 +528,88 @@ public class ItineraryService {
         return reorderedSchedule;
     }
 
+    private LocationInfo getDayStartLocationForReorder(
+            int day,
+            Itinerary itinerary,
+            Integer itineraryId) {
+
+        if (day == 1) {
+            // 첫날: DB에 저장된 출발지
+            String name = itinerary.getStartLocationName() != null
+                    ? itinerary.getStartLocationName()
+                    : "제주국제공항";
+            double lat = itinerary.getStartLat() != null
+                    ? itinerary.getStartLat()
+                    : 33.5066;
+            double lon = itinerary.getStartLon() != null
+                    ? itinerary.getStartLon()
+                    : 126.4929;
+
+            return new LocationInfo(name, lat, lon);
+        } else {
+            // 둘째날 이후: 전날 숙소
+            Accommodation prevAcc = accommodationMapper.findByItineraryIdAndDay(
+                    itineraryId,
+                    day - 1
+            );
+
+            if (prevAcc == null) {
+                log.warn("Day {} 전날 숙소 없음 - 출발지 사용", day);
+                return new LocationInfo(
+                        itinerary.getStartLocationName(),
+                        itinerary.getStartLat(),
+                        itinerary.getStartLon()
+                );
+            }
+
+            return new LocationInfo(
+                    prevAcc.getName(),
+                    prevAcc.getLatitude(),
+                    prevAcc.getLongitude()
+            );
+        }
+    }
+
+    /**
+     * reorder용 Day별 도착지 결정
+     */
+    private LocationInfo getDayEndLocationForReorder(
+            int day,
+            Itinerary itinerary,
+            Integer itineraryId) {
+
+        int travelDays = itinerary.getTravelDays();
+
+        if (day == travelDays) {
+            // 마지막 날: 출발지로 복귀
+            return new LocationInfo(
+                    itinerary.getStartLocationName() + " (복귀)",
+                    itinerary.getStartLat(),
+                    itinerary.getStartLon()
+            );
+        } else {
+            // 그 외: 당일 숙소
+            Accommodation todayAcc = accommodationMapper.findByItineraryIdAndDay(
+                    itineraryId,
+                    day
+            );
+
+            if (todayAcc == null) {
+                log.warn("Day {} 숙소 없음 - 출발지 사용", day);
+                return new LocationInfo(
+                        itinerary.getStartLocationName(),
+                        itinerary.getStartLat(),
+                        itinerary.getStartLon()
+                );
+            }
+
+            return new LocationInfo(
+                    todayAcc.getName(),
+                    todayAcc.getLatitude(),
+                    todayAcc.getLongitude()
+            );
+        }
+    }
     /**
      * 사용자 지정 순서로 일정 생성
      *

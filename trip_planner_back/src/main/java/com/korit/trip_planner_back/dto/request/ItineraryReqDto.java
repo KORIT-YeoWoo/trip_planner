@@ -19,6 +19,7 @@ public class ItineraryReqDto {
     private int budget;
     private String transport;
     private String partyType;
+    private StartLocationDto startLocation;
 
     private List<Integer> spotIds;
     private List<AccommodationDto> accommodations; // 숙소 위치 리스트
@@ -54,6 +55,14 @@ public class ItineraryReqDto {
             return false;
         }
         return accommodations.size() == getNights();
+    }
+
+    // 기본 출발지
+    public StartLocationDto getStartLocationOrDefault() {
+        if (startLocation == null) {
+            return StartLocationDto.createDefault();  // 기본값: 제주공항
+        }
+        return startLocation;
     }
 
 }

@@ -1,11 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import * as s from "./styles";
 import { useEffect, useState } from "react";
+import SpotDetailModal from "../../components/spotdetailmodal/SpotDetailModal"; // 관광지 상세보기 
 
 import { 
   getSpots, 
   addBookmark,    
-  removeBookmark, 
+  removeBookmark,   
   getMyFavorites,
   removeFavorites,
   addFavorites
@@ -36,6 +37,20 @@ function SpotListPage() {
  
   // navigate 추가 (민석)
   const navigate = useNavigate();
+
+  // 관광지상세 추가
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [detailSpot, setDetailSpot] = useState(null);
+
+  const openDetail = (spot) => {
+    setDetailSpot(spot);
+    setIsDetailOpen(true);
+  };
+
+  const closeDetail = () => {
+    setIsDetailOpen(false);
+    setDetailSpot(null);
+  };
 
   const handleCreateItinerary = () => {
     console.log("=== SpotListPage 디버깅 ===");
@@ -266,8 +281,20 @@ function SpotListPage() {
                   {isWished ? <IoMdHeart size={34} /> : <IoIosHeartEmpty size={34} />}
                 </button>
               </div>
+                <div css={s.cardBody}>
+                  <div css={s.title}>{r.title}</div>
 
-              <div css={s.title}>{r.title}</div>
+                    <button
+                      type="button"
+                      css={s.detailBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();   // ✅ 카드 선택 클릭 막기
+                        openDetail(r);         // ✅ 모달 오픈
+                      }}
+                    >
+                      상세보기
+                  </button>
+                </div>
             </div>
           );
         })}
@@ -279,6 +306,11 @@ function SpotListPage() {
         <IoLogoWechat size={28} />
       </button>
     </div>
+    <SpotDetailModal
+      isOpen={isDetailOpen}
+      spot={detailSpot}
+      onClose={closeDetail}
+    />
   </div>
 );
 

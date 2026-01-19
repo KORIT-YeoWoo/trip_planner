@@ -154,3 +154,29 @@ export const dragHandle = css`
         cursor: grabbing;
     }
 `;
+
+export const deleteZone = (isActive, isOver) => css`
+    position: sticky;
+    bottom: 20px;
+    width: calc(100%-40px);  // ✅ 좌우 20px씩 여백
+    height: ${isActive ? '40px' : '0'};
+    padding: ${isActive ? '20px' : '0'};
+    margin: ${isActive ? '10px' : '0'};
+    background-color: ${isOver ? '#f44336' : '#ffebee'};
+    border: 2px dashed ${isOver ? '#d32f2f' : '#ef5350'};
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: ${isOver ? 'white' : '#d32f2f'};
+    transition: all 0.3s ease;
+    overflow: hidden;
+    opacity: ${isActive ? 1 : 0};
+    
+    svg {
+        transition: transform 0.2s ease;
+        transform: ${isOver ? 'scale(1.2)' : 'scale(1)'};
+    }
+`;
+

@@ -100,7 +100,7 @@ export const accentText = css`
 
 export const foxAccent = css`
     color: #ff8a00;
-    font-weight: 800;https://github.com/KORIT-YeoWoo/trip_planner/pull/73/conflict?name=trip_planner_front%252Fsrc%252Fpages%252Ftravelinfopage%252Fstyles.js&ancestor_oid=26af67e9a11d2e4fe27ce068753bef6bef78575a&base_oid=e64e17338d0fd0cc6faec9fee559262191a796f1&head_oid=489812cd9271aa7115ecf8dac23bfb87937ab27e
+    font-weight: 800;
 `;
 
 export const button = css`

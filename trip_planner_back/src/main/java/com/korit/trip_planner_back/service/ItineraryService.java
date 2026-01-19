@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -606,5 +603,74 @@ public class ItineraryService {
                         hasIsland ? " (섬 포함)" : ""))
                 .build();
     }
+
+    // Day일정에서 관광지 삭제 및 재계산
+    public DayScheduleDto deleteScheduleItem(
+            Integer itineraryId,
+            Integer day,
+            Integer itemId){
+        log.info("=== Day {} 관광지 삭제 시작 ===",day);
+        log.info("삭제할 관광지 ID: {}", itemId);
+
+        // TODO: DB에서 현재 Day의 전체 관광지 조회
+        List<Integer> currentItemIds = List.of(2, 3, 4);
+
+        // 1. 삭제할 아이템 제외
+        List<Integer> remainingItemIds = currentItemIds.stream()
+                .filter(id -> !Objects.equals(id, itemId))
+                .toList();
+
+        if (remainingItemIds.isEmpty()){
+            throw new IllegalArgumentException("최소 1개 이상의 관광지가 필요합니다.");
+        }
+
+        log.info("남은 관광지: {}",remainingItemIds);
+
+        // 2. 관광지 조회
+        List<TouristSpot> spots = touristSpotMapper.findAllByIds(remainingItemIds);
+
+        if(spots.size() != remainingItemIds.size()){
+            throw new IllegalArgumentException("일부 관광지를 찾을 수 없습니다.");
+        }
+
+        // 3. 사용자 순서대로 정렬
+        Map<Integer, TouristSpot> spotMap = spots.stream()
+                .collect(Collectors.toMap(
+                        TouristSpot::getSpotId,
+                        spot -> spot
+                ));
+
+        List<TouristSpot> orderedSpots = remainingItemIds.stream()
+                .map(spotMap::get)
+                .toList();
+
+        // 4. 출발지/도착지 정보 (임시)
+        double startLat = 33.5066;  // 제주공항
+        double startLon = 126.4929;
+        double endLat = 33.5066;
+        double endLon = 126.4929;
+        String transport = "CAR";
+
+        // 5. 일정 재생성
+        DayScheduleDto updatedSchedule = buildDayScheduleWithFixedOrder(
+                day,
+                LocalDate.now(),
+                orderedSpots,
+                startLat,
+                startLon,
+                endLat,
+                endLon,
+                transport
+        );
+
+        log.info("=== Day {} 관광지 삭제 완료 ===", day);
+        log.info("남은 관광지: {}개, 총 거리: {}km, 총 시간: {}분",
+                orderedSpots.size(),
+                updatedSchedule.getTotalDistance(),
+                updatedSchedule.getTotalDuration());
+
+        return updatedSchedule;
+    }
+
 
 }

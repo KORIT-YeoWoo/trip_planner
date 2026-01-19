@@ -23,39 +23,56 @@ public class ItineraryController {
 
     @PostMapping("/generate")
     @Operation(summary = "일정 생성", description = "여행 일정 자동 생성 (TSP 최적화)")
-    public ResponseEntity<ItineraryRespDto> generateItinerary(
-            @RequestBody ItineraryReqDto request) {
+    public ResponseEntity<ItineraryRespDto> generateItinerary(@RequestBody ItineraryReqDto request) {
+        log.info("일정 생성 요청: {} ~ {}, 관광지 {}개",
+            request.getStartDate(),
+            request.getEndDate(),
+            request.getSpotIds() != null ? request.getSpotIds().size() : 0);
+        ItineraryRespDto result = itineraryService.createItinerary(request);
 
-            log.info("일정 생성 요청: {} ~ {}, 관광지 {}개",
-                    request.getStartDate(),
-                    request.getEndDate(),
-                    request.getSpotIds() != null ? request.getSpotIds().size() : 0);
-            ItineraryRespDto result = itineraryService.createItinerary(request);
+        log.info("일정 생성 완료: {}일",
+                request.getTravelDays());
+        return ResponseEntity.ok(result);
+    }
 
-            log.info("일정 생성 완료: {}일",
-                    request.getTravelDays());
-            return ResponseEntity.ok(result);
-        }
-
-        @PutMapping("/{itineraryId}/days/{day}/reorder")
-        @Operation(summary = "일정 순서 변경", description = "특정 날짜의 관광지 순서를 변경하고 TSP 재계산")
-        public ResponseEntity<DayScheduleDto> reorderDaySchedule(
-                @PathVariable Integer itineraryId,
-                @PathVariable Integer day,
-                @RequestBody ReorderRequestDto request) {
+    @PutMapping("/{itineraryId}/days/{day}/reorder")
+    @Operation(summary = "일정 순서 변경", description = "특정 날짜의 관광지 순서를 변경하고 TSP 재계산")
+    public ResponseEntity<DayScheduleDto> reorderDaySchedule(
+            @PathVariable Integer itineraryId,
+            @PathVariable Integer day,
+            @RequestBody ReorderRequestDto request) {
 
         log.info("일정 순서 변경 요청: itinerary={}, day={}, items={}",
-                itineraryId, day, request.getItemIds().size());
+            itineraryId, day, request.getItemIds().size());
 
         DayScheduleDto result = itineraryService.reorderDaySchedule(
-                itineraryId,
-                day,
-                request.getItemIds()
+            itineraryId,
+            day,
+            request.getItemIds()
         );
 
         log.info("일정 순서 변경 완료: day={}",day);
         return  ResponseEntity.ok(result);
-        }
+    }
+
+    @DeleteMapping("/{itineraryId}/days/{day}/items/{itemId}")
+    @Operation(summary = "관광지 삭제", description = "특정 날짜의 관광지를 삭제하고 일정 재계산")
+    public ResponseEntity<DayScheduleDto> deleteScheduleItem(
+            @PathVariable Integer itineraryId,
+            @PathVariable Integer day,
+            @PathVariable Integer itemId){
+
+        log.info("관광지 삭제 요청: itinerary={}, day={}, itemId={}", itineraryId, day, itemId);
+
+        DayScheduleDto result = itineraryService.deleteScheduleItem(
+                itineraryId,
+                day,
+                itemId
+        );
+
+        log.info("관광지 삭제 완료: day={}", day);
+        return ResponseEntity.ok(result);
+    }
 
     @GetMapping("/health")
     @Operation(summary = "상태 확인", description = "일정 생성 서비스 상태 확인")

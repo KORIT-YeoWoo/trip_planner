@@ -16,6 +16,8 @@ import { PiMountains } from "react-icons/pi";
 import { MdOutlineSurfing } from "react-icons/md";
 import { IoRestaurantOutline, IoCafeOutline, IoLogoWechat } from "react-icons/io5"; 
 import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
+import { LuAlarmClock } from "react-icons/lu";
+
 import { useNavigate } from "react-router-dom";
 import OpenaiModal from "../../components/openai/OpenaiModal";
 
@@ -292,6 +294,10 @@ function SpotListPage() {
               </div>
                 <div css={s.cardBody}>
                   <div css={s.title}>{r.title}</div>
+                  <div css={s.info}>
+                    <span>$ {r.price}원</span>
+                    <span><LuAlarmClock /> {r.spotDuration}분</span>
+                  </div>
 
                     <button
                       type="button"

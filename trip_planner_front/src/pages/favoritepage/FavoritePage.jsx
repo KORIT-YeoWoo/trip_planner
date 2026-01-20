@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { getMyFavorites, getSpots, removeFavorites } from "../../apis/spotApi"; 
 import { IoMdHeart } from "react-icons/io";
 import * as s from "./styles";
+
 function FavoritePage() {
     const [favoriteSpots, setFavoriteSpots]=useState([]);
     const[loading,setLoading] = useState(false);
+
 
     useEffect(() => {
     const fetchFavoriteSpots = async () => {
@@ -42,42 +44,67 @@ function FavoritePage() {
         }
     };
 
+   
+
 
     return (
         <div css={s.layout}> 
             <div css={s.bar}></div>
-            <div css={s.content}>
-                <h1>♡ 관심 여행지 ♡</h1>
-                {loading ? <p>로딩 중...</p> : (
-                <div css={s.grid}>
-                    {favoriteSpots.map((r) => (
-                        <div key={r.spotId} css={s.card(false)}> 
-                            <div css={s.imageWrapper}>
-                                {r.spotImg ? (
-                                    <img css={s.image} src={r.spotImg} alt={r.title} />
-                                ) : (
-                                    <div css={s.emptyImage}>🦊</div>
-                                )}
-                                {/* 여기서 하트는 항상 빨간색이어야 함 */}
-                                <button
-                                    type="button"
-                                    css={s.heartBtn(true)} 
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRemoveWish(r.spotId); // 클릭 시 삭제 함수 실행
-                                    }}
-                                >
-                                    <IoMdHeart size={34} />
-                                </button>
-                            </div>
-                            <div css={s.title}>{r.title}</div>
+            <div css={s.content} style={{ position: 'relative' }}>
+                <div css={s.overlay}>
+                    
+                    <div css={s.favoritContent}>
+                        <h1>♡ 관심 여행지 ♡</h1>
+                        {loading ? (
+                        <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
+                             ) : (
+                        <div css={s.gridScroll}>
+                            {favoriteSpots.length > 0 ? (
+                                favoriteSpots.map((r) => (
+                                    <div key={r.spotId} css={s.card(false)}> 
+                                        <div css={s.imageWrapper}>
+                                            {r.spotImg ? (
+                                                <img css={s.image} src={r.spotImg} alt={r.title} />
+                                            ) : (
+                                                <div css={s.emptyImage}>🦊</div>
+                                            )}
+                                            <button
+                                                type="button"
+                                                css={s.heartBtn(true)} 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemoveWish(r.spotId);
+                                                }}
+                                            >
+                                                <IoMdHeart size={34} />
+                                            </button>
+                                        </div>
+
+                                        <div css={s.title}>
+                                            {r.title}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div style={{ gridColumn: 'span 3', textAlign: 'center', padding: '100px 0', color: '#999' }}>
+                                    아직 찜한 여행지가 없어요!
+                                </div>
+                            )}
                         </div>
-                    ))}
+                    )}
+
+                    </div>
                 </div>
-            )}
+                
+                
+                
+                
             </div>
             <div css={s.bar}style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}></div>
+            
         </div>
+        
+
     );
 }
 

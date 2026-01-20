@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TravelPlans {
-    private int bookmarkId;
+public class TripPlans {
+    private int planId;
     private int userId;
     private int spotId;
     private int dayId;

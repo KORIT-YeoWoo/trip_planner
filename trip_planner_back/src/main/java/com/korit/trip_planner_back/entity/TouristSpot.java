@@ -17,6 +17,7 @@ public class TouristSpot {
     private double latitude;    // 위도
     private double longitude;   // 경도
     private int spotDuration;       // 지역 체류시간
+    private Integer originalDuration;
     private int price;
     private String description;
     private String openingHrs;  // 영업 시작시간

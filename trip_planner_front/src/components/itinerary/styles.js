@@ -180,3 +180,123 @@ export const deleteZone = (isActive, isOver) => css`
     }
 `;
 
+//==============
+
+export const durationSection = css`
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`;
+
+export const durationText = css`
+    font-size: 13px;
+    color: #666;
+`;
+
+export const editDurationBtn = css`
+    font-size: 12px;
+    border:none;
+    cursor: pointer;
+    background: none;
+    color: #ff6b35;
+`;
+
+// ✅ 팝업 백드롭 (투명한 배경)
+export const durationPopupBackdrop = css`
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    animation: fadeIn 0.15s ease;
+
+`;
+
+// ✅ 심플한 슬라이더 팝업
+export const durationPopup = css`
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+    padding: 20px 20px 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    animation: popupSlideIn 0.2s ease;
+
+    @keyframes popupSlideIn {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -45%) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    }
+`;
+
+export const popupDurationDisplay = css`
+    font-size: 14px;
+    font-weight: 600;
+    color: #ff6b35;
+`;
+
+export const durationSlider = css`
+    width: 200px;
+    height: 5px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #ffebe0 0%, #ff6b35 100%);
+    outline: none;
+    -webkit-appearance: none;
+
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #ff6b35;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: all 0.15s ease;
+
+        &:hover {
+            transform: scale(1.15);
+            box-shadow: 0 3px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        &:active {
+            transform: scale(1.05);
+        }
+    }
+
+    &::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #ff6b35;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+`;
+
+export const popupButtons = css`
+    display: none;
+`;
+
+export const saveBtn = css`
+    display: none;
+`;
+
+export const cancelBtn = css`
+    display: none;
+`;

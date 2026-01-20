@@ -3,80 +3,49 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import ItineraryScheduleList from "../../components/itinerary/ItineraryScheduleList";
 import * as s from "./styles";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function ItineraryDetailPage(){
     const location = useLocation();
     const { itineraryData } = location.state || {};
 
-    // ✅ 임시 데이터 추가
-    const defaultItineraryData = {
-        itinerariesId: 1,
-        days: [
-            {
-                day: 1,
-                date: "2026-01-19",
-                startTime: "09:00",
-                endTime: "18:15",
-                summary: "Day 1: 3개 관광지, 54.6km (섬 포함)",
-                totalDistance: 54.577,
-                totalDuration: 555,
-                totalCost: 12000,
-                items: [
-                    { 
-                        order: 0,
-                        type: "SPOT",
-                        itemId: 2, 
-                        name: "거문오름", 
-                        category: "자연",
-                        arrivalTime: "09:35",
-                        departureTime: "10:35", 
-                        duration: 60, 
-                        cost: 2000,
-                        island: false
-                    },
-                    { 
-                        order: 1,
-                        type: "SPOT",
-                        itemId: 3, 
-                        name: "우도", 
-                        category: "자연",
-                        arrivalTime: "11:08",
-                        departureTime: "17:08", 
-                        duration: 360, 
-                        cost: 10000,
-                        island: true
-                    },
-                    { 
-                        order: 2,
-                        type: "SPOT",
-                        itemId: 4, 
-                        name: "광치기해변", 
-                        category: "자연",
-                        arrivalTime: "17:15",
-                        departureTime: "18:15", 
-                        duration: 60, 
-                        cost: 0,
-                        island: false
-                    }
-                ]
-            }
-        ],
-        budget: 100000
-    };
-
     const [currentDay, setCurrentDay] = useState(0);
-    const [scheduleData, setScheduleData] = useState(
-        itineraryData?.days || defaultItineraryData.days
-    );
-    
+    const [scheduleData, setScheduleData] = useState(itineraryData?.days || []);
     const [isDragging, setIsDragging] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const currentItineraryId = itineraryData?.itinerariesId || defaultItineraryData.itinerariesId;
-    const currentBudget = itineraryData?.budget || defaultItineraryData.budget;
+    const currentItineraryId = itineraryData?.itineraryId;
+    const currentBudget = itineraryData?.budget;
 
     const currentDayData = scheduleData[currentDay];
 
+    // ✅ 컴포넌트 마운트 시 일정 데이터 불러오기
+    useEffect(() => {
+        if (!itineraryData && currentItineraryId) {
+            fetchItinerary();
+        }
+    }, [currentItineraryId]);
+
+    // ✅ 일정 데이터 가져오기
+    const fetchItinerary = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(
+                `http://localhost:8080/api/itinerary/${currentItineraryId}`
+            );
+            
+            if (response.data && response.data.days) {
+                setScheduleData(response.data.days);
+            }
+        } catch (error) {
+            console.error('일정 조회 실패:', error);
+            alert('일정을 불러오는데 실패했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ✅ 삭제 핸들러
     const handleDelete = async (itemId) => {
         try {
             console.log('🗑️ 삭제 요청:', { 
@@ -85,21 +54,17 @@ function ItineraryDetailPage(){
                 itemId 
             });
             
-            // 1. 삭제 API 호출
             await axios.delete(
                 `http://localhost:8080/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${itemId}`
             );
             
             console.log('✅ 삭제 성공!');
             
-            // 2. ✅ 서버에서 최신 일정 데이터 다시 불러오기
+            // 서버에서 최신 데이터 다시 불러오기
             const response = await axios.get(
                 `http://localhost:8080/api/itinerary/${currentItineraryId}`
             );
             
-            console.log('✅ 최신 데이터 받음:', response.data);
-            
-            // 3. ✅ 상태 업데이트
             if (response.data && response.data.days) {
                 setScheduleData(response.data.days);
             }
@@ -110,9 +75,8 @@ function ItineraryDetailPage(){
         }
     };
 
-
+    // ✅ 순서 변경 핸들러
     const handleReorder = async (newItemIds) => {
-        // ✅ 안전하게 접근
         if (!currentDayData) {
             console.error('currentDayData가 없습니다.');
             return;
@@ -137,7 +101,6 @@ function ItineraryDetailPage(){
 
             const updatedDayData = await response.json();
 
-            // scheduleData 업데이트
             setScheduleData(prev => {
                 const newData = [...prev];
                 newData[currentDay] = updatedDayData;
@@ -151,9 +114,55 @@ function ItineraryDetailPage(){
         }
     };
 
-    // ✅ 디버깅 로그
-    console.log('scheduleData:', scheduleData);
-    console.log('currentDayData:', currentDayData);
+    // ✅ 체류 시간 변경 핸들러
+    const handleDurationChange = async (itemId, newDuration) => {
+        try {
+            console.log('⏱️ 체류 시간 변경 요청:', {
+                itineraryId: currentItineraryId,
+                day: currentDay + 1,
+                itemId,
+                newDuration
+            });
+
+            const response = await axios.put(
+                `http://localhost:8080/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${itemId}/duration`,
+                { duration: newDuration }
+            );
+
+            console.log('✅ 시간 변경 성공:', response.data);
+
+            if (response.data && response.data.days) {
+                setScheduleData(response.data.days);
+            }
+
+            alert(`체류 시간이 ${newDuration}분으로 변경되었습니다.`);
+
+        } catch (error) {
+            console.error('❌ 시간 변경 실패:', error);
+            alert('시간 변경에 실패했습니다.');
+        }
+    };
+
+    // ✅ 로딩 중이거나 데이터가 없을 때
+    if (loading) {
+        return <div css={s.layout}>
+            <div css={s.container}>
+                <div style={{ textAlign: 'center', padding: '50px' }}>
+                    로딩 중...
+                </div>
+            </div>
+        </div>;
+    }
+
+    if (!scheduleData || scheduleData.length === 0) {
+        return <div css={s.layout}>
+            <div css={s.container}>
+                <div style={{ textAlign: 'center', padding: '50px' }}>
+                    일정 데이터가 없습니다.
+                </div>
+            </div>
+        </div>;
+    }
 
     return <div css={s.layout}>
         <div css={s.container}>
@@ -189,6 +198,7 @@ function ItineraryDetailPage(){
                         scheduleData={currentDayData?.items || []}
                         onReorder={handleReorder}
                         onDelete={handleDelete}
+                        onDurationChange={handleDurationChange}
                         onDragStart={() => setIsDragging(true)} 
                         onDragEnd={() => setIsDragging(false)}
                         aiComment={currentDayData?.summary}

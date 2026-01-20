@@ -1,5 +1,6 @@
 package com.korit.trip_planner_back.controller;
 
+import com.korit.trip_planner_back.dto.request.DurationUpdateDto;
 import com.korit.trip_planner_back.dto.request.ItineraryReqDto;
 import com.korit.trip_planner_back.dto.request.ReorderRequestDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
@@ -53,6 +54,20 @@ public class ItineraryController {
 
         log.info("일정 순서 변경 완료: day={}",day);
         return  ResponseEntity.ok(result);
+    }
+    // 일정 항목의 체류 시간 변경
+    @PutMapping("/{itineraryId}/days/{day}/items/{itemId}/duration")
+    public ResponseEntity<DayScheduleDto> updateItemDuration(
+            @PathVariable Integer itineraryId,
+            @PathVariable Integer day,
+            @PathVariable Integer itemId,
+            @RequestBody DurationUpdateDto request) {
+
+        DayScheduleDto result = itineraryService.updateItemDuration(
+                itineraryId, day, itemId, request.getDuration()
+        );
+
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{itineraryId}/days/{day}/items/{itemId}")

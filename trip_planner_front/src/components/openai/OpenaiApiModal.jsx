@@ -5,8 +5,9 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight"
 import "highlight.js/styles/github-dark.css";
 import { HashLoader } from "react-spinners";
-import { MdUpload } from "react-icons/md";
+
 import { sendTextOpenai } from "./openapiApi";
+import { BsFillSendFill } from "react-icons/bs";
 
 function TypingEffect({text, speed = 30}){
     const [displayText, setDisplayText] = useState("");
@@ -43,7 +44,7 @@ function OpenaiApiModal() {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatData, isLoading]);
 
-    // 1. prompt 대신 buildPrompt로 이름 변경 (기본 함수와 충돌 방지)
+
     const buildPrompt = (message, max = 8) => {
         const t = message.slice(-max);
         const history = t
@@ -95,7 +96,7 @@ function OpenaiApiModal() {
             console.error("open ai error", error);
             setChatData((prev) => [
                 ...prev,
-                { type: "answer", content: "⚠️ 답변을 가져오는 중 오류가 발생했습니다." },
+                { type: "answer", content: "답변을 가져오는 중 오류가 발생했습니다." },
             ]);
         }).finally(() => {
             setIsLoading(false);
@@ -152,7 +153,7 @@ function OpenaiApiModal() {
                     placeholder="제주도 여행지에 대해 물어보세요!"
                 />
                 <button type="button" disabled={isLoading} onClick={handleSend}>
-                    <MdUpload />
+                    <BsFillSendFill />
                 </button>
             </div>
         </div>

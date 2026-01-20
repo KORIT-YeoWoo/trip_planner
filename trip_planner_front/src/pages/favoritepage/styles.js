@@ -19,7 +19,7 @@ export const layout = css`
     width: 100%;
     flex: 1;        /* 부모가 flex면 이 한 줄이 먹힘 */
     min-width: 0; 
-    height: 100%;      /* 전체 높이 고정 */
+    
     overflow: hidden;
     align-items: stretch;
     grid-template-columns: 320px 1fr 320px;
@@ -28,7 +28,7 @@ export const layout = css`
 export const bar = css`
     
   
-    height: 100vh;  
+    height: 100%;  
     background-color: ${colors.card};
     border-right: 1px solid ${colors.border};
     overflow-y: auto;
@@ -38,9 +38,9 @@ export const bar = css`
 
 
 export const content = css`//메인
-
+  
     padding: 40px;
-    overflow-y: auto;
+    
     height: 100%;
     
     h1 {
@@ -58,60 +58,53 @@ export const grid = css`
 
 
 export const card = (select) => css`
-    background-color: ${colors.card};
-    border: 2px solid ${select ? colors.primary : "transparent"};
-    border-radius: ${colors.radius};
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    height: 392px;
+  background-color: ${colors.card};
+  border: 2px solid ${select ? colors.primary : "transparent"};
+  border-radius: ${colors.radius};
+  overflow: hidden;
+  padding:3px;
+  height: 230px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 
-    &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
-    }
-    
   
-    &:active:not(:has(button:active)) { 
-        transform: translateY(0px) scale(0.98);
-    }
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+  }
 `;
-
-export const imageWrapper= css`
+export const imageWrapper = css`
   position: relative;
   width: 100%;
-  
-  height: 280px;        /* 카드 상단 이미지 높이 */
+  height: 150px;
   overflow: hidden;
+  flex-shrink: 0;
   background-color: gray;
-  
+
 `;
 export const image = css`
-  position: absolute;
-  inset: 0;               /* top:0 left:0 right:0 bottom:0 */
-  width: 100%;
-  height: 100%;
-  
-  object-fit: cover;
-  transition: transform 0.3s ease;
-
-  
-`;
-export const emptyImage = css`
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 
+
+  object-fit: cover;
+
+`;
+
+export const emptyImage = css`
+  position: absolute;
+  inset: 0;
+  
   display: flex;
   align-items: center;
   justify-content: center;
 
   font-size: 64px;
   background-color: ${colors.muted};
-  color: ${colors.mutedForeground};
-  user-select: none;
+
 `;
 export const heartBtn = (isSelected) => css`
   position: absolute;
@@ -141,3 +134,73 @@ export const heartBtn = (isSelected) => css`
     transform: scale(0.9);
   }
 `;
+export const title = css`
+  font-weight: 800;
+  font-size: 17px;
+  flex-grow: 1;
+  color: ${colors.foreground};
+  margin: 12px 0;
+  text-align: center;
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+`;
+
+export const overlay = css`
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  overflow: hidden;
+`;
+export const favoritContent = css`
+  width: 90%;
+  max-width: 700px;
+  height: 80%;
+  background-color: white;
+  border-radius: ${colors.radius};
+  transform: translateY(-5%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+
+  h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: ${colors.foreground};
+    margin-bottom: 30px;
+    text-align: center;
+  }
+`;
+
+export const gridScroll = css`
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 20px;
+  
+
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: ${colors.border};
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+`;
+
+

@@ -304,3 +304,12 @@ export const detailBtn = css`
     transform: scale(0.97);
   }
 `;
+
+export const info = css`
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #666;
+
+`;

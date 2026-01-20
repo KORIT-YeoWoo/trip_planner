@@ -25,8 +25,11 @@ public class SecurityConfig {
         http.httpBasic(httpBasic -> httpBasic.disable());
         // form 로그인 비활성화
         http.formLogin(formLogin -> formLogin.disable());
+        // oauth2 로그인 활성화
+        http.oauth2Login(org.springframework.security.config.Customizer.withDefaults());
 
         http.authorizeHttpRequests(auth -> {
+            auth.requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll();
             auth.requestMatchers("/api/**").permitAll();
             auth.requestMatchers("/v3/api-docs/**").permitAll();
             auth.requestMatchers("/api-docs/**").permitAll();

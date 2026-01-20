@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.korit.trip_planner_back.dto.gpt.DayDistributionDto;
 import com.korit.trip_planner_back.dto.request.DailyLocationDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
+import com.korit.trip_planner_back.dto.response.ScheduleItemDto;
 import com.korit.trip_planner_back.entity.TouristSpot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -242,13 +244,19 @@ public class GPTService {
                 });
             }
         }
-
-        sb.append("\n### 요청사항\n");
-        sb.append("✅ 점심(12:00~13:00), 저녁(18:00~19:00) 근처에 식사 시간 추가\n");
-        sb.append("✅ 하루 일정이 20:00 이후 끝나면 관광지 체류 시간 단축\n");
-        sb.append("✅ 섬이 있는 날은 섬 체류시간 절대 단축 불가\n");
-        sb.append("❌ 관광지 순서 절대 변경 금지\n");
-        sb.append("❌ 관광지 추가/삭제 금지\n\n");
+        sb.append("\n### ⭐ 필수 요청사항 (반드시 지켜야 함!)\n");
+        sb.append("1. 점심시간 (12:00~13:00)에 반드시 식사 추가\n");
+        sb.append("   - 11:30~13:30 사이에 관광지가 있으면, 그 관광지 후에 점심 추가\n");
+        sb.append("   - 식당 정보가 없어도 '점심 식사' 항목을 추가해야 함\n");
+        sb.append("2. 저녁시간 (18:00~19:00)에 반드시 식사 추가\n");
+        sb.append("   - 17:30~19:30 사이에 관광지가 있으면, 그 관광지 후에 저녁 추가\n");
+        sb.append("   - 식당 정보가 없어도 '저녁 식사' 항목을 추가해야 함\n");
+        sb.append("3. 하루 일정이 최소 18:00까지는 진행되도록 조정\n");
+        sb.append("   - 관광지 체류 시간을 늘리거나\n");
+        sb.append("   - 식사 시간을 더 길게 잡거나\n");
+        sb.append("   - 여유 시간을 추가\n");
+        sb.append("4. 섬이 있는 날은 섬 체류시간 절대 단축 불가\n");
+        sb.append("5. 관광지 순서는 절대 변경 금지\n\n");
 
         sb.append("### 응답 형식 (JSON만)\n");
         sb.append("{\n");
@@ -486,7 +494,6 @@ public class GPTService {
     // 일정 다듬기 응답 파싱
     private List<DayScheduleDto> parseRefinementResponse(String gptResponse, List<DayScheduleDto> originalDays) {
         try {
-            // TODO: GPT 응답을 파싱해서 원본 일정에 식사/조정 반영
             // 현재는 원본 반환
             log.warn("일정 다듬기 파싱 미구현 - 원본 반환");
             return originalDays;
@@ -530,5 +537,71 @@ public class GPTService {
                 .excludeReason("기본 분배")
                 .dayGroups(dayGroups)
                 .build();
+    }
+
+
+    private List<DayScheduleDto> ensureMealTimes(List<DayScheduleDto> days) {
+        for (DayScheduleDto day : days) {
+            List<ScheduleItemDto> items = day.getItems();
+            boolean hasLunch = items.stream()
+                    .anyMatch(item -> item.getType().equals("MEAL") &&
+                            item.getArrivalTime().getHour() >= 11 &&
+                            item.getArrivalTime().getHour() <= 14);
+
+            boolean hasDinner = items.stream()
+                    .anyMatch(item -> item.getType().equals("MEAL") &&
+                            item.getArrivalTime().getHour() >= 17 &&
+                            item.getArrivalTime().getHour() <= 20);
+
+            // 점심 없으면 추가
+            if (!hasLunch) {
+                ScheduleItemDto lunch = createMealItem("점심 식사", 12, 0, 60);
+                insertMealAtAppropriateTime(items, lunch);
+            }
+
+            // 저녁 없으면 추가
+            if (!hasDinner) {
+                ScheduleItemDto dinner = createMealItem("저녁 식사", 18, 0, 60);
+                insertMealAtAppropriateTime(items, dinner);
+            }
+
+            // 시간 재계산
+            recalculateTimes(day);
+        }
+        return days;
+    }
+
+    private ScheduleItemDto createMealItem(String name, int hour, int minute, int duration) {
+        return ScheduleItemDto.builder()
+                .type("MEAL")
+                .name(name)
+                .arrivalTime(LocalTime.of(hour, minute))
+                .departureTime(LocalTime.of(hour, minute).plusMinutes(duration))
+                .duration(duration)
+                .cost(15000)  // 평균 식사비
+                .build();
+    }
+
+    private void insertMealAtAppropriateTime(List<ScheduleItemDto> items, ScheduleItemDto meal) {
+        // meal.arrivalTime에 가장 가까운 시간에 삽입
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).getDepartureTime().isAfter(meal.getArrivalTime())) {
+                items.add(i, meal);
+                return;
+            }
+        }
+        items.add(meal);  // 맨 끝에 추가
+    }
+
+    private void recalculateTimes(DayScheduleDto day) {
+        LocalTime currentTime = day.getStartTime();
+
+        for (ScheduleItemDto item : day.getItems()) {
+            item.setArrivalTime(currentTime);
+            item.setDepartureTime(currentTime.plusMinutes(item.getDuration()));
+            currentTime = item.getDepartureTime();
+        }
+
+        day.setEndTime(currentTime);
     }
 }

@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import axios from "axios";
 import { useLocation } from "react-router-dom";
 import ItineraryScheduleList from "../../components/itinerary/ItineraryScheduleList";
 import * as s from "./styles";
@@ -76,33 +77,36 @@ function ItineraryDetailPage(){
 
     const currentDayData = scheduleData[currentDay];
 
-        const handleDelete = async (itemId) => {
-        if (!currentDayData) return;
-
+    const handleDelete = async (itemId) => {
         try {
-            const response = await fetch(
-                `http://localhost:8080/api/itinerary/${currentItineraryId}/days/${currentDayData.day}/items/${itemId}`,
-                {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' }
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error('삭제 실패');
-            }
-
-            const updatedDayData = await response.json();
-
-            setScheduleData(prev => {
-                const newData = [...prev];
-                newData[currentDay] = updatedDayData;
-                return newData;
+            console.log('🗑️ 삭제 요청:', { 
+                itineraryId: currentItineraryId, 
+                day: currentDay + 1, 
+                itemId 
             });
-
-            console.log('삭제 성공:', updatedDayData);
+            
+            // 1. 삭제 API 호출
+            await axios.delete(
+                `http://localhost:8080/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${itemId}`
+            );
+            
+            console.log('✅ 삭제 성공!');
+            
+            // 2. ✅ 서버에서 최신 일정 데이터 다시 불러오기
+            const response = await axios.get(
+                `http://localhost:8080/api/itinerary/${currentItineraryId}`
+            );
+            
+            console.log('✅ 최신 데이터 받음:', response.data);
+            
+            // 3. ✅ 상태 업데이트
+            if (response.data && response.data.days) {
+                setScheduleData(response.data.days);
+            }
+            
         } catch (error) {
-            console.error('삭제 실패:', error);
+            console.error('❌ 삭제 실패:', error);
+            alert('삭제에 실패했습니다.');
         }
     };
 

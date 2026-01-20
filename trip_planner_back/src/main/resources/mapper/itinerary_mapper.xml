@@ -4,68 +4,46 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korit.trip_planner_back.mapper.ItineraryMapper">
 
-    <!-- ✅ INSERT - 출발지 정보 포함 -->
-    <insert id="insert" useGeneratedKeys="true" keyProperty="itinerariesId">
+    <!-- ✅ 수정: total_cost → totalCost -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="itineraryId">
         INSERT INTO itineraries
-        VALUES (
-            DEFAULT,
-            #{userId},
-            #{startDate},
-            #{endDate},
-            #{budget},
-            #{transport},
-            #{partyType},
-            #{totalCost},
-            NOW(),
-            #{startLocationName},
-            #{startLat},
-            #{startLon}
-        )
+        (user_id, start_date, end_date, budget, transport, party_type, total_cost, created_at)
+        VALUES
+        (#{userId}, #{startDate}, #{endDate}, #{budget}, #{transport}, #{partyType}, #{totalCost}, NOW())
     </insert>
 
-    <!-- ✅ SELECT BY ID - 출발지 정보 포함 -->
-    <select id="findByItinerariesId" resultType="itinerary">
+    <select id="findByItineraryId" resultType="itinerary">
         SELECT
-            itineraries_id,
-            user_id,
-            start_date,
-            end_date,
+            itinerary_id AS itineraryId,
+            user_id AS userId,
+            start_date AS startDate,
+            end_date AS endDate,
             budget,
             transport,
-            party_type,
-            total_cost,
-            created_at,
-            start_location_name,
-            start_lat,
-            start_lon
+            party_type AS partyType,
+            total_cost AS totalCost,
+            created_at AS createdAt
         FROM
             itineraries
         WHERE
-            itineraries_id = #{itinerariesId}
+            itinerary_id = #{itineraryId}
     </select>
 
-    <!-- ✅ SELECT ALL - 출발지 정보 포함 -->
     <select id="findAll" resultType="itinerary">
         SELECT
-            itineraries_id,
-            user_id,
-            start_date,
-            end_date,
+            itinerary_id AS itineraryId,
+            user_id AS userId,
+            start_date AS startDate,
+            end_date AS endDate,
             budget,
             transport,
-            party_type,
-            total_cost,
-            created_at,
-            start_location_name,
-            start_lat,
-            start_lon
+            party_type AS partyType,
+            total_cost AS totalCost,
+            created_at AS createdAt
         FROM
             itineraries
-        ORDER BY
-            created_at DESC
     </select>
 
-    <!-- ✅ UPDATE - 출발지 정보 포함 -->
     <update id="update">
         UPDATE itineraries
         SET
@@ -74,18 +52,14 @@
             budget = #{budget},
             transport = #{transport},
             party_type = #{partyType},
-            total_cost = #{totalCost},
-            start_location_name = #{startLocationName},
-            start_lat = #{startLat},
-            start_lon = #{startLon}
+            total_cost = #{totalCost}
         WHERE
-            itineraries_id = #{itinerariesId}
+            itinerary_id = #{itineraryId}
     </update>
 
-    <!-- DELETE - 변경 없음 -->
     <delete id="deleteById">
         DELETE FROM itineraries
-        WHERE itineraries_id = #{itinerariesId}
+        WHERE itinerary_id = #{itineraryId}
     </delete>
 
 </mapper>

@@ -12,7 +12,7 @@ public interface ItineraryMapper {
     // 기본 CRUD
     void insert(Itinerary itinerary);
 
-    Itinerary findByItinerariesId(Integer itineraryId);
+    Itinerary findByItineraryId(Integer itineraryId);
 
     List<Itinerary> findAll();
 

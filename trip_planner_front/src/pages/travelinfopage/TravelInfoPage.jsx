@@ -35,6 +35,14 @@ function TravelInfoPage() {
 
   const 총인원수 = 인원.성인 + 인원.아동;
 
+  // ✅ 날짜를 YYYY-MM-DD 형식으로 변환하는 헬퍼 함수 (시간대 문제 해결)
+  const formatDateToYYYYMMDD = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // 1. 카테고리 선택
   const 카테고리선택 = (cat) => {
     set카테고리(cat);
@@ -75,6 +83,8 @@ function TravelInfoPage() {
   // 3. 기간 선택 시 위치정보 초기화
   useEffect(() => {
     if (기간.일 > 0) {
+      console.log('🗓️ 날짜 계산:', { 박: 기간.박, 일: 기간.일 });
+      
       const locations = Array.from({ length: 기간.일 }, (_, index) => ({
         day: index + 1,
         startLocation: index === 0 
@@ -84,7 +94,7 @@ function TravelInfoPage() {
               lat: 33.5066, 
               lon: 126.4929 
             }
-          : null,  // 전날 숙소로 자동 채워질 예정
+          : null,
         endLocation: index === 기간.일 - 1
           ? { 
               name: '제주국제공항', 
@@ -92,12 +102,13 @@ function TravelInfoPage() {
               lat: 33.5066, 
               lon: 126.4929 
             }
-          : null   // 사용자가 입력해야 함
+          : null
       }));
       
+      console.log(`✅ ${기간.박}박${기간.일}일 → 위치정보 ${locations.length}개 생성`);
       set위치정보(locations);
     }
-  }, [기간.일]);
+  }, [기간.일, 기간.박]);
 
   // 4. 예산 계산
   const 최소예산 = 총인원수 * 기간.일 * 100000;
@@ -120,7 +131,7 @@ function TravelInfoPage() {
     set세부예산(결과);
   }, [총예산, 이동수단]);
 
-  // 5. 계획 완료 핸들러 수정
+  // 5. 계획 완료 핸들러
   const 계획완료핸들러 = () => {
     // 유효성 검사
     if (!선택된날짜범위 || !선택된날짜범위[0] || !선택된날짜범위[1]) {
@@ -144,28 +155,32 @@ function TravelInfoPage() {
       return;
     }
 
-    // 전달할 데이터 구성 
+    // ✅ 시간대 문제 해결한 날짜 변환
+    const startDateStr = formatDateToYYYYMMDD(선택된날짜범위[0]);
+    const endDateStr = formatDateToYYYYMMDD(선택된날짜범위[1]);
+    
+    console.log('🗓️ 변환된 날짜:');
+    console.log('  - startDate:', startDateStr);
+    console.log('  - endDate:', endDateStr);
+
+    // 전달할 데이터 구성
     const travelData = {
       selectedSpots: selectedSpotIds,
       travelInfo: {
         category: 카테고리,
         people: 인원,
-        dateRange: [
-          선택된날짜범위[0].toISOString().split('T')[0],
-          선택된날짜범위[1].toISOString().split('T')[0]
-        ],
+        dateRange: [startDateStr, endDateStr],
         dailySchedules: 일정시간목록.map((시간, index) => {
           const 날짜 = new Date(선택된날짜범위[0]);
           날짜.setDate(날짜.getDate() + index);
           
           return {
             day: index + 1,
-            date: 날짜.toISOString().split('T')[0],
+            date: formatDateToYYYYMMDD(날짜),  // ✅ 여기도 수정
             startTime: `${String(시간.시작).padStart(2, '0')}:00`,
             endTime: `${String(시간.종료).padStart(2, '0')}:00`
           };
         }),
-        // Day별 위치 정보 추가
         dailyLocations: 위치정보.map(dayLoc => ({
           day: dayLoc.day,
           startName: dayLoc.startLocation.name,
@@ -183,9 +198,14 @@ function TravelInfoPage() {
       }
     };
 
+    console.log('🧪 전달할 데이터:', travelData);
+    console.log('🧪 위치정보 개수:', travelData.travelInfo.dailyLocations.length);
+    console.log('🧪 dateRange:', travelData.travelInfo.dateRange);
+
     // LoadingPage로 이동하면서 데이터 전달
     navigate('/loading', { state: { travelData } });
   };
+  
   
   const 시간옵션들 = Array.from({ length: 24 }, (_, i) => (
     <option key={i} value={i}>
@@ -197,7 +217,7 @@ function TravelInfoPage() {
 
   return (
     <div css={s.전체페이지}>
-      {/* ✅ 단계 진행바 수정 (4단계로) */}
+      {/* 단계 진행바 */}
       <div css={s.단계진행바}>
         <div css={s.단계아이템(단계 === 1)}>
           인원 <IoPeopleSharp />
@@ -341,7 +361,7 @@ function TravelInfoPage() {
           </div>
         )}
 
-        {/*  Step 3: 출발지/숙소 */}
+        {/* Step 3: 출발지/숙소 */}
         {단계 === 3 && (
           <div css={s.위치설정컨테이너}>
             <h2 css={s.위치설정제목}>📍 출발지 및 숙소 설정</h2>
@@ -406,7 +426,7 @@ function TravelInfoPage() {
           </div>
         )}
 
-        {/* Step 4: 예산 (기존 Step 3) */}
+        {/* Step 4: 예산 */}
         {단계 === 4 && (
           <div css={s.통합페이지컨테이너}>
             <div css={s.왼쪽섹션}>
@@ -468,7 +488,7 @@ function TravelInfoPage() {
         )}
       </div>
 
-      {/* ✅ 네비게이션 버튼 수정 (4단계 대응) */}
+      {/* 네비게이션 버튼 */}
       <div css={s.네비버튼영역}>
         <button onClick={() => set단계((p) => Math.max(p - 1, 1))}>이전</button>
         <button

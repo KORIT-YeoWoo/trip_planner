@@ -6,7 +6,7 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="spotId">
         insert into tourist_spots
         values(default, #{title}, #{category}, #{address}, #{latitude}, #{longitude},
-            #{spotDuration}, #{price}, #{description}, #{openingHrs}, #{contact}, #{spotImg}, now(), #{is_island})
+            #{spotDuration}, #{originalDuration}, #{price}, #{description}, #{openingHrs}, #{contact}, #{spotImg}, now(), #{is_island})
     </insert>
     <select id="findById" resultType="touristSpot">
         select
@@ -17,6 +17,7 @@
             latitude,
             longitude,
             spot_duration,
+            original_duration,
             price,
             description,
             opening_hrs,
@@ -39,6 +40,7 @@
             latitude,
             longitude,
             spot_duration,
+            original_duration,
             price,
             description,
             opening_hrs,
@@ -91,6 +93,7 @@
             latitude,
             longitude,
             spot_duration,
+            original_duration,
             price,
             description,
             opening_hrs,

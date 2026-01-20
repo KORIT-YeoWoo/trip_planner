@@ -3,8 +3,7 @@ package com.korit.trip_planner_back.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.korit.trip_planner_back.dto.gpt.DayDistributionDto;
-import com.korit.trip_planner_back.dto.request.AccommodationDto;
-import com.korit.trip_planner_back.dto.request.StartLocationDto;
+import com.korit.trip_planner_back.dto.request.DailyLocationDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
 import com.korit.trip_planner_back.entity.TouristSpot;
 import lombok.extern.slf4j.Slf4j;
@@ -37,17 +36,19 @@ public class GPTService {
     public DayDistributionDto filterAndGroupSpots(
             List<TouristSpot> allSpots,
             int travelDays,
-            List<AccommodationDto> accommodations,
-            String transport,
-            StartLocationDto startLocation) {
+            List<DailyLocationDto> dailyLocations,
+            String transport) {
 
         log.info("GPT 필터링 시작: 관광지 {}개 → {}박{}일",
                 allSpots.size(), travelDays - 1, travelDays);
-        log.info("출발지: {}", startLocation.getName());
 
         try {
             // 1. 프롬프트 생성
-            String prompt = buildFilteringPrompt(allSpots, travelDays, accommodations, transport, startLocation );
+            String prompt = buildFilteringPrompt(
+                    allSpots,
+                    travelDays,
+                    dailyLocations,
+                    transport);
 
             // 2. GPT API 호출
             String gptResponse = callGptApi(prompt);
@@ -81,13 +82,7 @@ public class GPTService {
         }
     }
 
-    /**
-     * 제외된 관광지 계산
-     *
-     * @param allSpots 전체 관광지
-     * @param selectedIds 선택된 관광지 ID
-     * @return 제외된 관광지 ID 리스트
-     */
+    // 제외된 관광지 계산
     private List<Integer> calculateExcludedSpots(List<TouristSpot> allSpots, List<Integer> selectedIds) {
         Set<Integer> selectedSet = new HashSet<>(selectedIds);
 
@@ -97,12 +92,7 @@ public class GPTService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 최종 일정 다듬기
-     *
-     * @param days 기본 일정
-     * @return 다듬어진 일정
-     */
+    // 최종 일정 다듬기
     public List<DayScheduleDto> refineSchedule(List<DayScheduleDto> days) {
         log.info("GPT 일정 다듬기 시작: {}일", days.size());
 
@@ -127,34 +117,39 @@ public class GPTService {
         }
     }
 
-    /**
-     * GPT 1차 프롬프트: 필터링 + 그룹핑만
-     *
-     * ⚠️ 순서/시간 정하지 않음!
-     */
+    // GPT 1차 프롬프트: 필터링 + 그룹핑만
     private String buildFilteringPrompt(
             List<TouristSpot> allSpots,
             int travelDays,
-            List<AccommodationDto> accommodations,
-            String transport,
-            StartLocationDto startLocation) {
+            List<DailyLocationDto> dailyLocations,
+            String transport) {
 
         StringBuilder sb = new StringBuilder();
 
         sb.append("당신은 제주도 여행 전문가입니다.\n\n");
 
+        // ✅ 여행 정보 (Day별 동선 명확히 표시)
         sb.append("### 여행 정보\n");
         sb.append("- 기간: ").append(travelDays - 1).append("박").append(travelDays).append("일\n");
         sb.append("- 교통: ").append(transport).append("\n");
-        sb.append("- 숙소:\n");
-        for (int i = 0; i < accommodations.size(); i++) {
-            AccommodationDto acc = accommodations.get(i);
-            sb.append("  Day ").append(i + 1).append(" 밤: ")
-                    .append(acc.getName() != null ? acc.getName() : "숙소")
-                    .append(" (").append(acc.getLat()).append(", ").append(acc.getLon()).append(")\n");
-        }
+        sb.append("\n");
 
-        sb.append("\n### 선택된 관광지 (").append(allSpots.size()).append("개)\n");
+        sb.append("### 각 날짜별 동선\n");
+        for (DailyLocationDto dayLoc : dailyLocations) {
+            sb.append("- Day ").append(dayLoc.getDay()).append(": ")
+                    .append(dayLoc.getStartName()).append(" (")
+                    .append(String.format("%.4f", dayLoc.getStartLat())).append(", ")
+                    .append(String.format("%.4f", dayLoc.getStartLon())).append(")")
+                    .append(" → ... → ")
+                    .append(dayLoc.getEndName()).append(" (")
+                    .append(String.format("%.4f", dayLoc.getEndLat())).append(", ")
+                    .append(String.format("%.4f", dayLoc.getEndLon())).append(")")
+                    .append("\n");
+        }
+        sb.append("\n");
+
+        // 관광지 정보 (기존과 동일)
+        sb.append("### 선택된 관광지 (").append(allSpots.size()).append("개)\n");
         for (TouristSpot spot : allSpots) {
             sb.append("- ID:").append(spot.getSpotId())
                     .append(" | ").append(spot.getTitle())
@@ -170,8 +165,10 @@ public class GPTService {
 
         sb.append("\n### 요청사항\n");
         sb.append("1. 위 관광지를 ").append(travelDays).append("일로 그룹핑하세요\n");
-        sb.append("2. 지역적으로 가까운 것을 우선 선택하세요\n");
-        sb.append("3. 하루 일정은 08:00~20:00 (12시간) 기준입니다\n\n");
+        sb.append("2. **각 날짜의 출발지/도착지를 고려**해서 지역적으로 가까운 것끼리 묶으세요\n");
+        sb.append("   예: Day 1이 공항→중문이면, 동쪽→남쪽 순서로 관광지 배치\n");
+        sb.append("3. 섬(우도/마라도/가파도)은 하루에 1개만, 최대 3개 관광지\n");
+        sb.append("4. 너무 많으면 제외하세요 (1일당 3~5개 권장)\n");
 
         sb.append("### ⚠️ 중요 규칙 ⚠️\n");
         sb.append("❌ 관광지 방문 순서는 절대 정하지 마세요\n");
@@ -210,12 +207,7 @@ public class GPTService {
         return sb.toString();
     }
 
-    /**
-     * GPT 2차: 최종 다듬기 프롬프트
-     *
-     * ⚠️ TSP 이후에만 호출!
-     * ⚠️ 순서 절대 변경 금지!
-     */
+    // GPT 2차: 최종 다듬기 프롬프트
     private String buildRefinementPrompt(List<DayScheduleDto> days) {
         StringBuilder sb = new StringBuilder();
 
@@ -285,9 +277,7 @@ public class GPTService {
         return sb.toString();
     }
 
-    /**
-     * GPT API 호출
-     */
+    // GPT API 호출
     private String callGptApi(String prompt) throws Exception {
         log.info("GPT API 호출 시작");
 
@@ -329,9 +319,7 @@ public class GPTService {
         return content;
     }
 
-    /**
-     * Day 분배 응답 파싱
-     */
+    // Day 분배 응답 파싱
     private DayDistributionDto parseDistributionResponse(String gptResponse, List<TouristSpot> allSpots) {
         try {
             // JSON 추출 (```json ... ``` 제거)
@@ -400,9 +388,7 @@ public class GPTService {
         }
     }
 
-    /**
-     * 균등 분배 생성 (fallback)
-     */
+    // 균등 분배 생성 (fallback)
     private Map<Integer, List<Integer>> createEvenDistribution(List<Integer> spotIds, int days) {
         Map<Integer, List<Integer>> dayGroups = new HashMap<>();
 
@@ -421,11 +407,7 @@ public class GPTService {
         return dayGroups;
     }
 
-    /**
-     * 섬 + 본섬 혼합 방지
-     *
-     * 섬이 있는 Day는 섬 + 근처 2개만 유지
-     */
+    // 섬 + 본섬 혼합 방지
     private Map<Integer, List<Integer>> separateIslandsIfMixed(
             Map<Integer, List<Integer>> dayGroups,
             List<TouristSpot> allSpots) {
@@ -501,9 +483,7 @@ public class GPTService {
         return result;
     }
 
-    /**
-     * 일정 다듬기 응답 파싱
-     */
+    // 일정 다듬기 응답 파싱
     private List<DayScheduleDto> parseRefinementResponse(String gptResponse, List<DayScheduleDto> originalDays) {
         try {
             // TODO: GPT 응답을 파싱해서 원본 일정에 식사/조정 반영
@@ -517,9 +497,7 @@ public class GPTService {
         }
     }
 
-    /**
-     * JSON 추출 (마크다운 제거)
-     */
+    // JSON 추출 (마크다운 제거)
     private String extractJson(String text) {
         // ```json ... ``` 제거
         text = text.replaceAll("```json\\s*", "");
@@ -527,9 +505,7 @@ public class GPTService {
         return text.trim();
     }
 
-    /**
-     * 기본 분배 전략 (GPT 실패 시)
-     */
+    // 기본 분배 전략 (GPT 실패 시)
     private DayDistributionDto createDefaultDistribution(List<TouristSpot> allSpots, int travelDays) {
         log.warn("GPT 실패 - 기본 분배 전략 사용");
 

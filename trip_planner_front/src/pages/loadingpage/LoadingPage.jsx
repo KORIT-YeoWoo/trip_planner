@@ -1,13 +1,19 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as s from "./styles";
 
 import foxQuestion from "../../assets/물음표여우.PNG";
 import foxTrouble from "../../assets/곤란여우.PNG";
 import foxHappy from "../../assets/기쁜여우.PNG";
 
-function LoadingPage({ isComplete = false, onDone }) {
+function LoadingPage() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { travelData } = location.state || {};
+
     const [progress, setProgress] = useState(1);
+    const [isApiComplete, setIsApiComplete ] = useState(false);
 
     const phase = useMemo(() => {
         if (progress <= 50) return 1;
@@ -26,45 +32,74 @@ function LoadingPage({ isComplete = false, onDone }) {
     }, [phase]);
 
     useEffect(() => {
-        if (isComplete) {
-        const timer = setInterval(() => {
-            setProgress((p) => (p >= 100 ? 100 : p + 2));
-        }, 30);
-        return () => clearInterval(timer);
+        if (!travelData) {
+            alert("여행 정보가 없습니다.");
+            navigate("/spots");
+            return;
+        }
+
+        const generatePlan = async () => {
+            try {
+                const response = await generateItinerary(travelData);
+
+                setIsApiComplete(true);
+
+                setTimeout(()=> {
+                    navigate(`/schedule`, {
+                        state: { itineraryData: response.data }
+                    });
+                }, 800);
+            } catch (error) {
+                console.error("일정 생성 실패:",error);
+                alert("일정 생성에 실패했습니다. 다시 시도해주세요.");
+                navigate("/travelinfo");
+            }
+        };
+
+        generatePlan();
+    }, [travelData, navigate]);
+
+    useEffect(() =>{
+        if(isApiComplete) {
+            const timer = setInterval(() => {
+                setProgress((p)=> {
+                    if(p >= 100){
+                        clearInterval(timer);
+                        return 100;
+                    }
+                    return p + 3;
+                });
+            }, 30);
+            return () => clearInterval(timer);
         }
 
         const timer = setInterval(() => {
-        setProgress((p) => {
-            if (p >= 99) return 99;
-            if (p < phaseInfo.max) return p + 1;
-            return p + 1;
-        });
-        }, phase === 1 ? 45 : phase === 2 ? 60 : 80);
+            setProgress((p) => {
+                if (p >= phaseInfo.max) return phaseInfo.max;
+                return p + 1;
+            });
+        }, phase === 1 ? 50 : phase === 2 ? 70 : 100);
 
         return () => clearInterval(timer);
-    }, [phase, phaseInfo.max, isComplete]);
-
-    useEffect(() => {
-        if (progress === 100 && onDone) onDone();
-    }, [progress, onDone]);
+    }, [phase, phaseInfo.max, isApiComplete]);
 
     return (
         <div css={s.overlay}>
-        <div css={s.centerWrap}>
-            {/* ✅ 고정 박스 */}
-            <div css={s.foxBox}>
-            <img css={s.foxImage} src={phaseInfo.image} alt="fox" />
-            </div>
+            <div css={s.centerWrap}>
+                {/* ✅ 고정 박스 */}
+                <div css={s.foxBox}>
+                    <img css={s.foxImage} src={phaseInfo.image} alt="fox" />
+                </div>
 
-            <div css={s.message}>{phaseInfo.text}</div>
+                <div css={s.message}>{phaseInfo.text}</div>
 
-            <div css={s.progressWrap}>
-            <div css={s.progressTrack}>
-                <div css={s.progressFill(progress)} />
+                <div css={s.progressWrap}>
+                    <div css={s.progressTrack}>
+                        <div css={s.progressFill(progress)} />
+                    </div>
+                    <div css={s.percentText}>{progress}%</div>
+                </div>
             </div>
-            <div css={s.percentText}>{progress}%</div>
-            </div>
-        </div>
         </div>
     );
 }

@@ -336,3 +336,55 @@ export const 비어있는상태 = css`
   height: 100%;
   color: #ccc;
 `;
+
+export const 위치설정컨테이너 = css`
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+`;
+
+export const 위치설정제목 = css`
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+`;
+
+export const 위치설정안내 = css`
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.6;
+  text-align: center;
+  font-size: 15px;
+`;
+
+// Day별 위치 목록
+export const 일차위치목록 = css`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+// Day별 카드
+export const 일차위치카드 = css`
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+export const 일차제목 = css`
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+`;

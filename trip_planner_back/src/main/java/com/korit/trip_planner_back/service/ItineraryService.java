@@ -49,10 +49,10 @@ public class ItineraryService {
 
         // 2. 일정 정보 DB 저장
         Itinerary itinerary = saveItinerary(request);
-        log.info("일정 저장 완료: ID={}", itinerary.getItinerariesId());
+        log.info("일정 저장 완료: ID={}", itinerary.getItineraryId());
 
         // 3. Day별 위치 정보 DB 저장
-        saveDailyLocations(itinerary.getItinerariesId(), request.getDailyLocations());
+        saveDailyLocations(itinerary.getItineraryId(), request.getDailyLocations());
         log.info("위치 정보 저장 완료: {}일", request.getDailyLocations().size());
 
         // 4. 관광지 조회
@@ -84,7 +84,7 @@ public class ItineraryService {
         ItineraryRespDto response = buildFinalResponse(request, days);
 
         // 9. itineraryId 포함
-        response.setItineraryId(itinerary.getItinerariesId());
+        response.setItineraryId(itinerary.getItineraryId());
         return response;
     }
 
@@ -506,7 +506,7 @@ public class ItineraryService {
                 .collect(Collectors.toList());
 
         // 5. DB에서 일정 정보 조회
-        Itinerary itinerary = itineraryMapper.findByItinerariesId(itineraryId);
+        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
         if (itinerary == null) {
             throw new IllegalArgumentException("일정을 찾을 수 없습니다: " + itineraryId);
         };
@@ -649,6 +649,28 @@ public class ItineraryService {
                         orderedSpots.size(),
                         totalDistance,
                         hasIsland ? " (섬 포함)" : ""))
+                .build();
+    }
+
+    public ItineraryRespDto getItinerary(Integer itineraryId) {
+
+        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
+
+        if (itinerary == null) {
+            throw new IllegalArgumentException("일정을 찾을 수 없습니다: " + itineraryId);
+        }
+
+        // ❗ 아직 DaySchedule은 DB에 없음 → 빈 리스트
+        return ItineraryRespDto.builder()
+                .itineraryId(itinerary.getItineraryId())
+                .startDate(itinerary.getStartDate())
+                .endDate(itinerary.getEndDate())
+                .budget(itinerary.getBudget())
+                .transport(itinerary.getTransport())
+                .partyType(itinerary.getPartyType())
+                .days(List.of())   // TODO
+                .totalCost(itinerary.getTotalCost())
+                .summary("일정 조회")
                 .build();
     }
 

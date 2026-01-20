@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Itinerary {
 
-    private Integer itinerariesId;
+    private Integer itineraryId;
     private Integer userId;
     private LocalDate startDate;      // 여행 시작일
     private LocalDate endDate;        // 여행 종료일

@@ -74,6 +74,18 @@ public class ItineraryController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/{itineraryId}")
+    @Operation(summary = "일정 조회", description = "생성된 전체 여행 일정 조회")
+    public ResponseEntity<ItineraryRespDto> getItinerary(
+            @PathVariable Integer itineraryId
+    ) {
+        log.info("일정 조회 요청: itineraryId={}", itineraryId);
+
+        ItineraryRespDto result = itineraryService.getItinerary(itineraryId);
+
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/health")
     @Operation(summary = "상태 확인", description = "일정 생성 서비스 상태 확인")
     public ResponseEntity<String> healthCheck() {

@@ -22,6 +22,7 @@ export default function App() {
           <Route path="/ai/chat" element={<AiChatPage />} />
           <Route path="/my" element={<MyPageCategory />} />
           <Route path="*" element={<NotFoundPage />} />
+          <Route path="/login" element ={<LoginPage/>} />
         </Route>
 
         <Route element={<FullScreenLayout />}>

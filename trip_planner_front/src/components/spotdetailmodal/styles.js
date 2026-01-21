@@ -149,3 +149,83 @@ export const desc = css`
     line-height: 1.6;
     white-space: pre-wrap;
 `;
+
+export const reviewSection = css`
+    margin-top: auto; /* ✅ 오른쪽 영역 맨 아래로 내려가게 */
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+`;
+
+export const starInputRow = css`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+`;
+
+export const starBtn = (active) => css`
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    color: ${active ? "#f47a20" : "#cfcfcf"};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.12s ease, color 0.12s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+    }
+`;
+
+export const commentBar = css`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: #ffd8bd;
+    border-radius: 999px;
+    padding: 6px 10px 6px 14px;
+`;
+
+export const commentInput = css`
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+
+    font-size: 14px;
+    font-weight: 500;
+    color: #5a3b22;
+
+    resize: none;
+    padding: 2px 0;
+    line-height: 1.3;
+    max-height: 84px;
+
+    &::placeholder {
+        color: rgba(90, 59, 34, 0.55);
+        font-weight: 700;
+    }
+`;
+
+export const sendBtn = (enabled) => css`
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: none;
+    cursor: ${enabled ? "pointer" : "not-allowed"};
+
+    background: ${enabled ? "#f47a20" : "rgba(244, 122, 32, 0.35)"};
+    color: #fff;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        filter: ${enabled ? "brightness(0.98)" : "none"};
+    }
+`;

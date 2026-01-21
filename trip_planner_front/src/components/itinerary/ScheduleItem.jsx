@@ -25,7 +25,7 @@ function ScheduleItem({ data, order, isFixed = false, onDurationChange }) {
         transition,
         isDragging,
     } = useSortable({ 
-        id: data?.itemId || 0,
+        id: data?.spotId || 0,
         disabled: isFixed
     });
 
@@ -37,7 +37,7 @@ function ScheduleItem({ data, order, isFixed = false, onDurationChange }) {
     // ✅ 저장 핸들러 (자동 저장)
     const handleSave = () => {
         if (newDuration !== duration && onDurationChange) {
-            onDurationChange(data.itemId, newDuration);
+            onDurationChange(data.spotId, newDuration);
         }
         setIsEditingDuration(false);
     };
@@ -45,18 +45,21 @@ function ScheduleItem({ data, order, isFixed = false, onDurationChange }) {
     // ✅ 취소 핸들러 (백드롭 클릭 시 자동 저장)
     const handleCancel = () => {
         if (newDuration !== duration && onDurationChange) {
-            onDurationChange(data.itemId, newDuration);
+            onDurationChange(data.spotId, newDuration);
         }
         setIsEditingDuration(false);
     };
 
     // ✅ 시간 포맷팅
     const formatDuration = (minutes) => {
+        if (!minutes || minutes === 0) return "0시간";
+        
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
-        if (hours > 0 && mins > 0) return `${hours}시간 ${mins}분`;
-        if (hours > 0) return `${hours}시간`;
-        return `${mins}분`;
+        
+        if (hours === 0) return `${mins}분`;
+        if (mins === 0) return `${hours}시간`;
+        return `${hours}시간 ${mins}분`;
     };
 
     return (
@@ -103,7 +106,7 @@ function ScheduleItem({ data, order, isFixed = false, onDurationChange }) {
                                             css={s.durationSlider}
                                         />
                                         <span css={s.popupDurationDisplay}>
-                                            {formatDuration(newDuration)}
+                                            {newDuration}
                                         </span>
                                     </div>
                                 </>

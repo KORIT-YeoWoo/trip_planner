@@ -20,7 +20,6 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
 import DeleteZone from "./DeleteZone";
-import { last } from "lodash";
 
 function ItineraryScheduleList({ 
     scheduleData, 
@@ -76,8 +75,8 @@ function ItineraryScheduleList({
         }
 
         if (active.id !== over.id) {
-            const oldIndex = items.findIndex(item => item.itemId === active.id);
-            const newIndex = items.findIndex(item => item.itemId === over.id);
+            const oldIndex = items.findIndex(item => item.spotId === active.id);
+            const newIndex = items.findIndex(item => item.spotId === over.id);
 
             if (oldIndex === -1 || newIndex === -1) {
                 console.error('Invalid drag indices');
@@ -89,8 +88,8 @@ function ItineraryScheduleList({
 
             if (onReorder) {
                 try {
-                    const newItemIds = newItems.map(item => item.itemId);
-                    await onReorder(newItemIds);
+                    const newspotIds = newItems.map(item => item.spotId);
+                    await onReorder(newspotIds);
                 } catch (error) {
                     console.error('순서 변경 실패:', error);
                     alert(error.message || '순서 변경에 실패했습니다.');
@@ -101,7 +100,7 @@ function ItineraryScheduleList({
     };
 
     const startPoint = {
-        itemId: 'start-point',
+        spotId: 'start-point',
         type: 'START',
         name: '출발',
         arrivalTime: startTime || '09:00',
@@ -111,7 +110,7 @@ function ItineraryScheduleList({
     };
 
     const endPoint = {
-        itemId: 'end-point',
+        spotId: 'end-point',
         type: 'END',
         name: '도착',
         arrivalTime: endTime || '18:15',
@@ -134,7 +133,7 @@ function ItineraryScheduleList({
             modifiers={[restrictToVerticalAxis]} 
         >
             <SortableContext
-                items={items.map(item => item.itemId)}
+                items={items.map(item => item.spotId)}
                 strategy={verticalListSortingStrategy}
             >
                 <ul css={s.scheduleItems}> 
@@ -146,7 +145,7 @@ function ItineraryScheduleList({
 
                     {items.map((item, index) => ( 
                         <ScheduleItem
-                            key={item.itemId}
+                            key={item.spotId}
                             data={item}
                             order={index + 1}
                             onDurationChange={onDurationChange} 

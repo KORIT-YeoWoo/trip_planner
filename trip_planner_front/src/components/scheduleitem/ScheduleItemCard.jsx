@@ -24,7 +24,7 @@ function ScheduleItemCard({ item, onDurationChange }) {
                 onChange={(e) => setNewDuration(Number(e.target.value))}
             />
             <span>{newDuration}분</span>
-            <button onClick={() => onDurationChange(item.itemId, newDuration)}>
+            <button onClick={() => onDurationChange(item.spotId, newDuration)}>
                 저장
             </button>
             <button onClick={() => setIsEditing(false)}>

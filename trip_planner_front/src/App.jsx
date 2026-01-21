@@ -9,6 +9,7 @@ import MainLayout from "./components/common/layouts/MainLayout";
 import FullScreenLayout from "./components/common/layouts/FullScreenLayout";
 import FavoritePage from "./pages/favoritepage/FavoritePage";
 import AiChatPage from "./pages/aichatpage/AiChatPage";
+import LoginPage from "./pages/loginpage/LoginPage";
 
 export default function App() {
   return <>
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/favorites" element={<FavoritePage />} />
           <Route path="/ai/chat" element={<AiChatPage />} />
           <Route path="*" element={<NotFoundPage />} />
+          <Route path="/login" element ={<LoginPage/>} />
         </Route>
 
         <Route element={<FullScreenLayout />}>

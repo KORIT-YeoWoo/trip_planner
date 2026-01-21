@@ -18,7 +18,7 @@ instance.interceptors.request.use(
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
 
-        console.log(`[API 요청] ${config.method.toUpperCase} ${config.url}`);
+        console.log(`[API 요청] ${config.method.toUpperCase()} ${config.url}`);
         return config;
     },
     (error) => {

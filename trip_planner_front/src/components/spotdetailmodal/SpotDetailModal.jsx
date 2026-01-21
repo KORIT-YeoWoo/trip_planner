@@ -8,7 +8,7 @@ import { IoSend } from "react-icons/io5";
 function SpotDetailModal({ isOpen, spot, onClose, children, onSubmitReview }) {
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
-    const [comment, setComment] = useState("");
+    const [comment, setComment] = useState(""); 
     
 
     useEffect(() => {
@@ -159,23 +159,23 @@ function SpotDetailModal({ isOpen, spot, onClose, children, onSubmitReview }) {
                 </div>
 
                     <div css={s.commentBar}>
-                    <textarea
-                        css={s.commentInput}
-                        placeholder="리뷰를 작성해보세요."
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        onKeyDown={onCommentKeyDown}
-                        rows={1}
-                    />
-                    <button
-                        type="button"
-                        css={s.sendBtn(canSubmit)}
-                        onClick={submitReview}
-                        aria-label="댓글 전송"
-                    >
-                        <IoSend size={16} />
-                    </button>
-                    </div>
+                        <textarea
+                            css={s.commentInput}
+                            placeholder="리뷰를 작성해보세요."
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            onKeyDown={onCommentKeyDown}
+                            rows={1}
+                        />
+                            <button
+                                type="button"   
+                                css={s.sendBtn(canSubmit)}
+                                onClick={submitReview}
+                                aria-label="댓글 전송"
+                            >
+                                <IoSend size={16} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

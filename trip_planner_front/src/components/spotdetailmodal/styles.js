@@ -216,7 +216,7 @@ export const sendBtn = (enabled) => css`
     height: 36px;
     border-radius: 999px;
     border: none;
-    cursor: ${enabled ? "pointer" : "not-allowed"};
+    cursor: ${enabled ? "pointer" : "default"};
 
     background: ${enabled ? "#f47a20" : "rgba(244, 122, 32, 0.35)"};
     color: #fff;

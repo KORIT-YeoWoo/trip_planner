@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getMyFavorites, getSpots, removeFavorites } from "../../apis/spotApi"; 
 import { IoMdHeart } from "react-icons/io";
 import * as s from "./styles";
+import MyPageCategory from "../../components/mypage/MyPageCategory";
 
 function FavoritePage() {
     const [favoriteSpots, setFavoriteSpots]=useState([]);
@@ -49,7 +50,7 @@ function FavoritePage() {
 
     return (
         <div css={s.layout}> 
-            <div css={s.bar}></div>
+            <div css={s.bar}><MyPageCategory /></div>
             <div css={s.content} style={{ position: 'relative' }}>
                 <div css={s.overlay}>
                     

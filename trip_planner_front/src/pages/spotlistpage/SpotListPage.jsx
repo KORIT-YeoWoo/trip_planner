@@ -189,14 +189,13 @@ function SpotListPage() {
   <div css={s.layout}>
     {/* 왼쪽: 선택된 여행지 */}
     <div css={s.selectedSection}>
-      
-
       <div css={s.selectedListWrapper}>
-        <h2>선택한 여행지</h2>
-        <div>
-          <p>선택된 관광지 수: {selectedId.length}</p>
-          <p>예상 예산:{totalPay}원</p>
+        <h2 css={s.sHeader}>선택한 여행지</h2>
+        <div css={s.sinfo}>
+          <p>선택된 관광지 수: {selectedId.length}개</p>
+          <p>예상 예산: {totalPay.toLocaleString()}원</p>
         </div>
+        
         <ul css={s.spotSelectList}>
           {selectedId.map((id, index) => {
             const spot = spots.find((s) => s.spotId === id);
@@ -207,12 +206,11 @@ function SpotListPage() {
                 <span css={s.spotSelectText}>
                   {index + 1}. {spot.title}
                 </span>
-
+                
                 <button
                   type="button"
                   css={s.removeBtn}
                   onClick={() => toggleSelect(spot.spotId)}
-                  aria-label="선택 해제"
                 >
                   ✕
                 </button>
@@ -220,14 +218,18 @@ function SpotListPage() {
             );
           })}
         </ul>
-        <button
+        <div css={s.btnwrap}>
+          <button
             type="button"
+            css={s.sclick}
             disabled={selectedId.length === 0}
-            // 온클릭 이벤트 이렇게 추가하면 될 것 같아
             onClick={handleCreateItinerary}
+            
           >
             {selectedId.length === 0 ? "여행지를 선택하세요" : "일정 만들기"}
-        </button>
+          </button>
+        </div>
+        
       </div>
     </div>
 

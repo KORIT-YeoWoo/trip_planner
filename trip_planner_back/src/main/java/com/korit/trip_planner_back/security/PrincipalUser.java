@@ -12,6 +12,7 @@ import java.util.Map;
 
 @Getter
 public class PrincipalUser extends DefaultOAuth2User {
+
     private final User user;
 
     public PrincipalUser(Collection<? extends GrantedAuthority> authorities, Map<String, Object> attributes, String nameAttributeKey, User user) {

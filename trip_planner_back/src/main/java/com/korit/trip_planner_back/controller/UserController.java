@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     @GetMapping("/me")
@@ -20,15 +21,16 @@ public class UserController {
         return ResponseEntity.ok(principalUser.getUser());
     }
 
-    // 닉넴 업데이트
     @PatchMapping("/nickname")
     public ResponseEntity<?> updateNickname(
             @AuthenticationPrincipal PrincipalUser principalUser,
             @RequestBody Map<String, String> request) {
+
         String newNickname = request.get("nickname");
         int userId = principalUser.getUser().getUserId();
 
         userService.updateNickname(userId, newNickname);
-        return ResponseEntity.ok("닉네임 업데이트 성공");
+
+        return ResponseEntity.ok("Success");
     }
 }

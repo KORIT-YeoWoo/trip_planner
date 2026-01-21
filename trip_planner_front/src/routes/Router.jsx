@@ -8,6 +8,7 @@ import PlanPage from "../pages/PlanPage";
 import MyPage from "../pages/MyPage";
 import MyItinerariesPage from "../pages/MyItinerariesPage";
 import MyFavoritesPage from "../pages/MyFavoritesPage";
+import LoginPage from "../pages/loginpage/LoginPage";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "spots",
         element: <SpotListPage />,
+      },
+      {
+        path: "login",
+        element: <LoginPage />,
       },
       {
         path: "plan",

@@ -27,7 +27,7 @@ export const layout = css`
 `;
 export const bar = css`
     
-  
+    padding: 20px;
     height: 100%;  
     background-color: ${colors.card};
     border-right: 1px solid ${colors.border};
@@ -52,8 +52,8 @@ export const content = css`//메인
 `;
 export const grid = css`
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
 `;
 
 
@@ -62,11 +62,13 @@ export const card = (select) => css`
   border: 2px solid ${select ? colors.primary : "transparent"};
   border-radius: ${colors.radius};
   overflow: hidden;
-  padding:3px;
-  height: 230px;
+  padding:0px;
+  aspect-ratio: 1 / 1;
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
   transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 
   
   &:hover {
@@ -77,7 +79,8 @@ export const card = (select) => css`
 export const imageWrapper = css`
   position: relative;
   width: 100%;
-  height: 150px;
+  min-height: 0;
+  flex: 1;
   overflow: hidden;
   flex-shrink: 0;
   background-color: gray;
@@ -135,14 +138,14 @@ export const heartBtn = (isSelected) => css`
   }
 `;
 export const title = css`
-  font-weight: 800;
-  font-size: 17px;
-  flex-grow: 1;
+  font-weight: 700;
+  font-size: 13px;
+
   color: ${colors.foreground};
-  margin: 12px 0;
+
   text-align: center;
   margin: 0;
-  padding: 10px;
+  padding: 10px 5px;
   text-align: center;
 `;
 
@@ -161,7 +164,7 @@ export const overlay = css`
 `;
 export const favoritContent = css`
   width: 90%;
-  max-width: 700px;
+  
   height: 80%;
   background-color: white;
   border-radius: ${colors.radius};
@@ -177,7 +180,8 @@ export const favoritContent = css`
     font-weight: 800;
     color: ${colors.foreground};
     margin-bottom: 30px;
-    text-align: center;
+    text-align: left;
+    margin:20px ;
   }
 `;
 
@@ -186,7 +190,7 @@ export const gridScroll = css`
   overflow-y: auto; 
   padding: 10px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr); 
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   
 

@@ -2,6 +2,7 @@ package com.korit.trip_planner_back.controller;
 
 import com.korit.trip_planner_back.entity.Favorite;
 import com.korit.trip_planner_back.mapper.FavoriteMapper;
+import com.korit.trip_planner_back.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +19,14 @@ public class FavoriteController {
 
     @GetMapping("")
     public ResponseEntity<?>getFavorites(){
-        int userId = 1;
+        int userId = PrincipalUser.getAuthenticatedPrincipalUser().getUser().getUserId();
         return ResponseEntity.ok().body(favoriteMapper.findByUserId(userId));
     }
 
     @PostMapping("/{spotId}")
 
     public ResponseEntity<?> addFavorite(@PathVariable Integer spotId){
-        int userId = 1;//테스트용
+        int userId = PrincipalUser.getAuthenticatedPrincipalUser().getUser().getUserId();
         Favorite favorite = Favorite.builder()
                         .spotId(spotId).userId(userId).createdAt(LocalDateTime.now()).build();
 
@@ -38,7 +39,7 @@ public class FavoriteController {
     }
     @DeleteMapping("/{spotId}")
     public ResponseEntity<?> removeFavorite(@PathVariable Integer spotId){
-        int userId = 1;
+        int userId = PrincipalUser.getAuthenticatedPrincipalUser().getUser().getUserId();
         favoriteMapper.deleteById(userId,spotId);
         return ResponseEntity.ok().body("삭제성공");
     }

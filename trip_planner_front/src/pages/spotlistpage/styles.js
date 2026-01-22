@@ -41,7 +41,7 @@ export const selectedSection = css`
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 12px;
-    color: ${colors.foreground};
+    color: white;
   }
 `;
 
@@ -54,6 +54,8 @@ export const spotSelectList = css`
   flex-direction: column;
   gap: 10px;
   background-color: ${colors.card};
+  flex: 1;
+  overflow-y: auto;
 `;
 
 export const spotSelectItem = css`
@@ -66,7 +68,7 @@ export const spotSelectItem = css`
   border-radius: ${colors.radius};
   background: ${colors.background};
   transition: border-color 0.2s;
-
+  overflow: hidden;
   &:hover {
     border-color: ${colors.primary};
   }
@@ -75,6 +77,7 @@ export const spotSelectItem = css`
 export const spotSelectText = css`
   font-size: 14px;
   font-weight: 600;
+  min-width: 0;
   color: ${colors.foreground};
   overflow: hidden;
   text-overflow: ellipsis;
@@ -84,12 +87,13 @@ export const selectedListWrapper = css`
   margin-top: 100px;
   border-radius: ${colors.radius};
   background-color: ${colors.card};
-  /* ✅ 제목(h2) 제외한 영역만 스크롤 */
+ 
   max-height: calc(100vh - 80px); 
   overflow-y: auto;
   min-height: 400px;
-  
-  padding-right: 4px; /* 스크롤바 여백 */
+  flex-direction: column;
+  display: flex;
+
   box-shadow:  0 4px 8px rgba(0, 0, 0, 0.06);
   border: 2px solid ${"transparent"};
   
@@ -271,9 +275,9 @@ export const heartBtn = (isSelected) => css`
 `;
 
 export const cardBody = css`
-  position: relative;          /* 상세보기 버튼 기준점 */
+  position: relative;          
   padding: 12px 14px 18px;
-  min-height: 80px;            /* 버튼 자리 확보 */
+  min-height: 80px;            
 `;
 
 export const detailBtn = css`
@@ -305,6 +309,44 @@ export const detailBtn = css`
     transform: scale(0.97);
   }
 `;
+export const chatBtn = css`
+  border: none;
+  background-color: white;   
+  cursor: pointer;
+
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;      
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto; 
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    background-color: ${colors.muted};  /* 살짝 회색 */
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+
+ 
+    pointer-events: none;
+  }
+`;
+
+
 
 export const info = css`
   display: flex;
@@ -319,7 +361,7 @@ export const sHeader = css`
     margin: 0;
     padding: 20px;
     width: 100%;
-    
+    box-sizing: border-box;
     font-size: 20px;
     font-weight: 600;
     text-align: center;
@@ -341,8 +383,11 @@ export const sinfo = css`
 `;
 export const btnwrap = css`
     padding: 20px;
+    
     border-top: 1px solid ${colors.border}; /* 선택 목록과 버튼 사이에 경계선 추가 */
     background-color: ${colors.card}; /* 배경색 통일 */
+    position: sticky;
+    bottom: 0;
 `;
 export const sclick = css`
     border: none;
@@ -350,11 +395,12 @@ export const sclick = css`
     padding: 16px;
     border-radius: 12px;
     background-color: ${colors.primary};
-    color: white;
+    color: black;
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.2s, filter 0.2s;
+    
 
     /* 기존에 가로 스크롤을 유발하던 margin과 calc width는 삭제하세요! */
 

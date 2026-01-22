@@ -2,7 +2,7 @@
 import * as s from "./styles";
 import { useEffect, useState } from "react";
 import SpotDetailModal from "../../components/spotdetailmodal/SpotDetailModal"; // 관광지 상세보기 
-
+import chatbotImg from "../../assets/chatbot.png";
 import { 
   getSpots, 
   addBookmark,    
@@ -319,8 +319,8 @@ function SpotListPage() {
       
     </div>
     <div css={s.selectedSection} style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}>
-      <button type="button" onClick={() =>{console.log("버튼 클릭됨!");setAiOpen(true)}}>
-        <IoLogoWechat size={28} />
+      <button css={s.chatBtn} type="button" onClick={() =>{console.log("버튼 클릭됨!");setAiOpen(true)}}>
+        <img src={chatbotImg} alt="AI 챗봇 열기" />
       </button>
     </div>
     <SpotDetailModal

@@ -17,7 +17,7 @@ export const layout = css`
 
     display: grid;
     width: 100%;
-    flex: 1;        /* 부모가 flex면 이 한 줄이 먹힘 */
+    flex: 1;       
     min-width: 0; 
     
     overflow: hidden;

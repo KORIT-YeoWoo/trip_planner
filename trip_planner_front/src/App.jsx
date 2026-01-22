@@ -11,6 +11,7 @@ import FavoritePage from "./pages/favoritepage/FavoritePage";
 import AiChatPage from "./pages/aichatpage/AiChatPage";
 import MyPageCategory from "./components/mypage/MyPageCategory";
 import LoginPage from "./pages/loginpage/LoginPage";
+import OAuth2CallbackPage from "./pages/OAuth2CallbackPage/OAuth2CallbackPage";
 
 export default function App() {
   return <>
@@ -21,9 +22,10 @@ export default function App() {
           <Route path="/travelinfo" element={<TravelInfoPage />} />
           <Route path="/favorites" element={<FavoritePage />} />
           <Route path="/ai/chat" element={<AiChatPage />} />
-          
+          <Route path="/my" element={<MyPageCategory />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/oauth2/callback" element={<OAuth2CallbackPage />} />
           <Route path="*" element={<NotFoundPage />} />
-          <Route path="/login" element ={<LoginPage/>} />
         </Route>
 
         <Route element={<FullScreenLayout />}>

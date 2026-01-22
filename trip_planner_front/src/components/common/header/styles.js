@@ -43,6 +43,30 @@ export const navLink = css`
   }
 `;
 
+export const userName = css`
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 600;
+`;
+
+export const logoutButton = css`
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+  }
+`;
+
 export const button = css`
   background-color: #ff6b35;
   color: #ffffff;

@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korit.trip_planner_back.mapper.UserMapper">
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="userId">
         insert into users
-        values(default, #{oauth2_id}, #{name}, #{nickname}, #{age},
-        #{gender}, #{phone}, #{email}, #{provider}, #{role}, #{profile_img}, now())
+        values(default, #{oauth2Id}, #{name}, #{nickname}, #{age},
+        #{gender}, #{phone}, #{email}, #{provider}, #{role}, #{profileImg}, now())
     </insert>
-    <select id="findByUserId" resultType="User">
+
+    <select id="findByUserId" resultType="com.korit.trip_planner_back.entity.User">
         select
-            user_id,
-            oauth2_id,
+            user_id as userId,
+            oauth2_id as oauth2Id,
             name,
             nickname,
             age,
@@ -20,17 +22,18 @@
             email,
             provider,
             role,
-            profile_img,
-            created_at
+            profile_img as profileImg,
+            created_at as createdAt
         from
             users
         where
             user_id = #{userId}
     </select>
-    <select id="findByOauth2Id" resultType="User">
+
+    <select id="findByOauth2Id" resultType="com.korit.trip_planner_back.entity.User">
         select
-            user_id,
-            oauth2_id,
+            user_id as userId,
+            oauth2_id as oauth2Id,
             name,
             nickname,
             age,
@@ -39,17 +42,18 @@
             email,
             provider,
             role,
-            profile_img,
-            created_at
+            profile_img as profileImg,
+            created_at as createdAt
         from
             users
         where
             oauth2_id = #{oauth2Id}
     </select>
-    <select id="findByNickname" resultType="User">
+
+    <select id="findByNickname" resultType="com.korit.trip_planner_back.entity.User">
         select
-            user_id,
-            oauth2_id,
+            user_id as userId,
+            oauth2_id as oauth2Id,
             name,
             nickname,
             age,
@@ -58,13 +62,14 @@
             email,
             provider,
             role,
-            profile_img,
-            created_at
+            profile_img as profileImg,
+            created_at as createdAt
         from
             users
         where
             nickname = #{nickname}
     </select>
+
     <update id="updateNickname">
         UPDATE
             users

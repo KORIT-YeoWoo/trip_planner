@@ -1,75 +1,176 @@
-/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 
-const colors = {
-    primary: "#E66B23", // 이미지의 오렌지색
-    text: "#333333",
-    subText: "#666666",
-    border: "#E0E0E0",
-    white: "#FFFFFF",
-};
-
 export const container = css`
-
-    
-    width: 279px;
-    background-color: ${colors.white};
-    border-radius: 20px;
-    border: 1px solid ${colors.border};
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
 `;
 
-export const hi = css`
-    background-color: ${colors.primary};
-    padding: 20px;
-    text-align: center;
-    
-    h2 {
-        margin: 0;
-        color: ${colors.white};
-        font-size: 20px;
-        font-weight: 600;
-        
-        
+export const profileSection = css`
+    display: flex;
+    gap: 24px;
+    padding: 32px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+`;
+
+export const profileImage = css`
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 `;
 
-// 공통 메뉴 스타일 (아이콘과 텍스트 정렬)
-const menuItem = css`
+export const defaultAvatar = css`
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
-    padding: 18px 24px;
-    border-bottom: 1px solid ${colors.border};
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: 500;
-    color: ${colors.text};
-    transition: background 0.2s;
+    justify-content: center;
+    background: linear-gradient(135deg, #ff6b35, #f47a20);
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
+`;
 
-    svg {
+export const profileInfo = css`
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+`;
+
+export const nicknameDisplay = css`
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    h2 {
+        margin: 0;
         font-size: 24px;
-        margin-right: 15px;
-        flex-shrink: 0;
-    }
-
-    &:hover {
-        background-color: #F9F9F9;
+        font-weight: 700;
+        color: #333;
     }
 `;
 
-export const booking = css`${menuItem};`;
-export const favorite = css`${menuItem};`;
-export const myTripStyle = css`${menuItem};`;
+export const nicknameEdit = css`
+    display: flex;
+    gap: 8px;
+    align-items: center;
+`;
 
-export const logout = css`
-    ${menuItem};
-    border-bottom: none; // 마지막 항목은 구분선 제거
-    color: ${colors.subText};
+export const nicknameInput = css`
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    flex: 1;
+    max-width: 300px;
 
-    svg {
-        color: ${colors.subText};
+    &:focus {
+        outline: none;
+        border-color: #ff6b35;
+    }
+`;
+
+export const editButton = css`
+    padding: 6px 12px;
+    background: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #6b7280;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+`;
+
+export const saveButton = css`
+    padding: 8px 16px;
+    background: #ff6b35;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        background: #e55a2b;
+    }
+`;
+
+export const cancelButton = css`
+    padding: 8px 16px;
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        background: #f5f5f5;
+    }
+`;
+
+export const email = css`
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+`;
+
+export const provider = css`
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+`;
+
+export const menuSection = css`
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+`;
+
+export const menuItem = css`
+    padding: 16px 24px;
+    background: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+    color: #333;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s;
+
+    &:hover {
+        background: #f9fafb;
+        transform: translateX(4px);
+    }
+`;
+
+export const logoutMenuItem = css`
+    color: #ef4444;
+    margin-top: 24px;
+
+    &:hover {
+        background: #fef2f2;
     }
 `;

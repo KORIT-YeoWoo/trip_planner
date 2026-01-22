@@ -1,6 +1,7 @@
 package com.korit.trip_planner_back.controller;
 
 
+import com.korit.trip_planner_back.dto.response.ApiResponseDto;
 import com.korit.trip_planner_back.entity.TouristSpot;
 import com.korit.trip_planner_back.mapper.TouristSpotMapper;
 
@@ -30,5 +31,18 @@ public class SpotController {
         // 페이지네이션 로직 추가 필요
         int offset = (page - 1) * size;
         return touristSpotMapper.findByPage(size, offset);
+    }
+
+    @GetMapping("/{spotId}")
+    public ApiResponseDto<Object> getSpot(@PathVariable int spotId) {
+        TouristSpot spot = touristSpotMapper.findById(spotId);
+
+        if (spot == null) {
+            // 데이터가 없을 경우 에러 응답
+            return ApiResponseDto.error("해당 스팟을 찾을 수 없습니다.");
+        }
+
+        // 데이터가 있을 경우 성공 응답
+        return ApiResponseDto.success(spot);
     }
 }

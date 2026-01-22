@@ -21,6 +21,7 @@
             price,
             description,
             opening_hrs,
+            contact,
             spot_img,
             created_at,
             is_island
@@ -46,7 +47,7 @@
             opening_hrs,
             spot_img,
             is_island,
-            created_at,
+            created_at
         FROM
             tourist_spots
         <where>

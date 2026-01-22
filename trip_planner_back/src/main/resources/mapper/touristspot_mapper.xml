@@ -67,6 +67,7 @@
             address,
             latitude,
             longitude,
+            spot_duration,
             spot_img AS spotImg,
             price,
             is_island,

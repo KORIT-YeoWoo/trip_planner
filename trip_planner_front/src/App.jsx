@@ -10,6 +10,7 @@ import FullScreenLayout from "./components/common/layouts/FullScreenLayout";
 import FavoritePage from "./pages/favoritepage/FavoritePage";
 import AiChatPage from "./pages/aichatpage/AiChatPage";
 import MyPageCategory from "./components/mypage/MyPageCategory";
+import LoginPage from "./pages/loginpage/LoginPage";
 
 export default function App() {
   return <>

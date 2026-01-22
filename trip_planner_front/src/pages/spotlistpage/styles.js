@@ -26,7 +26,7 @@ export const layout = css`
 
 
 export const selectedSection = css`
-  flex: 1;
+  
   padding: 20px;
   border-right: 1px solid ${colors.border};
   background-color: ${colors.card};
@@ -34,7 +34,7 @@ export const selectedSection = css`
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
+  overflow-x: hidden;
   background-color: ${colors.background};
 
   h2 {
@@ -45,7 +45,7 @@ export const selectedSection = css`
   }
 `;
 
-/* ✅ 왼쪽 리스트 */
+
 export const spotSelectList = css`
   margin: 0;
   padding: 0;
@@ -92,6 +92,7 @@ export const selectedListWrapper = css`
   padding-right: 4px; /* 스크롤바 여백 */
   box-shadow:  0 4px 8px rgba(0, 0, 0, 0.06);
   border: 2px solid ${"transparent"};
+  
 `;
 
 
@@ -312,4 +313,61 @@ export const info = css`
   font-size: 13px;
   color: #666;
 
+`;
+export const sHeader = css`
+    background-color: ${colors.primary};
+    margin: 0;
+    padding: 20px;
+    width: 100%;
+    
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+`;
+export const sinfo = css`
+    padding: 15px;
+ 
+    
+    text-align: center;
+    
+    p {
+        margin: 4px 0;
+        font-size: 14px;
+        background-color: transparent;
+        height: 50px;
+        font-weight: 100;
+        color: gray;
+    }
+`;
+export const btnwrap = css`
+    padding: 20px;
+    border-top: 1px solid ${colors.border}; /* 선택 목록과 버튼 사이에 경계선 추가 */
+    background-color: ${colors.card}; /* 배경색 통일 */
+`;
+export const sclick = css`
+    border: none;
+    width: 100%; /* 부모(btnwrap)가 준 여백 안에서 100%를 차지합니다 */
+    padding: 16px;
+    border-radius: 12px;
+    background-color: ${colors.primary};
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.2s;
+
+    /* 기존에 가로 스크롤을 유발하던 margin과 calc width는 삭제하세요! */
+
+    &:hover { 
+        filter: brightness(1.1); 
+    }
+    
+    &:active { 
+        transform: scale(0.98); 
+    }
+    
+    &:disabled {
+        background-color: #ccc;
+        cursor: default;
+    }
 `;

@@ -15,18 +15,18 @@ function FavoritePage() {
     const fetchFavoriteSpots = async () => {
       try {
         setLoading(true);
-        // 1. API 호출 (참고하신 형식과 동일)
+        // API 호출
         const response = await getMyFavorites();
         
-        // 2. 응답 구조에 따라 데이터 추출 (가장 중요한 부분!)
+        // 데이터 추출 
         // 인터셉터가 response.data를 주면 response를 쓰고, 
-        // 아니면 일반적인 response.data를 시도합니다.
+        // 아니면 일반적인 response.data를 시도
         const favoriteData = response.data || response;
         
         setFavoriteSpots(Array.isArray(favoriteData) ? favoriteData : []);
       } catch (err) {
         console.error('관광지 목록 조회 실패:', err);
-        // 에러 상태가 있다면 여기서 처리 (setError 등)
+        // 에러 상태가 있다면 여기서 처리
       } finally {
         setLoading(false);
       }

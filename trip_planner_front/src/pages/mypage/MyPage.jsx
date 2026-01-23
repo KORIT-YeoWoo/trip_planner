@@ -1,0 +1,32 @@
+/** @jsxImportSource @emotion/react */
+
+import * as s from "./styles";
+import MyPageCategory from "../../components/mypage/MyPageCategory";
+
+function MyPage() {
+
+
+
+   
+
+
+    return (
+        <div css={s.layout}> 
+            <div css={s.bar}><MyPageCategory /></div>
+            <div css={s.content} style={{ position: 'relative' }}>
+                
+                </div>
+                
+                
+                
+                
+            
+            <div css={s.bar}style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}></div>
+            
+        </div>
+        
+
+    );
+}
+
+export default MyPage;

@@ -51,7 +51,7 @@ function MyPageCategory() {
 
     return (
         <div css={s.container}>
-            {/* 상단 오렌지 프로필 헤더 */}
+         
             <div css={s.hi}>
                 <div css={s.profileWrapper}>
                     {isEditingNickname ? (
@@ -67,7 +67,7 @@ function MyPageCategory() {
                         </div>
                     ) : (
                         <div css={s.nicknameDisplay}>
-                            <h2>{user.nickname || user.name}님의 마이페이지</h2>
+                            <h2>{user.nickname || user.name} 님의 마이페이지</h2>
                             <button onClick={() => setIsEditingNickname(true)} css={s.editButton}>수정</button>
                         </div>
                     )}
@@ -75,7 +75,7 @@ function MyPageCategory() {
                 </div>
             </div>
 
-            {/* 하단 메뉴 리스트 */}
+           
             <div css={s.booking} onClick={() => navigate('/my/itineraries')}>
                 <HiOutlineLocationMarker />저장된 일정
             </div>

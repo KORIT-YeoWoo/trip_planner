@@ -13,7 +13,7 @@ export default function Footer() {
         </div>
 
         <div css={s.links}>
-          <a href="#" css={s.link}>
+          <a href="/tos" css={s.link}>
             이용약관
           </a>
           <a href="#" css={s.link}>

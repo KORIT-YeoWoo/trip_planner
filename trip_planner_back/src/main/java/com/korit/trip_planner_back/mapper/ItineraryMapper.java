@@ -20,16 +20,4 @@ public interface ItineraryMapper {
 
     void deleteById(Integer itineraryId);
 
-    // 사용자별 일정 조회
-//    List<Itinerary> selectByUserId(
-//            @Param("userId") Long userId,
-//            @Param("offset") int offset,
-//            @Param("size") int size
-//    );
-//
-//    // 사용자 일정 개수
-//    long countByUserId(Long userId);
-//
-//    // 일정 상세 조회 (일차, 아이템 포함)
-//    Itinerary selectDetailById(Long itineraryId);
 }

@@ -27,6 +27,13 @@ public class DayScheduleDto {
     private Integer totalCost;
     private boolean hasIsland;  // 섬 포함 여부
     private String summary;     // Day 요약
+    private String startName;
+    private Double startLat;
+    private Double startLon;
+    private String endName;
+    private Double endLat;
+    private Double endLon;
+    private TravelInfoDto startToFirstTravel;
 
     public void calculateTotals() {
         log.debug("calculateTotals() 시작 - Day {}, items 크기: {}",

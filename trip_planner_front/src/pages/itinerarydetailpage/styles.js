@@ -14,10 +14,10 @@ export const container = css`
 `;
 
 export const map = css`
-    flex: 0.4;                // 비율 유지
+    flex: 0.4;
     display: flex;
     flex-direction: column;
-    height: 100vh;            // 전체 화면 높이로 강제 (또는 calc(100vh - 헤더높이))
+    height: 100vh;
     overflow: hidden;
 `;
 
@@ -26,6 +26,7 @@ export const mapInfo = css`
     background-color: #ff6b35;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding-left: 20px;
     color: white;
     font-size: 1.5rem;
@@ -38,12 +39,36 @@ export const mapInfo = css`
     }
 `;
 
+export const locationInfo = css`
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+    
+    & > div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        & > span:first-of-type {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        
+        & > span:last-of-type {
+            font-weight: 500;
+        }
+    }
+`;
+
 export const kakaoMap = css`
     width: 100%;
-    height: 100%;             // 부모 높이를 100% 채움 (필수!)
-    position: relative;       // 오버레이/마커 위치 제어용
-    min-height: 500px;        // 최소 높이 보장 (여백 방지)
-    background: #f0f0f0;      // 로딩 중 빈 공간 방지용 회색
+    flex: 1;
+    position: relative;
+    min-height: 500px;
+    background: #f0f0f0;
 
 `;
 

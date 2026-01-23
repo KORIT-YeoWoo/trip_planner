@@ -25,5 +25,6 @@ public class ItineraryItem {
     private Integer travelTime;
     private Double travelDistance;
     private Integer cost;
+    private String routePath;
     private LocalDateTime createdAt;
 }

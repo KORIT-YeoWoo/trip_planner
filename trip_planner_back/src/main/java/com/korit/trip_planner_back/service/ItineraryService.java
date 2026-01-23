@@ -132,6 +132,10 @@ public class ItineraryService {
         List<DayScheduleDto> days = new ArrayList<>();
 
         for (ItineraryDay dayEntity : dayEntities) {
+            DailyLocation dailyLoc = dailyLocationMapper.findByItineraryIdAndDay(
+                    itineraryId, dayEntity.getDayNumber()
+            );
+
             // 해당 Day의 items 조회
             List<ItineraryItem> itemEntities = itineraryItemMapper.findByDayId(
                     itineraryId, dayEntity.getDayNumber());
@@ -147,10 +151,15 @@ public class ItineraryService {
                     .endTime(dayEntity.getEndTime())
                     .items(items)
                     .summary(dayEntity.getAiComment())
+                    .startName(dailyLoc != null ? dailyLoc.getStartName() : null)
+                    .startLat(dailyLoc != null ? dailyLoc.getStartLat() : null)
+                    .startLon(dailyLoc != null ? dailyLoc.getStartLon() : null)
+                    .endName(dailyLoc != null ? dailyLoc.getEndName() : null)
+                    .endLat(dailyLoc != null ? dailyLoc.getEndLat() : null)
+                    .endLon(dailyLoc != null ? dailyLoc.getEndLon() : null)
                     .build();
 
             dayDto.calculateTotals();
-
             days.add(dayDto);
         }
 
@@ -523,6 +532,13 @@ public class ItineraryService {
                 dayLocation.getEndLon(),
                 itinerary.getTransport()
         );
+
+        newSchedule.setStartLat(dayLocation.getStartLat());
+        newSchedule.setStartLon(dayLocation.getStartLon());
+        newSchedule.setStartName(dayLocation.getStartName());
+        newSchedule.setEndLat(dayLocation.getEndLat());
+        newSchedule.setEndLon(dayLocation.getEndLon());
+        newSchedule.setEndName(dayLocation.getEndName());
 
         // 7. DB 업데이트
         updateDayScheduleInDb(itineraryId, day, newSchedule);

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -14,6 +16,7 @@ public class TravelInfoDto {
     private double distance;
     private int duration;
     private String transportType; // 교통수단 - CAR, PUBLIC, WALK
+    private List<List<Double>> path;
 
     // 평균 속도 (km/h)
     public double getAverageSpeed() {

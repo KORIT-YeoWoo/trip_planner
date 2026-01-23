@@ -5,6 +5,39 @@ import ItineraryScheduleList from "../../components/itinerary/ItineraryScheduleL
 import * as s from "./styles";
 import { useState, useEffect, useRef } from "react";
 
+const createMarkerStyle = (type) => {
+    const colors = {
+        start: '#FF6B35',
+        end: '#FF6B35',
+        spot: '#FF6B35'
+    };
+    
+    return `
+        background: ${colors[type]};
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 28px;
+        font-weight: bold;
+        font-size: 14px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    `;
+};
+
+const createMarkerOverlay = (map, position, label, type) => {
+    const content = `<div style="${createMarkerStyle(type)}">${label}</div>`;
+    
+    const overlay = new window.kakao.maps.CustomOverlay({
+        position,
+        content,
+        yAnchor: 1.3,
+    });
+    overlay.setMap(map);
+    return overlay;
+};
+
 function ItineraryDetailPage() {
     const location = useLocation();
     const { itineraryData } = location.state || {};
@@ -19,137 +52,197 @@ function ItineraryDetailPage() {
 
     const currentDayData = scheduleData[currentDay];
     const mapContainerRef = useRef(null);
+    const mapRef = useRef(null);
+    const overlaysRef = useRef([]);
+    const polylineRef = useRef(null);
 
-    // 1. 카카오맵 SDK 동적 로드 (한 번만 로드)
+    // SDK 로드
     useEffect(() => {
         if (window.kakao && window.kakao.maps) {
-            console.log('카카오맵 SDK 이미 로드됨');
+            console.log('SDK 이미 준비됨');
             return;
         }
 
-        console.log('카카오맵 SDK 동적 로드 시작');
+        console.log('카카오맵 SDK 로드 시작');
 
         const script = document.createElement('script');
-        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&libraries=services,clusterer,drawing&autoload=false`;
+        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false`;
         script.async = true;
 
         script.onload = () => {
-            console.log('카카오맵 SDK 로드 완료!');
+            console.log('SDK 스크립트 로드 완료');
             window.kakao.maps.load(() => {
-                console.log('kakao.maps.load 완료 → 맵 사용 가능');
+                console.log('kakao.maps.load 완료');
             });
         };
 
         script.onerror = () => {
-            console.error('카카오맵 SDK 로드 실패');
-            alert('카카오맵을 불러오지 못했습니다. 앱키와 도메인 등록을 확인해주세요.');
+            console.error('SDK 로드 실패');
+            alert('카카오맵 로드 실패 - 앱키와 도메인 등록 확인');
         };
 
         document.head.appendChild(script);
-    }, []); // 빈 배열 → 컴포넌트 마운트 시 한 번만
+    }, []);
 
-    // 2. 맵 초기화 & 업데이트 (currentDayData나 currentDay 바뀔 때마다)
+    // 맵 초기화 & 경로 탐색
     useEffect(() => {
-        if (!window.kakao || !window.kakao.maps || !mapContainerRef.current || !currentDayData) {
-            console.log('맵 초기화 스킵:', {
-                kakaoLoaded: !!window.kakao?.maps,
-                container: !!mapContainerRef.current,
-                dayData: !!currentDayData
-            });
+        if (!window.kakao?.maps || !mapContainerRef.current || !currentDayData) {
+            console.log('초기화 스킵');
             return;
         }
 
-        console.log('맵 초기화 시작 - Day:', currentDayData.day);
+        console.log('지도 초기화 시작 - Day:', currentDayData.day);
 
-        const container = mapContainerRef.current;
-        const options = {
-            center: new window.kakao.maps.LatLng(33.5066, 126.4929), // 제주 중심
-            level: 10,
-        };
+        // 이전 요소 제거
+        overlaysRef.current.forEach(o => o.setMap(null));
+        overlaysRef.current = [];
 
-        const map = new window.kakao.maps.Map(container, options);
-
-        // 마커 이미지 (빨간 핀)
-        const markerImage = new window.kakao.maps.MarkerImage(
-            'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
-            new window.kakao.maps.Size(32, 35)
-        );
-
-        
-        // 출발지 마커
-        if (currentDayData.startLat && currentDayData.startLon) {
-            new window.kakao.maps.Marker({
-                map,
-                position: new window.kakao.maps.LatLng(currentDayData.startLat, currentDayData.startLon),
-                title: currentDayData.startName || '출발지',
-                image: markerImage,
-            });
-            console.log('출발지 마커 추가:', currentDayData.startName);
+        if (polylineRef.current) {
+            polylineRef.current.setMap(null);
+            polylineRef.current = null;
         }
 
-        // 경유지 마커 + 번호 오버레이
-        const path = [];
-        
-        currentDayData.items?.forEach((item, index) => {
+        const map = mapRef.current || new window.kakao.maps.Map(mapContainerRef.current, {
+            center: new window.kakao.maps.LatLng(33.5066, 126.4929),
+            level: 10,
+        });
+        mapRef.current = map;
+
+        const bounds = new window.kakao.maps.LatLngBounds();
+
+        // 출발지
+        if (currentDayData.startLat && currentDayData.startLon) {
+            const pos = new window.kakao.maps.LatLng(currentDayData.startLat, currentDayData.startLon);
+            bounds.extend(pos);
+            overlaysRef.current.push(createMarkerOverlay(map, pos, '출', 'start'));
+        }
+
+        // 경유지
+        currentDayData.items?.forEach((item, idx) => {
             if (item.lat && item.lon) {
-                const position = new window.kakao.maps.LatLng(item.lat, item.lon);
-                path.push(position);
-
-                // 번호 커스텀 오버레이 (깔끔하게)
-                const content = `<div style="
-                    background: #FF6B35;
-                    color: white;
-                    width: 28px;
-                    height: 28px;
-                    border-radius: 50%;
-                    text-align: center;
-                    line-height: 28px;
-                    font-weight: bold;
-                    font-size: 14px;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-                ">${index + 1}</div>`;
-
-                new window.kakao.maps.CustomOverlay({
-                    position,
-                    content,
-                    yAnchor: 1.3,
-                }).setMap(map);
+                const pos = new window.kakao.maps.LatLng(item.lat, item.lon);
+                bounds.extend(pos);
+                overlaysRef.current.push(createMarkerOverlay(map, pos, idx + 1, 'spot'));
             }
         });
 
-        // 도착지 마커
+        // 도착지
         if (currentDayData.endLat && currentDayData.endLon) {
-            new window.kakao.maps.Marker({
-                map,
-                position: new window.kakao.maps.LatLng(currentDayData.endLat, currentDayData.endLon),
-                title: currentDayData.endName || '도착지',
-                image: markerImage,
-            });
-            path.push(new window.kakao.maps.LatLng(currentDayData.endLat, currentDayData.endLon));
-            console.log('도착지 마커 추가:', currentDayData.endName);
+            const pos = new window.kakao.maps.LatLng(currentDayData.endLat, currentDayData.endLon);
+            bounds.extend(pos);
+            overlaysRef.current.push(createMarkerOverlay(map, pos, '도', 'end'));
         }
 
-        // 경로선 (빨간색 실선)
-        if (path.length > 1) {
-            new window.kakao.maps.Polyline({
-                map,
-                path,
-                strokeWeight: 5,
-                strokeColor: '#FF0000',
-                strokeOpacity: 0.8,
-                strokeStyle: 'solid',
-            });
-            console.log('경로선 그리기 완료 - 포인트 수:', path.length);
-        }
+        // 범위 조정
+        if (!bounds.isEmpty()) map.setBounds(bounds);
 
-        // 지도 범위 자동 조정
-        if (path.length > 0) {
-            const bounds = new window.kakao.maps.LatLngBounds();
-            path.forEach(p => bounds.extend(p));
-            map.setBounds(bounds);
-            console.log('지도 범위 자동 조정 완료');
+        // ✅ REST API로 경로 탐색
+        if (currentDayData.startLat && currentDayData.startLon && currentDayData.endLat && currentDayData.endLon) {
+            fetchDirections(map, currentDayData);
         }
     }, [currentDayData, currentDay]);
+
+    // ✅ Kakao Directions REST API 호출
+    const fetchDirections = async (map, dayData) => {
+        try {
+            const waypoints = dayData.items
+                ?.filter(item => item.lat && item.lon)
+                .map(item => `${item.lon},${item.lat}`) // 경도,위도 순서
+                .join('|');
+
+            const params = new URLSearchParams({
+                origin: `${dayData.startLon},${dayData.startLat}`,
+                destination: `${dayData.endLon},${dayData.endLat}`,
+                priority: 'RECOMMEND',
+                car_type: '1',
+                car_fuel: 'GASOLINE'
+            });
+
+            if (waypoints) {
+                params.append('waypoints', waypoints);
+            }
+
+            const response = await fetch(
+                `https://apis-navi.kakaomobility.com/v1/directions?${params}`,
+                {
+                    headers: {
+                        'Authorization': `KakaoAK ${import.meta.env.VITE_KAKAO_REST_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`경로 탐색 실패: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('경로 탐색 성공!', result);
+
+            if (result.routes && result.routes.length > 0) {
+                const route = result.routes[0];
+                const roadPath = [];
+
+                route.sections.forEach(section => {
+                    section.roads.forEach(road => {
+                        for (let i = 0; i < road.vertexes.length; i += 2) {
+                            roadPath.push(new window.kakao.maps.LatLng(
+                                road.vertexes[i + 1], // 위도
+                                road.vertexes[i]      // 경도
+                            ));
+                        }
+                    });
+                });
+
+                const polyline = new window.kakao.maps.Polyline({
+                    map,
+                    path: roadPath,
+                    strokeWeight: 6,
+                    strokeColor: '#FF6B35',
+                    strokeOpacity: 0.9,
+                    strokeStyle: 'solid'
+                });
+
+                polylineRef.current = polyline;
+            }
+        } catch (error) {
+            console.error('경로 탐색 실패:', error);
+            // 경로 탐색 실패 시 단순 직선으로 표시
+            drawSimpleLine(map, dayData);
+        }
+    };
+
+    // ✅ 경로 탐색 실패 시 대체: 단순 직선
+    const drawSimpleLine = (map, dayData) => {
+        const path = [];
+        
+        if (dayData.startLat && dayData.startLon) {
+            path.push(new window.kakao.maps.LatLng(dayData.startLat, dayData.startLon));
+        }
+        
+        dayData.items?.forEach(item => {
+            if (item.lat && item.lon) {
+                path.push(new window.kakao.maps.LatLng(item.lat, item.lon));
+            }
+        });
+        
+        if (dayData.endLat && dayData.endLon) {
+            path.push(new window.kakao.maps.LatLng(dayData.endLat, dayData.endLon));
+        }
+        
+        if (path.length > 1) {
+            const polyline = new window.kakao.maps.Polyline({
+                map,
+                path,
+                strokeWeight: 4,
+                strokeColor: '#FF6B35',
+                strokeOpacity: 0.7,
+                strokeStyle: 'shortdash'
+            });
+            
+            polylineRef.current = polyline;
+        }
+    };
 
     // ✅ 컴포넌트 마운트 시 일정 데이터 불러오기
     useEffect(() => {
@@ -260,7 +353,6 @@ function ItineraryDetailPage() {
     // ✅ 체류 시간 변경 핸들러
     const handleDurationChange = async (spotId, newDuration) => {
         try {
-            // 1. 요청 보내기
             const response = await axios.put(
                 `http://localhost:8080/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${spotId}/duration`,
                 { duration: newDuration }
@@ -268,11 +360,9 @@ function ItineraryDetailPage() {
 
             console.log('✅ 시간 변경 성공:', response.data);
 
-            // 2. 서버에서 받은 **변경된 Day 하나**만 현재 scheduleData에 반영
             if (response.data && response.data.day) {
                 setScheduleData(prev => {
                     const newData = [...prev];
-                    // day 번호가 1부터 시작하니, 배열 인덱스는 0부터
                     const targetIndex = newData.findIndex(d => d.day === response.data.day);
                     if (targetIndex !== -1) {
                         newData[targetIndex] = response.data;
@@ -286,7 +376,6 @@ function ItineraryDetailPage() {
         } catch (error) {
             console.error('❌ 시간 변경 실패:', error);
             alert('시간 변경에 실패했습니다.');
-            // 필요 시 원래 값 복구 로직 추가 가능
         }
     };
 

@@ -12,5 +12,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReorderRequestDto {
-    private List<Integer> itemIds;
+    private List<Integer> spotIds;
 }

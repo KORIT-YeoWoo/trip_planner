@@ -12,13 +12,12 @@ import java.time.LocalTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class ItineraryDay {
-    private String dayId;
-    private String itineraryId;
-    private String dayNumber;
-    private LocalTime startDate;
-    private LocalTime endDate;
+    private Integer dayId;
+    private Integer itineraryId;
+    private Integer dayNumber;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private LocalDate date;
     private String aiComment;
 }

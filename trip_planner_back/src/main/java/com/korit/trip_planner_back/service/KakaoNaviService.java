@@ -13,6 +13,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Slf4j
 @Service
 public class KakaoNaviService {
@@ -25,6 +28,8 @@ public class KakaoNaviService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
+    private final Map<String, RouteInfo> cache = new ConcurrentHashMap<>();
+
     public KakaoNaviService() {
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
@@ -32,6 +37,17 @@ public class KakaoNaviService {
 
     public RouteInfo getRouteInfo(double originLat, double originLon,
                                   double destLat, double destLon) {
+
+        // ✅ 1. 캐시 키 생성
+        String cacheKey = String.format("%.6f,%.6f-%.6f,%.6f",
+                originLat, originLon, destLat, destLon);
+
+        // ✅ 2. 캐시 확인
+        if (cache.containsKey(cacheKey)) {
+            log.debug("캐시 히트: {}", cacheKey);
+            return cache.get(cacheKey);
+        }
+
         try {
             // URL 생성
             String url = UriComponentsBuilder.fromHttpUrl(KAKAO_NAVI_API_URL)
@@ -57,15 +73,35 @@ public class KakaoNaviService {
             );
 
             // 응답 파싱
-            return parseResponse(response.getBody());
+            RouteInfo routeInfo = parseResponse(response.getBody());
+
+            if (routeInfo != null) {
+                cache.put(cacheKey, routeInfo);
+            }
+
+            return routeInfo;
 
         } catch (Exception e) {
-            log.error("카카오 네비 API 호출 실패: {} -> {}",
-                    String.format("%.4f,%.4f", originLat, originLon),
-                    String.format("%.4f,%.4f", destLat, destLon),
-                    e);
-            return null;
+            log.warn("Kakao API 실패 → 직선거리 사용: ({},{}) → ({},{})",
+                    originLat, originLon, destLat, destLon);
+
+            // ✅ 4. 실패 시 직선거리 사용
+            return createFallbackRoute(originLat, originLon, destLat, destLon);
         }
+    }
+
+    private RouteInfo createFallbackRoute(double lat1, double lon1,
+                                          double lat2, double lon2) {
+        // Haversine 거리 계산
+        double distance = com.korit.trip_planner_back.algorithm.HaversineDistance
+                .calculate(lat1, lon1, lat2, lon2);
+
+        // 평균 속도 50km/h 가정
+        int duration = (int) Math.ceil((distance / 50.0) * 60);
+
+        log.debug("Fallback 경로: {:.1f}km, {}분 (직선거리 기반)", distance, duration);
+
+        return new RouteInfo(distance, duration);
     }
 
     private RouteInfo parseResponse(String responseBody) {

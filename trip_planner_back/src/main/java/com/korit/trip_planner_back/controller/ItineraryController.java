@@ -25,6 +25,9 @@ public class ItineraryController {
     @PostMapping("/generate")
     @Operation(summary = "일정 생성", description = "여행 일정 자동 생성 (TSP 최적화)")
     public ResponseEntity<ItineraryRespDto> generateItinerary(@RequestBody ItineraryReqDto request) {
+        System.out.println("📅 요청받은 날짜: " + request.getStartDate() + " ~ " + request.getEndDate());
+        System.out.println("📍 dailyLocations 개수: " + request.getDailyLocations().size());
+
         log.info("일정 생성 요청: {} ~ {}, 관광지 {}개",
             request.getStartDate(),
             request.getEndDate(),
@@ -44,45 +47,44 @@ public class ItineraryController {
             @RequestBody ReorderRequestDto request) {
 
         log.info("일정 순서 변경 요청: itinerary={}, day={}, items={}",
-            itineraryId, day, request.getItemIds().size());
+            itineraryId, day, request.getSpotIds().size());
 
         DayScheduleDto result = itineraryService.reorderDaySchedule(
             itineraryId,
             day,
-            request.getItemIds()
+            request.getSpotIds()
         );
 
         log.info("일정 순서 변경 완료: day={}",day);
         return  ResponseEntity.ok(result);
     }
     // 일정 항목의 체류 시간 변경
-    @PutMapping("/{itineraryId}/days/{day}/items/{itemId}/duration")
+    @PutMapping("/{itineraryId}/days/{day}/items/{spotId}/duration")
     public ResponseEntity<DayScheduleDto> updateItemDuration(
             @PathVariable Integer itineraryId,
             @PathVariable Integer day,
-            @PathVariable Integer itemId,
+            @PathVariable Integer spotId,
             @RequestBody DurationUpdateDto request) {
 
         DayScheduleDto result = itineraryService.updateItemDuration(
-                itineraryId, day, itemId, request.getDuration()
+                itineraryId, day, spotId, request.getDuration()
         );
 
         return ResponseEntity.ok(result);
     }
 
-    @DeleteMapping("/{itineraryId}/days/{day}/items/{itemId}")
-    @Operation(summary = "관광지 삭제", description = "특정 날짜의 관광지를 삭제하고 일정 재계산")
+    @DeleteMapping("/{itineraryId}/days/{day}/items/{spotId}")
     public ResponseEntity<DayScheduleDto> deleteScheduleItem(
             @PathVariable Integer itineraryId,
             @PathVariable Integer day,
-            @PathVariable Integer itemId){
+            @PathVariable Integer spotId){
 
-        log.info("관광지 삭제 요청: itinerary={}, day={}, itemId={}", itineraryId, day, itemId);
+        log.info("관광지 삭제 요청: itinerary={}, day={}, spotId={}", itineraryId, day, spotId);
 
         DayScheduleDto result = itineraryService.deleteScheduleItem(
                 itineraryId,
                 day,
-                itemId
+                spotId
         );
 
         log.info("관광지 삭제 완료: day={}", day);

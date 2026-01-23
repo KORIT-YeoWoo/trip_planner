@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
+@Slf4j
 @Data
 @Builder
 @NoArgsConstructor
@@ -25,25 +28,39 @@ public class DayScheduleDto {
     private boolean hasIsland;  // 섬 포함 여부
     private String summary;     // Day 요약
 
-    // 관광지 개수 계산
-    public int getSpotCount() {
-        if (items == null) return 0;
-        return (int) items.stream()
-                .filter(item -> "SPOT".equals(item.getType()))
-                .count();
+    public void calculateTotals() {
+        log.debug("calculateTotals() 시작 - Day {}, items 크기: {}",
+                getDay(), items != null ? items.size() : "null");
+
+        if (items == null || items.isEmpty()) {
+            this.totalDistance = 0.0;
+            this.totalDuration = 0;
+            this.totalCost = 0;
+            log.debug("items가 비어있음 → 총합 0으로 초기화");
+            return;
+        }
+
+        this.totalCost = items.stream()
+                .mapToInt(item -> Optional.ofNullable(item.getCost()).orElse(0))
+                .sum();
+
+        this.totalDuration = items.stream()
+                .mapToInt(item -> {
+                    int stay = item.getDuration();  // 체류 시간
+                    int travel = Optional.ofNullable(item.getTravelFromPrevious())
+                            .map(TravelInfoDto::getDuration)
+                            .orElse(0);  // 이동 시간
+                    return stay + travel;
+                })
+                .sum();
+
+        this.totalDistance = items.stream()
+                .filter(item -> item.getTravelFromPrevious() != null)
+                .mapToDouble(item -> Optional.ofNullable(item.getTravelFromPrevious().getDistance()).orElse(0.0))
+                .sum();
+
+        log.debug("calculateTotals() 완료 - Day {}: distance={}, duration={}, cost={}",
+                getDay(), totalDistance, totalDuration, totalCost);
     }
 
-    // 식사 개수 계산
-    public int getMealCount() {
-        if (items == null) return 0;
-        return (int) items.stream()
-                .filter(item -> "MEAL".equals(item.getType()))
-                .count();
-    }
-
-    // 총 소요 시간 (시간 단위)
-    public Double getTotalDurationInHours() {
-        if (totalDuration == null) return null;
-        return totalDuration / 60.0;
-    }
 }

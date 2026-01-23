@@ -76,8 +76,11 @@ function LoadingPage() {
                     }
                 }
             );
-
+            
             console.log('🦊✨ 백엔드 응답 성공:', response.data);
+            console.log('🦊✨ dailyItineraries 개수:', response.data.days?.length); // 👈 추가
+            console.log('🦊✨ dailyItineraries 전체:', response.data.days); // 👈 추가
+            console.log('🦊✨ itineraryId:', response.data.itineraryId);
             return response;
 
         } catch (error) {

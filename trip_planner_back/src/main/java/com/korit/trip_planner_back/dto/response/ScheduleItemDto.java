@@ -14,7 +14,7 @@ import java.time.LocalTime;
 public class ScheduleItemDto {
     private int order;
     private String type; // 유형 - SPOT: 관광지, MEAL: 식사, ACCOMMODATION: 숙소
-    private int itemId;
+    private int spotId;
     private String name;
     private String category;
     private double lat;

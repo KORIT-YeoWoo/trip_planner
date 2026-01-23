@@ -188,10 +188,11 @@ public class TspService {
 
         double totalActualDistance = 0.0;
         int totalDuration = 0;
+        int successCount = 0;
+        int failCount = 0;
 
         for (RouteSegmentDto segment : segments) {
             try {
-                // 카카오 API 호출
                 KakaoNaviService.RouteInfo routeInfo = kakaoNaviService.getRouteInfo(
                         segment.getFromLat(),
                         segment.getFromLon(),
@@ -199,41 +200,37 @@ public class TspService {
                         segment.getToLon()
                 );
 
+                // ✅ null 체크 (이미 fallback 처리됨)
                 if (routeInfo != null) {
-                    // 구간에 실제 거리/시간 설정
                     segment.setActualDistance(routeInfo.getDistance());
                     segment.setDuration(routeInfo.getDuration());
 
                     totalActualDistance += routeInfo.getDistance();
                     totalDuration += routeInfo.getDuration();
-
-                    log.debug("구간 {}: {}km, {}분",
-                            segment.getOrder(),
-                            routeInfo.getDistance(),
-                            routeInfo.getDuration());
+                    successCount++;
                 } else {
-                    log.warn("구간 {} API 호출 실패: {} -> {}",
-                            segment.getOrder(),
-                            segment.getFromSpotName(),
-                            segment.getToSpotName());
+                    // 이론상 발생 안 함 (fallback 있음)
+                    failCount++;
                 }
 
-                // API 호출 간격 (과도한 호출 방지)
                 Thread.sleep(100);
 
             } catch (Exception e) {
                 log.error("구간 {} 처리 중 오류: {}", segment.getOrder(), e.getMessage());
+                failCount++;
             }
         }
 
-        // 응답에 총 실제 거리/시간 설정
+        // ✅ 일부 실패해도 결과 반환
         if (totalActualDistance > 0) {
             response.setTotalActualDistance(totalActualDistance);
             response.setTotalDuration(totalDuration);
 
-            log.info("카카오 API 완료 - 총 거리: {}km, 총 시간: {}분",
-                    String.format("%.1f", totalActualDistance),
-                    totalDuration);
+            log.info("Kakao API 완료 - 성공: {}, 실패: {}, 총: {:.1f}km, {}분",
+                    successCount, failCount, totalActualDistance, totalDuration);
+        } else {
+            // ✅ 전부 실패해도 직선거리는 있음
+            log.warn("Kakao API 전부 실패 - 직선거리만 사용");
         }
     }
 }

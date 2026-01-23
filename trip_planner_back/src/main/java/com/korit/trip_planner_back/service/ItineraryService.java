@@ -9,15 +9,15 @@ import com.korit.trip_planner_back.dto.response.ScheduleItemDto;
 import com.korit.trip_planner_back.dto.response.TravelInfoDto;
 import com.korit.trip_planner_back.dto.tsp.TspRequestDto;
 import com.korit.trip_planner_back.dto.tsp.TspResponseDto;
-import com.korit.trip_planner_back.entity.DailyLocation;
-import com.korit.trip_planner_back.entity.Itinerary;
-import com.korit.trip_planner_back.entity.TouristSpot;
-import com.korit.trip_planner_back.mapper.DailyLocationMapper;
-import com.korit.trip_planner_back.mapper.ItineraryMapper;
-import com.korit.trip_planner_back.mapper.TouristSpotMapper;
+import com.korit.trip_planner_back.entity.*;
+import com.korit.trip_planner_back.mapper.*;
+import com.korit.trip_planner_back.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -35,30 +35,27 @@ public class ItineraryService {
     private final KakaoNaviService kakaoNaviService;
     private final ItineraryMapper itineraryMapper;
     private final DailyLocationMapper dailyLocationMapper;
+    private final ItineraryDayMapper itineraryDayMapper;
+    private final ItineraryItemMapper itineraryItemMapper;
 
+    @Transactional
     public ItineraryRespDto createItinerary(ItineraryReqDto request) {
         log.info("=== 일정 생성 시작 ===");
-        log.info("기간: {} ~ {}, 관광지: {}개",
-                request.getStartDate(),
-                request.getEndDate(),
-                request.getSpotIds().size());
 
-        // 1. 요청 검증
+        // 1. 검증
         validateRequest(request);
 
-        // 2. 일정 정보 DB 저장
+        // 2. DB 저장 (itineraries)
         Itinerary itinerary = saveItinerary(request);
         log.info("일정 저장 완료: ID={}", itinerary.getItineraryId());
 
-        // 3. Day별 위치 정보 DB 저장
+        // 3. DB 저장 (daily_locations)
         saveDailyLocations(itinerary.getItineraryId(), request.getDailyLocations());
-        log.info("위치 정보 저장 완료: {}일", request.getDailyLocations().size());
 
         // 4. 관광지 조회
         List<TouristSpot> allSpots = touristSpotMapper.findAllByIds(request.getSpotIds());
-        log.info("관광지 조회 완료: {}개", allSpots.size());
 
-        // 5. GPT 1차: 필터링 + Day 그룹핑
+        // 5. GPT 필터링 + 그룹핑
         DayDistributionDto distribution = gptService.filterAndGroupSpots(
                 allSpots,
                 request.getTravelDays(),
@@ -66,62 +63,203 @@ public class ItineraryService {
                 request.getTransport()
         );
 
-        log.info("선택: {}개, 제외: {}개",
-                distribution.getSelectedSpots().size(),
-                distribution.getExcludedSpots().size());
+        // 6. TSP 계산
+        List<DayScheduleDto> days = calculateOptimalSchedules(request, distribution, allSpots);
 
-        // 6. 각 Day별 TSP 계산
-        List<DayScheduleDto> days = calculateOptimalSchedules(request, distribution);
-
-        log.info("TSP 계산 완료: {}일", days.size());
-
-        // 7. GPT 2차: 최종 다듬기
+        // 7. GPT 다듬기
         days = gptService.refineSchedule(days);
 
-        // 8. 최종 응답 생성
-        ItineraryRespDto response = buildFinalResponse(request, days);
+        // 8. ✅ DB 저장 (itinerary_days, itinerary_items)
+        saveDaySchedules(itinerary.getItineraryId(), days);
 
-        // 9. itineraryId 포함
-        response.setItineraryId(itinerary.getItineraryId());
+        // 9. 최종 응답
+        ItineraryRespDto response = buildFinalResponse(itinerary.getItineraryId(), request, days);
+
         return response;
     }
 
-    // Day별 최적 일정 계산 (TSP)
+    // ✅ 추가: Day 일정 DB 저장
+    private void saveDaySchedules(Integer itineraryId, List<DayScheduleDto> days) {
+        for (DayScheduleDto dayDto : days) {
+            // itinerary_days INSERT
+            ItineraryDay day = ItineraryDay.builder()
+                    .itineraryId(itineraryId)
+                    .dayNumber(dayDto.getDay())
+                    .date(dayDto.getDate())
+                    .startTime(dayDto.getStartTime())
+                    .endTime(dayDto.getEndTime())
+                    .aiComment(dayDto.getSummary())
+                    .build();
+
+            itineraryDayMapper.insert(day);
+
+            // itinerary_items INSERT
+            for (ScheduleItemDto item : dayDto.getItems()) {
+                ItineraryItem itemEntity = ItineraryItem.builder()
+                        .itineraryId(itineraryId)
+                        .day(dayDto.getDay())
+                        .spotId(item.getSpotId())
+                        .sequenceOrder(item.getOrder())
+                        .arrivalTime(item.getArrivalTime())
+                        .departureTime(item.getDepartureTime())
+                        .duration(item.getDuration())
+                        .originalDuration(item.getDuration())
+                        .travelTime(item.getTravelFromPrevious() != null
+                                ? item.getTravelFromPrevious().getDuration() : 0)
+                        .travelDistance(item.getTravelFromPrevious() != null
+                                ? item.getTravelFromPrevious().getDistance() : 0.0)
+                        .cost(item.getCost())
+                        .build();
+
+                itineraryItemMapper.insert(itemEntity);
+            }
+        }
+
+        log.info("일정 DB 저장 완료: {}일, 총 {}개 항목",
+                days.size(),
+                days.stream().mapToInt(d -> d.getItems().size()).sum());
+    }
+
+    // ✅ 수정: 일정 조회 (DB에서)
+    public ItineraryRespDto getItinerary(Integer itineraryId) {
+        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
+        if (itinerary == null) {
+            throw new IllegalArgumentException("일정을 찾을 수 없습니다: " + itineraryId);
+        }
+
+        // DB에서 days 조회
+        List<ItineraryDay> dayEntities = itineraryDayMapper.findByItineraryId(itineraryId);
+        List<DayScheduleDto> days = new ArrayList<>();
+
+        for (ItineraryDay dayEntity : dayEntities) {
+            // 해당 Day의 items 조회
+            List<ItineraryItem> itemEntities = itineraryItemMapper.findByDayId(
+                    itineraryId, dayEntity.getDayNumber());
+
+            List<ScheduleItemDto> items = itemEntities.stream()
+                    .map(this::toScheduleItemDto)
+                    .collect(Collectors.toList());
+
+            DayScheduleDto dayDto = DayScheduleDto.builder()
+                    .day(dayEntity.getDayNumber())
+                    .date(dayEntity.getDate())
+                    .startTime(dayEntity.getStartTime())
+                    .endTime(dayEntity.getEndTime())
+                    .items(items)
+                    .summary(dayEntity.getAiComment())
+                    .build();
+
+            dayDto.calculateTotals();
+
+            days.add(dayDto);
+        }
+
+        log.info("=== 조회된 일정 ID={} 상세 응답 ===", itineraryId);
+        log.info("총 일차 수: {}", days.size());
+
+        days.forEach(day -> {
+            log.info("Day {} - items: {}개 | totalDistance: {}km | totalDuration: {}분 | totalCost: {}원",
+                    day.getDay(),
+                    day.getItems() != null ? day.getItems().size() : 0,
+                    day.getTotalDistance(),
+                    day.getTotalDuration(),
+                    day.getTotalCost()
+            );
+        });
+
+        return ItineraryRespDto.builder()
+                .itineraryId(itinerary.getItineraryId())
+                .startDate(itinerary.getStartDate())
+                .endDate(itinerary.getEndDate())
+                .budget(itinerary.getBudget())
+                .transport(itinerary.getTransport())
+                .partyType(itinerary.getPartyType())
+                .days(days)
+                .totalCost(itinerary.getTotalCost())
+                .build();
+    }
+
+    // ItineraryItem → ScheduleItemDto 변환
+    private ScheduleItemDto toScheduleItemDto(ItineraryItem item) {
+        TouristSpot spot = touristSpotMapper.findById(item.getSpotId());
+
+        TravelInfoDto travelInfo = null;
+        if (item.getTravelTime() != null && item.getTravelTime() > 0) {
+            travelInfo = TravelInfoDto.builder()
+                    .distance(item.getTravelDistance())
+                    .duration(item.getTravelTime())
+                    .transportType("CAR")
+                    .build();
+        }
+
+        return ScheduleItemDto.builder()
+                .order(item.getSequenceOrder())
+                .type("SPOT")
+                .spotId(item.getSpotId())
+                .name(spot.getTitle())
+                .category(spot.getCategory())
+                .lat(spot.getLatitude())
+                .lon(spot.getLongitude())
+                .arrivalTime(item.getArrivalTime())
+                .departureTime(item.getDepartureTime())
+                .duration(item.getDuration())
+                .cost(item.getCost())
+                .isIsland(spot.isIsland())
+                .travelFromPrevious(travelInfo)
+                .build();
+    }
+
+    // ✅ 추가: 로그인 userId 가져오기
+    private Integer getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !(auth.getPrincipal() instanceof PrincipalUser)) {
+            // 개발 중에는 1 반환
+            log.warn("로그인 정보 없음 - 테스트용 userId=1 사용");
+            return 1;
+        }
+
+        PrincipalUser principal = (PrincipalUser) auth.getPrincipal();
+        return principal.getUser().getUserId();
+    }
+
+    // ✅ 수정: N+1 쿼리 제거
     private List<DayScheduleDto> calculateOptimalSchedules(
             ItineraryReqDto request,
-            DayDistributionDto distribution) {
+            DayDistributionDto distribution,
+            List<TouristSpot> allSpots) {
 
         List<DayScheduleDto> days = new ArrayList<>();
         Map<Integer, List<Integer>> dayGroups = distribution.getDayGroups();
+
+        // ✅ 한 번에 조회한 관광지를 Map으로
+        Map<Integer, TouristSpot> spotMap = allSpots.stream()
+                .collect(Collectors.toMap(TouristSpot::getSpotId, s -> s));
 
         for (Map.Entry<Integer, List<Integer>> entry : dayGroups.entrySet()) {
             int day = entry.getKey();
             List<Integer> daySpotIds = entry.getValue();
 
-            if (daySpotIds.isEmpty()) {
-                log.warn("Day {}에 관광지가 없습니다.", day);
-                continue;
-            }
+            if (daySpotIds.isEmpty()) continue;
 
-            log.info("Day {} TSP 계산: {}개 관광지", day, daySpotIds.size());
+            // ✅ Map에서 가져오기 (DB 조회 X)
+            List<TouristSpot> daySpots = daySpotIds.stream()
+                    .map(spotMap::get)
+                    .collect(Collectors.toList());
 
             if (daySpotIds.size() == 1) {
-                log.info("Day {} 관광지 1개 - TSP 생략", day);
-                DayScheduleDto daySchedule = buildSingleSpotSchedule(
+                days.add(buildSingleSpotSchedule(
                         day,
                         request.getStartDate().plusDays(day - 1),
-                        daySpotIds.get(0),
+                        daySpots.get(0),
                         request
-                );
-                days.add(daySchedule);
+                ));
                 continue;
             }
 
-            // 출발지/도착지 결정
             LocationInfo start = getDayStartLocation(day, request);
             LocationInfo end = getDayEndLocation(day, request);
 
-            // TSP 계산
             TspRequestDto tspRequest = TspRequestDto.builder()
                     .spotIds(daySpotIds)
                     .startLat(start.lat)
@@ -135,24 +273,21 @@ public class ItineraryService {
 
             TspResponseDto tspResult = tspService.calculateOptimalRoute(tspRequest);
 
-            // Day 일정 생성
-            DayScheduleDto daySchedule = buildDayScheduleFromTsp(
+            days.add(buildDayScheduleFromTsp(
                     day,
                     request.getStartDate().plusDays(day - 1),
                     tspResult,
-                    request
-            );
-
-            days.add(daySchedule);
+                    request,
+                    spotMap
+            ));
         }
 
         return days;
     }
 
-    // 일정 정보 DB 저장
     private Itinerary saveItinerary(ItineraryReqDto request) {
         Itinerary itinerary = Itinerary.builder()
-                .userId(1)  // TODO: 실제 로그인 사용자 ID
+                .userId(getCurrentUserId())  // ✅ 수정
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .budget(request.getBudget())
@@ -162,55 +297,43 @@ public class ItineraryService {
                 .build();
 
         itineraryMapper.insert(itinerary);
-
         return itinerary;
     }
 
-    // Day별 위치 정보 DB 저장
     private void saveDailyLocations(Integer itineraryId, List<DailyLocationDto> locations) {
-        if (locations == null || locations.isEmpty()) {
-            throw new IllegalArgumentException("위치 정보가 없습니다.");
+        for (DailyLocationDto locDto : locations) {
+            dailyLocationMapper.insert(locDto.toEntity(itineraryId));
+        }
+    }
+
+    private void validateRequest(ItineraryReqDto request) {
+        if (request.getStartDate() == null || request.getEndDate() == null) {
+            throw new IllegalArgumentException("여행 날짜를 입력해주세요.");
         }
 
-        for (DailyLocationDto locDto : locations) {
-            DailyLocation location = locDto.toEntity(itineraryId);
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new IllegalArgumentException("시작일이 종료일보다 늦습니다.");
+        }
 
-            dailyLocationMapper.insert(location);
+        if (request.getSpotIds() == null || request.getSpotIds().size() < 2) {
+            throw new IllegalArgumentException("최소 2개 이상의 관광지를 선택해주세요.");
+        }
 
-            log.debug("Day {} 위치 저장: {} → {}",
-                    locDto.getDay(),
-                    locDto.getStartName(),
-                    locDto.getEndName());
+        if (!request.hasValidDailyLocations()) {
+            throw new IllegalArgumentException("위치 정보가 올바르지 않습니다.");
         }
     }
 
     private DayScheduleDto buildSingleSpotSchedule(
-            int day,
-            LocalDate date,
-            Integer spotId,
-            ItineraryReqDto request) {
-
-        // DB에서 관광지 조회
-        List<TouristSpot> spots = touristSpotMapper.findAllByIds(List.of(spotId));
-
-        if (spots.isEmpty()) {
-            log.warn("관광지를 찾을 수 없습니다: {}", spotId);
-            return null;
-        }
-
-        TouristSpot spot = spots.get(0);
-
-        // 출발지 (공항 또는 전날 숙소)
-        LocationInfo start = getDayStartLocation(day, request);
+            int day, LocalDate date, TouristSpot spot, ItineraryReqDto request) {
 
         LocalTime currentTime = LocalTime.of(9, 0);
         int duration = spot.getSpotDuration() > 0 ? spot.getSpotDuration() : 60;
 
-        // 관광지 1개만
         ScheduleItemDto item = ScheduleItemDto.builder()
                 .order(0)
                 .type("SPOT")
-                .itemId(spotId)
+                .spotId(spot.getSpotId())
                 .name(spot.getTitle())
                 .category(spot.getCategory())
                 .lat(spot.getLatitude())
@@ -220,8 +343,6 @@ public class ItineraryService {
                 .departureTime(currentTime.plusMinutes(duration))
                 .cost(spot.getPrice())
                 .isIsland(spot.isIsland())
-                .description(spot.getDescription())
-                .travelFromPrevious(null)  // 첫 번째라 없음
                 .build();
 
         return DayScheduleDto.builder()
@@ -234,135 +355,54 @@ public class ItineraryService {
                 .totalDuration(duration)
                 .totalCost(spot.getPrice())
                 .hasIsland(spot.isIsland())
-                .summary(String.format("Day %d: 1개 관광지%s",
-                        day,
-                        spot.isIsland() ? " (섬 포함)" : ""))
                 .build();
     }
 
-    // Day별 출발지 결정
-    private LocationInfo getDayStartLocation(int day, ItineraryReqDto request) {
-        DailyLocationDto dayLoc = request.getDailyLocations().get(day - 1);
-
-        return new LocationInfo(
-                dayLoc.getStartName(),
-                dayLoc.getStartLat(),
-                dayLoc.getStartLon()
-        );
-    }
-
-    // Day별 도착지 결정
-    private LocationInfo getDayEndLocation(int day, ItineraryReqDto request) {
-        DailyLocationDto dayLoc = request.getDailyLocations().get(day - 1);
-
-        return new LocationInfo(
-                dayLoc.getEndName(),
-                dayLoc.getEndLat(),
-                dayLoc.getEndLon()
-        );
-    }
-
-    // 요청 검증
-    private void validateRequest(ItineraryReqDto request) {
-        // 날짜 검증
-        if (request.getStartDate() == null || request.getEndDate() == null) {
-            throw new IllegalArgumentException("여행 날짜를 입력해주세요.");
-        }
-
-        if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new IllegalArgumentException("시작일이 종료일보다 늦습니다.");
-        }
-
-        // 관광지 검증
-        if (request.getSpotIds() == null || request.getSpotIds().isEmpty()) {
-            throw new IllegalArgumentException("관광지를 선택해주세요.");
-        }
-
-        if (request.getSpotIds().size() < 2) {
-            throw new IllegalArgumentException("최소 2개 이상의 관광지를 선택해주세요.");
-        }
-
-        // ✅ 변경: dailyLocations 검증
-        if (!request.hasValidDailyLocations()) {
-            throw new IllegalArgumentException(
-                    String.format("위치 정보가 올바르지 않습니다. (%d일 여행 = %d개 위치 정보 필요)",
-                            request.getTravelDays(), request.getTravelDays()));
-        }
-    }
-
     private DayScheduleDto buildDayScheduleFromTsp(
-            int day,
-            LocalDate date,
-            TspResponseDto tspResult,
-            ItineraryReqDto request) {
+            int day, LocalDate date, TspResponseDto tspResult,
+            ItineraryReqDto request, Map<Integer, TouristSpot> spotMap) {
 
         List<Integer> spotIds = tspResult.getOptimizedSpotIds();
-
-        // DB에서 관광지 조회
-        List<TouristSpot> spots = touristSpotMapper.findAllByIds(spotIds);
-        Map<Integer, TouristSpot> spotMap = spots.stream()
-                .collect(Collectors.toMap(
-                        spot -> (int) spot.getSpotId(),
-                        spot -> spot
-                ));
-
-        // TSP 구간 정보 Map
-        Map<String, com.korit.trip_planner_back.dto.tsp.RouteSegmentDto> segmentMap = new HashMap<>();
-        if (tspResult.getRouteSegments() != null) {
-            for (com.korit.trip_planner_back.dto.tsp.RouteSegmentDto segment : tspResult.getRouteSegments()) {
-                String key = segment.getFromSpotId() + "-" + segment.getToSpotId();
-                segmentMap.put(key, segment);
-            }
-        }
-
         List<ScheduleItemDto> items = new ArrayList<>();
         LocalTime currentTime = LocalTime.of(9, 0);
 
         boolean hasIsland = false;
         double totalDistance = 0.0;
-        int totalTravelDuration = 0;
-        int totalStayDuration = 0;
+        int totalDuration = 0;
         int totalCost = 0;
+        Integer fromSpotId = 0;
 
-        Integer fromSpotId = 0;  // 출발지
-
-        // 각 관광지를 항목으로 변환
         for (int i = 0; i < spotIds.size(); i++) {
-            Integer spotId = spotIds.get(i);
-            TouristSpot spot = spotMap.get(spotId);
+            TouristSpot spot = spotMap.get(spotIds.get(i));
+            if (spot.isIsland()) hasIsland = true;
 
-            if (spot == null) {
-                log.warn("관광지를 찾을 수 없습니다: {}", spotId);
-                continue;
-            }
-
-            if (spot.isIsland()) {
-                hasIsland = true;
-            }
-
-            // 이동 정보
             TravelInfoDto travelInfo = null;
-            String segmentKey = fromSpotId + "-" + spotId;
-            com.korit.trip_planner_back.dto.tsp.RouteSegmentDto segment = segmentMap.get(segmentKey);
+            if (tspResult.getRouteSegments() != null) {
+                String key = fromSpotId + "-" + spotIds.get(i);
+                var segment = tspResult.getRouteSegments().stream()
+                        .filter(s -> key.equals(s.getFromSpotId() + "-" + s.getToSpotId()))
+                        .findFirst()
+                        .orElse(null);
 
-            if (segment != null && segment.getActualDistance() != null) {
-                currentTime = currentTime.plusMinutes(segment.getDuration());
-                totalTravelDuration += segment.getDuration();
-                totalDistance += segment.getActualDistance();
+                if (segment != null && segment.getActualDistance() != null) {
+                    currentTime = currentTime.plusMinutes(segment.getDuration());
+                    totalDuration += segment.getDuration();
+                    totalDistance += segment.getActualDistance();
 
-                travelInfo = TravelInfoDto.builder()
-                        .distance(segment.getActualDistance())
-                        .duration(segment.getDuration())
-                        .transportType(request.getTransport())
-                        .build();
+                    travelInfo = TravelInfoDto.builder()
+                            .distance(segment.getActualDistance())
+                            .duration(segment.getDuration())
+                            .transportType(request.getTransport())
+                            .build();
+                }
             }
 
             int duration = spot.getSpotDuration() > 0 ? spot.getSpotDuration() : 60;
 
-            ScheduleItemDto item = ScheduleItemDto.builder()
+            items.add(ScheduleItemDto.builder()
                     .order(i)
                     .type("SPOT")
-                    .itemId(spotId)
+                    .spotId(spot.getSpotId())
                     .name(spot.getTitle())
                     .category(spot.getCategory())
                     .lat(spot.getLatitude())
@@ -372,16 +412,13 @@ public class ItineraryService {
                     .departureTime(currentTime.plusMinutes(duration))
                     .cost(spot.getPrice())
                     .isIsland(spot.isIsland())
-                    .description(spot.getDescription())
                     .travelFromPrevious(travelInfo)
-                    .build();
-
-            items.add(item);
+                    .build());
 
             totalCost += spot.getPrice();
-            totalStayDuration += duration;
+            totalDuration += duration;
             currentTime = currentTime.plusMinutes(duration);
-            fromSpotId = spotId;
+            fromSpotId = spot.getSpotId();
         }
 
         return DayScheduleDto.builder()
@@ -391,49 +428,34 @@ public class ItineraryService {
                 .endTime(currentTime)
                 .items(items)
                 .totalDistance(totalDistance)
-                .totalDuration(totalTravelDuration + totalStayDuration)
+                .totalDuration(totalDuration)
                 .totalCost(totalCost)
                 .hasIsland(hasIsland)
-                .summary(String.format("Day %d: %d개 관광지, %.1fkm%s",
-                        day,
-                        spotIds.size(),
-                        totalDistance,
-                        hasIsland ? " (섬 포함)" : ""))
                 .build();
     }
 
-    private static class LocationInfo {
-        String name;
-        double lat;
-        double lon;
-
-        LocationInfo(String name, double lat, double lon) {
-            this.name = name;
-            this.lat = lat;
-            this.lon = lon;
-        }
+    private LocationInfo getDayStartLocation(int day, ItineraryReqDto request) {
+        DailyLocationDto loc = request.getDailyLocations().get(day - 1);
+        return new LocationInfo(loc.getStartName(), loc.getStartLat(), loc.getStartLon());
     }
 
-    // 최종 응답 생성
-    private ItineraryRespDto buildFinalResponse(ItineraryReqDto request, List<DayScheduleDto> days) {
-        // 전체 거리/시간/비용 집계
+    private LocationInfo getDayEndLocation(int day, ItineraryReqDto request) {
+        DailyLocationDto loc = request.getDailyLocations().get(day - 1);
+        return new LocationInfo(loc.getEndName(), loc.getEndLat(), loc.getEndLon());
+    }
+
+    private ItineraryRespDto buildFinalResponse(Integer itineraryId, ItineraryReqDto request, List<DayScheduleDto> days) {
         double totalDistance = days.stream()
-                .mapToDouble(day -> day.getTotalDistance() != null ? day.getTotalDistance() : 0.0)
-                .sum();
-
+                .mapToDouble(d -> d.getTotalDistance() != null ? d.getTotalDistance() : 0.0).sum();
         int totalDuration = days.stream()
-                .mapToInt(day -> day.getTotalDuration() != null ? day.getTotalDuration() : 0)
-                .sum();
-
+                .mapToInt(d -> d.getTotalDuration() != null ? d.getTotalDuration() : 0).sum();
         int totalCost = days.stream()
-                .mapToInt(day -> day.getTotalCost() != null ? day.getTotalCost() : 0)
-                .sum();
-
+                .mapToInt(d -> d.getTotalCost() != null ? d.getTotalCost() : 0).sum();
         int totalSpots = days.stream()
-                .mapToInt(day -> day.getItems() != null ? day.getItems().size() : 0)
-                .sum();
+                .mapToInt(d -> d.getItems() != null ? d.getItems().size() : 0).sum();
 
         return ItineraryRespDto.builder()
+                .itineraryId(itineraryId)
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .budget(request.getBudget())
@@ -444,94 +466,54 @@ public class ItineraryService {
                 .totalDuration(totalDuration)
                 .totalCost(totalCost)
                 .totalSpots(totalSpots)
-                .summary(String.format("%d박%d일, %d개 관광지, 총 %.1fkm, 약 %.1f시간",
-                        request.getNights(),
-                        request.getTravelDays(),
-                        totalSpots,
-                        totalDistance,
-                        totalDuration / 60.0))
                 .build();
     }
 
-    // Day 일정 순서 변경
+    @Transactional
     public DayScheduleDto reorderDaySchedule(
             Integer itineraryId,
             Integer day,
-            List<Integer> newItemIds) {
+            List<Integer> sptIds) {
 
         log.info("=== Day {} 순서 변경 시작 ===", day);
-        log.info("사용자 지정 순서: {}", newItemIds);
 
         // 1. 검증
-        if (newItemIds == null || newItemIds.isEmpty()) {
+        if (sptIds == null || sptIds.isEmpty()) {
             throw new IllegalArgumentException("관광지 ID 리스트가 비어있습니다.");
         }
 
         // 2. 관광지 조회
-        List<TouristSpot> spots = touristSpotMapper.findAllByIds(newItemIds);
-
-        if (spots.size() != newItemIds.size()) {
+        List<TouristSpot> spots = touristSpotMapper.findAllByIds(sptIds);
+        if (spots.size() != sptIds.size()) {
             throw new IllegalArgumentException("일부 관광지를 찾을 수 없습니다.");
         }
 
         // 3. 섬 개수 체크
-        long islandCount = spots.stream()
-                .filter(TouristSpot::isIsland)
-                .count();
-
+        long islandCount = spots.stream().filter(TouristSpot::isIsland).count();
         if (islandCount > 1) {
-            throw new IllegalArgumentException(
-                    "하루에 섬은 1개만 방문 가능합니다. (현재: " + islandCount + "개)"
-            );
+            throw new IllegalArgumentException("하루에 섬은 1개만 방문 가능합니다.");
+        }
+        if (islandCount == 1 && sptIds.size() > 3) {
+            throw new IllegalArgumentException("섬이 있는 날은 최대 3개 관광지만 가능합니다.");
         }
 
-        if (islandCount == 1 && newItemIds.size() > 3) {
-            throw new IllegalArgumentException(
-                    "섬이 있는 날은 최대 3개 관광지만 가능합니다."
-            );
+        // 4. DB 조회
+        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
+        DailyLocation dayLocation = dailyLocationMapper.findByItineraryIdAndDay(itineraryId, day);
+
+        if (itinerary == null || dayLocation == null) {
+            throw new IllegalArgumentException("일정 정보를 찾을 수 없습니다.");
         }
 
-        // 4. 관광지를 사용자 지정 순서대로 정렬
+        // 5. 사용자 순서대로 정렬
         Map<Integer, TouristSpot> spotMap = spots.stream()
-                .collect(Collectors.toMap(
-                        TouristSpot::getSpotId,
-                        spot -> spot
-                ));
-
-        List<TouristSpot> orderedSpots = newItemIds.stream()
+                .collect(Collectors.toMap(TouristSpot::getSpotId, s -> s));
+        List<TouristSpot> orderedSpots = sptIds.stream()
                 .map(spotMap::get)
                 .collect(Collectors.toList());
 
-        // 5. DB에서 일정 정보 조회
-        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
-        if (itinerary == null) {
-            throw new IllegalArgumentException("일정을 찾을 수 없습니다: " + itineraryId);
-        }
-
-        // 6. DB에서 해당 일차의 위치 정보 조회
-        DailyLocation dayLocation = dailyLocationMapper.findByItineraryIdAndDay(
-                itineraryId,
-                day
-        );
-
-        if (dayLocation == null) {
-            throw new IllegalArgumentException(
-                    String.format("Day %d 위치 정보를 찾을 수 없습니다.", day));
-        }
-
-        log.info("Day {} 출발지: {} ({}, {})",
-                day,
-                dayLocation.getStartName(),
-                dayLocation.getStartLat(),
-                dayLocation.getStartLon());
-        log.info("Day {} 도착지: {} ({}, {})",
-                day,
-                dayLocation.getEndName(),
-                dayLocation.getEndLat(),
-                dayLocation.getEndLon());
-
-        // 7. 사용자 순서 그대로 일정 생성 (TSP 사용 안 함!)
-        DayScheduleDto reorderedSchedule = buildDayScheduleWithFixedOrder(
+        // 6. 일정 재생성
+        DayScheduleDto newSchedule = buildScheduleWithKakao(
                 day,
                 itinerary.getStartDate().plusDays(day - 1),
                 orderedSpots,
@@ -542,13 +524,151 @@ public class ItineraryService {
                 itinerary.getTransport()
         );
 
-        log.info("=== Day {} 순서 변경 완료 ===", day);
+        // 7. DB 업데이트
+        updateDayScheduleInDb(itineraryId, day, newSchedule);
 
-        return reorderedSchedule;
+        log.info("=== Day {} 순서 변경 완료 ===", day);
+        return newSchedule;
+    }
+    @Transactional
+    public DayScheduleDto deleteScheduleItem(
+            Integer itineraryId,
+            Integer day,
+            Integer spotId) {
+
+        log.info("=== Day {} 관광지 삭제 시작: spotId={} ===", day, spotId);
+
+        // 1. 현재 day의 모든 아이템을 DB에서 조회 (삭제 전 상태)
+        List<ItineraryItem> currentItems = itineraryItemMapper.findByDayId(itineraryId, day);
+
+        log.info("삭제 전 아이템 수: {}", currentItems.size());
+
+        // 2. 메모리상에서 삭제 대상 제외 (DB에는 아직 손대지 않음)
+        List<ItineraryItem> remainingItems = currentItems.stream()
+                .filter(item -> !item.getSpotId().equals(spotId))
+                .sorted(Comparator.comparingInt(ItineraryItem::getSequenceOrder))
+                .collect(Collectors.toList());
+
+        if (remainingItems.isEmpty()) {
+            throw new IllegalArgumentException("최소 1개 이상의 관광지가 필요합니다.");
+        }
+
+        if (remainingItems.size() == currentItems.size()) {
+            log.warn("삭제 대상 spotId={} 를 찾지 못함 (이미 삭제됐거나 잘못된 ID)", spotId);
+            throw new IllegalArgumentException("삭제할 아이템을 찾을 수 없습니다.");
+        }
+
+        log.info("삭제 후 남은 아이템 수: {}", remainingItems.size());
+
+        // 3. 남은 spotId 목록 추출
+        List<Integer> remainingSpotIds = remainingItems.stream()
+                .map(ItineraryItem::getSpotId)
+                .collect(Collectors.toList());
+
+        // 4. 관광지 정보 재조회 (필요한 필드만)
+        List<TouristSpot> spots = touristSpotMapper.findAllByIds(remainingSpotIds);
+
+        if (spots.size() != remainingSpotIds.size()) {
+            throw new IllegalArgumentException("일부 관광지 정보를 찾을 수 없습니다.");
+        }
+
+        // 5. 일정 기본 정보 조회
+        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
+        DailyLocation dayLocation = dailyLocationMapper.findByItineraryIdAndDay(itineraryId, day);
+
+        if (itinerary == null || dayLocation == null) {
+            throw new IllegalArgumentException("일정 또는 위치 정보를 찾을 수 없습니다.");
+        }
+
+        // 6. Kakao Navigation으로 새 일정 계산
+        //    → buildScheduleWithKakao가 spots 리스트의 순서를 존중하도록 가정
+        DayScheduleDto newSchedule = buildScheduleWithKakao(
+                day,
+                itinerary.getStartDate().plusDays(day - 1),
+                spots,  // 순서가 중요하므로 remainingSpotIds 순서대로 정렬된 spots여야 함
+                dayLocation.getStartLat(),
+                dayLocation.getStartLon(),
+                dayLocation.getEndLat(),
+                dayLocation.getEndLon(),
+                itinerary.getTransport()
+        );
+
+        // 7. DB 일괄 업데이트 (기존 전체 삭제 → 새로 삽입)
+        updateDayScheduleInDb(itineraryId, day, newSchedule);
+
+        log.info("삭제 및 재정렬 완료 → 최종 아이템 수: {}", newSchedule.getItems().size());
+
+        return newSchedule;
     }
 
-    // 사용자 지정 순서로 일정 생성
-    private DayScheduleDto buildDayScheduleWithFixedOrder(
+    @Transactional
+    public DayScheduleDto updateItemDuration(
+            Integer itineraryId,
+            Integer day,
+            Integer spotId,
+            Integer newDuration) {
+
+        log.info("=== Day {} 체류 시간 변경: {} → {}분 ===", day, spotId, newDuration);
+
+        // 1. 검증
+        if (newDuration < 10 || newDuration > 240) {
+            throw new IllegalArgumentException("체류 시간은 10분~4시간 사이여야 합니다.");
+        }
+
+        // 2. DB 조회
+        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
+        DailyLocation dayLocation = dailyLocationMapper.findByItineraryIdAndDay(itineraryId, day);
+        List<ItineraryItem> items = itineraryItemMapper.findByDayId(itineraryId, day);
+
+        if (itinerary == null || dayLocation == null || items.isEmpty()) {
+            throw new IllegalArgumentException("일정 정보를 찾을 수 없습니다.");
+        }
+
+        // 3. 관광지 조회
+        List<Integer> spotIds = items.stream()
+                .map(ItineraryItem::getSpotId)
+                .collect(Collectors.toList());
+        List<TouristSpot> spots = touristSpotMapper.findAllByIds(spotIds);
+
+        // 4. 사용자 순서대로 정렬
+        Map<Integer, TouristSpot> spotMap = spots.stream()
+                .collect(Collectors.toMap(TouristSpot::getSpotId, s -> s));
+        List<TouristSpot> orderedSpots = spotIds.stream()
+                .map(spotMap::get)
+                .collect(Collectors.toList());
+
+        // 5. 체류 시간 커스텀 적용
+        Map<Integer, Integer> currentDurations = items.stream()
+                .collect(Collectors.toMap(ItineraryItem::getSpotId, ItineraryItem::getDuration));
+
+        for (TouristSpot spot : orderedSpots) {
+            if (Objects.equals(spot.getSpotId(), spotId)) {
+                spot.setSpotDuration(newDuration);  // 변경 대상
+            } else {
+                spot.setSpotDuration(currentDurations.getOrDefault(spot.getSpotId(), spot.getSpotDuration()));  // ← 기존 DB duration 반영!
+            }
+        }
+
+        // 6. 일정 재생성
+        DayScheduleDto newSchedule = buildScheduleWithKakao(
+                day,
+                itinerary.getStartDate().plusDays(day - 1),
+                orderedSpots,
+                dayLocation.getStartLat(),
+                dayLocation.getStartLon(),
+                dayLocation.getEndLat(),
+                dayLocation.getEndLon(),
+                itinerary.getTransport()
+        );
+
+        // 7. DB 업데이트
+        updateDayScheduleInDb(itineraryId, day, newSchedule);
+
+        log.info("=== Day {} 체류 시간 변경 완료 ===", day);
+        return newSchedule;
+    }
+
+    private DayScheduleDto buildScheduleWithKakao(
             int day,
             LocalDate date,
             List<TouristSpot> orderedSpots,
@@ -563,33 +683,26 @@ public class ItineraryService {
 
         boolean hasIsland = false;
         double totalDistance = 0.0;
-        int totalTravelDuration = 0;
-        int totalStayDuration = 0;
+        int totalDuration = 0;
         int totalCost = 0;
 
         double currentLat = startLat;
         double currentLon = startLon;
 
-        // 사용자가 지정한 순서대로 처리
         for (int i = 0; i < orderedSpots.size(); i++) {
             TouristSpot spot = orderedSpots.get(i);
+            if (spot.isIsland()) hasIsland = true;
 
-            if (spot.isIsland()) {
-                hasIsland = true;
-            }
-
-            // 이동 정보 계산 (카카오 API)
+            // Kakao API 호출
             TravelInfoDto travelInfo = null;
             KakaoNaviService.RouteInfo routeInfo = kakaoNaviService.getRouteInfo(
-                    currentLat,
-                    currentLon,
-                    spot.getLatitude(),
-                    spot.getLongitude()
+                    currentLat, currentLon,
+                    spot.getLatitude(), spot.getLongitude()
             );
 
             if (routeInfo != null) {
                 currentTime = currentTime.plusMinutes(routeInfo.getDuration());
-                totalTravelDuration += routeInfo.getDuration();
+                totalDuration += routeInfo.getDuration();
                 totalDistance += routeInfo.getDistance();
 
                 travelInfo = TravelInfoDto.builder()
@@ -601,10 +714,10 @@ public class ItineraryService {
 
             int duration = spot.getSpotDuration() > 0 ? spot.getSpotDuration() : 60;
 
-            ScheduleItemDto item = ScheduleItemDto.builder()
+            items.add(ScheduleItemDto.builder()
                     .order(i)
                     .type("SPOT")
-                    .itemId(spot.getSpotId())
+                    .spotId(spot.getSpotId())
                     .name(spot.getTitle())
                     .category(spot.getCategory())
                     .lat(spot.getLatitude())
@@ -614,350 +727,74 @@ public class ItineraryService {
                     .departureTime(currentTime.plusMinutes(duration))
                     .cost(spot.getPrice())
                     .isIsland(spot.isIsland())
-                    .description(spot.getDescription())
                     .travelFromPrevious(travelInfo)
-                    .build();
-
-            items.add(item);
+                    .build());
 
             totalCost += spot.getPrice();
-            totalStayDuration += duration;
+            totalDuration += duration;
             currentTime = currentTime.plusMinutes(duration);
 
-            // 다음 이동을 위해 현재 위치 업데이트
             currentLat = spot.getLatitude();
             currentLon = spot.getLongitude();
         }
 
-        return DayScheduleDto.builder()
+        DayScheduleDto result = DayScheduleDto.builder()
                 .day(day)
                 .date(date)
                 .startTime(LocalTime.of(9, 0))
                 .endTime(currentTime)
                 .items(items)
-                .totalDistance(totalDistance)
-                .totalDuration(totalTravelDuration + totalStayDuration)
-                .totalCost(totalCost)
                 .hasIsland(hasIsland)
-                .summary(String.format("Day %d: %d개 관광지, %.1fkm%s",
-                        day,
-                        orderedSpots.size(),
-                        totalDistance,
-                        hasIsland ? " (섬 포함)" : ""))
                 .build();
+
+        result.calculateTotals();
+        return result;
     }
 
-    public ItineraryRespDto getItinerary(Integer itineraryId) {
+    private void updateDayScheduleInDb(Integer itineraryId, Integer day, DayScheduleDto schedule) {
+        // 1. 기존 items 삭제
+        itineraryItemMapper.deleteByDay(itineraryId, day);
 
-        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
-
-        if (itinerary == null) {
-            throw new IllegalArgumentException("일정을 찾을 수 없습니다: " + itineraryId);
+        // 2. Day 정보 업데이트
+        ItineraryDay dayEntity = itineraryDayMapper.findByItineraryIdAndDay(itineraryId, day);
+        if (dayEntity != null) {
+            dayEntity.setStartTime(schedule.getStartTime());
+            dayEntity.setEndTime(schedule.getEndTime());
+            itineraryDayMapper.update(dayEntity);
         }
 
-        // ❗ 아직 DaySchedule은 DB에 없음 → 빈 리스트
-        return ItineraryRespDto.builder()
-                .itineraryId(itinerary.getItineraryId())
-                .startDate(itinerary.getStartDate())
-                .endDate(itinerary.getEndDate())
-                .budget(itinerary.getBudget())
-                .transport(itinerary.getTransport())
-                .partyType(itinerary.getPartyType())
-                .days(List.of())   // TODO
-                .totalCost(itinerary.getTotalCost())
-                .summary("일정 조회")
-                .build();
-    }
-
-    // Day일정에서 관광지 삭제 및 재계산
-    public DayScheduleDto deleteScheduleItem(
-            Integer itineraryId,
-            Integer day,
-            Integer itemId) {
-
-        log.info("=== Day {} 관광지 삭제 시작 ===", day);
-        log.info("삭제할 관광지 ID: {}", itemId);
-
-        // 1. DB에서 일정 정보 조회
-        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
-        if (itinerary == null) {
-            throw new IllegalArgumentException("일정을 찾을 수 없습니다: " + itineraryId);
-        }
-
-        // 2. DB에서 해당 일차의 위치 정보 조회
-        DailyLocation dayLocation = dailyLocationMapper.findByItineraryIdAndDay(
-                itineraryId,
-                day
-        );
-
-        if (dayLocation == null) {
-            throw new IllegalArgumentException(
-                    String.format("Day %d 위치 정보를 찾을 수 없습니다.", day));
-        }
-
-        // 3. 현재 Day의 전체 관광지 ID 조회
-        List<Integer> currentItemIds = getCurrentDayItemIds(itineraryId, day);
-
-        // 4. 삭제할 아이템 제외
-        List<Integer> remainingItemIds = currentItemIds.stream()
-                .filter(id -> !Objects.equals(id, itemId))
-                .collect(Collectors.toList());
-
-        if (remainingItemIds.isEmpty()) {
-            throw new IllegalArgumentException("최소 1개 이상의 관광지가 필요합니다.");
-        }
-
-        log.info("남은 관광지: {}", remainingItemIds);
-
-        // 5. 관광지 조회
-        List<TouristSpot> spots = touristSpotMapper.findAllByIds(remainingItemIds);
-
-        if (spots.size() != remainingItemIds.size()) {
-            throw new IllegalArgumentException("일부 관광지를 찾을 수 없습니다.");
-        }
-
-        // 6. 사용자 순서대로 정렬
-        Map<Integer, TouristSpot> spotMap = spots.stream()
-                .collect(Collectors.toMap(
-                        TouristSpot::getSpotId,
-                        spot -> spot
-                ));
-
-        List<TouristSpot> orderedSpots = remainingItemIds.stream()
-                .map(spotMap::get)
-                .collect(Collectors.toList());
-
-        // 7. 일정 재생성
-        DayScheduleDto updatedSchedule = buildDayScheduleWithFixedOrder(
-                day,
-                itinerary.getStartDate().plusDays(day - 1),
-                orderedSpots,
-                dayLocation.getStartLat(),
-                dayLocation.getStartLon(),
-                dayLocation.getEndLat(),
-                dayLocation.getEndLon(),
-                itinerary.getTransport()
-        );
-
-        log.info("=== Day {} 관광지 삭제 완료 ===", day);
-        log.info("남은 관광지: {}개, 총 거리: {}km, 총 시간: {}분",
-                orderedSpots.size(),
-                updatedSchedule.getTotalDistance(),
-                updatedSchedule.getTotalDuration());
-
-        return updatedSchedule;
-    }
-
-    /**
-     * Day 일정에서 관광지 체류 시간 변경 및 재계산
-     */
-    public DayScheduleDto updateItemDuration(
-            Integer itineraryId,
-            Integer day,
-            Integer itemId,
-            Integer newDuration) {
-
-        log.info("=== Day {} 체류 시간 변경 시작 ===", day);
-        log.info("관광지 ID: {}, 새 체류 시간: {}분", itemId, newDuration);
-
-        // 1. 검증
-        if (newDuration < 10 || newDuration > 240) {
-            throw new IllegalArgumentException("체류 시간은 10분~4시간 사이여야 합니다.");
-        }
-
-        // 2. DB에서 일정 정보 조회
-        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
-        if (itinerary == null) {
-            throw new IllegalArgumentException("일정을 찾을 수 없습니다: " + itineraryId);
-        }
-
-        // 3. DB에서 해당 일차의 위치 정보 조회
-        DailyLocation dayLocation = dailyLocationMapper.findByItineraryIdAndDay(
-                itineraryId,
-                day
-        );
-
-        if (dayLocation == null) {
-            throw new IllegalArgumentException(
-                    String.format("Day %d 위치 정보를 찾을 수 없습니다.", day));
-        }
-
-        log.info("Day {} 출발지: {} ({}, {})",
-                day,
-                dayLocation.getStartName(),
-                dayLocation.getStartLat(),
-                dayLocation.getStartLon());
-
-        // 4. 현재 Day의 전체 관광지 ID 조회
-        List<Integer> currentItemIds = getCurrentDayItemIds(itineraryId, day);
-
-        // 5. 변경할 관광지가 포함되어 있는지 확인
-        if (!currentItemIds.contains(itemId)) {
-            throw new IllegalArgumentException("해당 관광지를 찾을 수 없습니다: " + itemId);
-        }
-
-        log.info("현재 관광지 순서: {}", currentItemIds);
-
-        // 6. 관광지 조회
-        List<TouristSpot> spots = touristSpotMapper.findAllByIds(currentItemIds);
-
-        if (spots.size() != currentItemIds.size()) {
-            throw new IllegalArgumentException("일부 관광지를 찾을 수 없습니다.");
-        }
-
-        // 7. 사용자 순서대로 정렬
-        Map<Integer, TouristSpot> spotMap = spots.stream()
-                .collect(Collectors.toMap(
-                        TouristSpot::getSpotId,
-                        spot -> spot
-                ));
-
-        List<TouristSpot> orderedSpots = currentItemIds.stream()
-                .map(spotMap::get)
-                .collect(Collectors.toList());
-
-        // 8. 변경된 체류 시간으로 일정 재생성
-        DayScheduleDto updatedSchedule = buildDayScheduleWithCustomDuration(
-                day,
-                itinerary.getStartDate().plusDays(day - 1),
-                orderedSpots,
-                dayLocation.getStartLat(),
-                dayLocation.getStartLon(),
-                dayLocation.getEndLat(),
-                dayLocation.getEndLon(),
-                itinerary.getTransport(),
-                itemId,
-                newDuration
-        );
-
-        log.info("=== Day {} 체류 시간 변경 완료 ===", day);
-        log.info("총 거리: {}km, 총 시간: {}분",
-                updatedSchedule.getTotalDistance(),
-                updatedSchedule.getTotalDuration());
-
-        return updatedSchedule;
-    }
-
-    /**
-     * 현재 Day의 관광지 ID 목록 조회 (임시)
-     * TODO: 실제로는 itinerary_items 테이블에서 조회해야 함
-     */
-    private List<Integer> getCurrentDayItemIds(Integer itineraryId, Integer day) {
-        log.warn("getCurrentDayItemIds: 임시 데이터 사용 중 (DB 구현 필요)");
-        return List.of(2, 3, 4);
-    }
-
-    /**
-     * 특정 관광지의 체류 시간을 커스텀하여 일정 생성
-     */
-    private DayScheduleDto buildDayScheduleWithCustomDuration(
-            int day,
-            LocalDate date,
-            List<TouristSpot> orderedSpots,
-            double startLat,
-            double startLon,
-            double endLat,
-            double endLon,
-            String transport,
-            Integer customItemId,
-            Integer customDuration) {
-
-        List<ScheduleItemDto> items = new ArrayList<>();
-        LocalTime currentTime = LocalTime.of(9, 0);
-
-        boolean hasIsland = false;
-        double totalDistance = 0.0;
-        int totalTravelDuration = 0;
-        int totalStayDuration = 0;
-        int totalCost = 0;
-
-        double currentLat = startLat;
-        double currentLon = startLon;
-
-        // 사용자가 지정한 순서대로 처리
-        for (int i = 0; i < orderedSpots.size(); i++) {
-            TouristSpot spot = orderedSpots.get(i);
-
-            if (spot.isIsland()) {
-                hasIsland = true;
-            }
-
-            // 이동 정보 계산 (카카오 API)
-            TravelInfoDto travelInfo = null;
-            KakaoNaviService.RouteInfo routeInfo = kakaoNaviService.getRouteInfo(
-                    currentLat,
-                    currentLon,
-                    spot.getLatitude(),
-                    spot.getLongitude()
-            );
-
-            if (routeInfo != null) {
-                currentTime = currentTime.plusMinutes(routeInfo.getDuration());
-                totalTravelDuration += routeInfo.getDuration();
-                totalDistance += routeInfo.getDistance();
-
-                travelInfo = TravelInfoDto.builder()
-                        .distance(routeInfo.getDistance())
-                        .duration(routeInfo.getDuration())
-                        .transportType(transport)
-                        .build();
-            }
-
-            // ✅ 체류 시간 결정 (커스텀 vs 기본)
-            int duration;
-            int originalDuration = spot.getSpotDuration() > 0 ? spot.getSpotDuration() : 60;
-
-            if (Objects.equals(spot.getSpotId(), customItemId)) {
-                duration = customDuration;
-                log.info("관광지 '{}' 체류 시간: {}분 → {}분 (사용자 조정)",
-                        spot.getTitle(), originalDuration, customDuration);
-            } else {
-                duration = originalDuration;
-            }
-
-            ScheduleItemDto item = ScheduleItemDto.builder()
-                    .order(i)
-                    .type("SPOT")
-                    .itemId(spot.getSpotId())
-                    .name(spot.getTitle())
-                    .category(spot.getCategory())
-                    .lat(spot.getLatitude())
-                    .lon(spot.getLongitude())
-                    .arrivalTime(currentTime)
-                    .duration(duration)
-                    .departureTime(currentTime.plusMinutes(duration))
-                    .cost(spot.getPrice())
-                    .isIsland(spot.isIsland())
-                    .description(spot.getDescription())
-                    .travelFromPrevious(travelInfo)
+        // 3. 새 items 저장
+        for (ScheduleItemDto item : schedule.getItems()) {
+            ItineraryItem itemEntity = ItineraryItem.builder()
+                    .itineraryId(itineraryId)
+                    .day(day)
+                    .spotId(item.getSpotId())
+                    .sequenceOrder(item.getOrder())
+                    .arrivalTime(item.getArrivalTime())
+                    .departureTime(item.getDepartureTime())
+                    .duration(item.getDuration())
+                    .originalDuration(item.getDuration())
+                    .travelTime(item.getTravelFromPrevious() != null
+                            ? item.getTravelFromPrevious().getDuration() : 0)
+                    .travelDistance(item.getTravelFromPrevious() != null
+                            ? item.getTravelFromPrevious().getDistance() : 0.0)
+                    .cost(item.getCost())
                     .build();
 
-            items.add(item);
-
-            totalCost += spot.getPrice();
-            totalStayDuration += duration;
-            currentTime = currentTime.plusMinutes(duration);
-
-            // 다음 이동을 위해 현재 위치 업데이트
-            currentLat = spot.getLatitude();
-            currentLon = spot.getLongitude();
+            itineraryItemMapper.insert(itemEntity);
         }
-
-        return DayScheduleDto.builder()
-                .day(day)
-                .date(date)
-                .startTime(LocalTime.of(9, 0))
-                .endTime(currentTime)
-                .items(items)
-                .totalDistance(totalDistance)
-                .totalDuration(totalTravelDuration + totalStayDuration)
-                .totalCost(totalCost)
-                .hasIsland(hasIsland)
-                .summary(String.format("Day %d: %d개 관광지, %.1fkm%s",
-                        day,
-                        orderedSpots.size(),
-                        totalDistance,
-                        hasIsland ? " (섬 포함)" : ""))
-                .build();
     }
+
+    private static class LocationInfo {
+        String name;
+        double lat;
+        double lon;
+
+        LocationInfo(String name, double lat, double lon) {
+            this.name = name;
+            this.lat = lat;
+            this.lon = lon;
+        }
+    }
+
 }

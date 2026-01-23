@@ -13,6 +13,7 @@ import AiChatPage from "./pages/aichatpage/AiChatPage";
 import LoginPage from "./pages/loginpage/LoginPage";
 import OAuth2CallbackPage from "./pages/OAuth2CallbackPage/OAuth2CallbackPage";
 import MyPage from "./pages/mypage/MyPage";
+import TosPage from "./pages/tospage/TosPage";
 
 export default function App() {
   return <>
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/ai/chat" element={<AiChatPage />} />
           <Route path="/my" element={<MyPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/tos" element={<TosPage />} />
           <Route path="/auth/oauth2/callback" element={<OAuth2CallbackPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

@@ -5,6 +5,7 @@ import SpotDetailModal from "../../components/spotdetailmodal/SpotDetailModal"; 
 import chatbotImg from "../../assets/chatbot.png";
 import { 
   getSpots, 
+  getSpotById,
   addBookmark,    
   removeBookmark,   
   getMyFavorites,
@@ -50,9 +51,22 @@ function SpotListPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [detailSpot, setDetailSpot] = useState(null);
 
-  const openDetail = (spot) => {
+  const openDetail = async (spot) => {
     setDetailSpot(spot);
     setIsDetailOpen(true);
+
+    try {
+      // 2) 상세 API로 description 포함 데이터 다시 받기
+      const res = await getSpotById(spot.spotId);
+
+      // axios 인터셉터가 response.data를 자동 추출하는 구조라서
+      // res가 ApiResponse일 가능성이 큼 -> res.data가 진짜 spot
+      const fullSpot = res?.data ?? res;
+
+      setDetailSpot(fullSpot); // ✅ description 포함된 데이터로 교체
+    } catch (e) {
+      console.error("관광지 상세 조회 실패:", e);
+    }
   };
 
   const closeDetail = () => {

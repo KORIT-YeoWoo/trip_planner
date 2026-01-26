@@ -30,7 +30,7 @@ export const bar = css`
     padding: 20px;
     height: 100%;  
     background-color: ${colors.card};
-    border-right: 1px solid ${colors.border};
+    border-right: 1px solid ${colors.background};
     overflow-y: auto;
     background-color:  ${colors.background};
     

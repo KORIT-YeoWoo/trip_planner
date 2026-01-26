@@ -14,7 +14,7 @@ function MyPage() {
             <div css={s.bar}><MyPageCategory /></div>
             <div css={s.content}></div>
 
-            <div css={s.bar}style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}></div>
+            <div css={s.bar}style={{ borderRight: 'none' }}></div>
             
         </div>
         

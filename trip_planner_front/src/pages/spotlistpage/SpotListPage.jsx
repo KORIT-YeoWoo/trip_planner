@@ -318,7 +318,7 @@ function SpotListPage() {
       </div>
       
     </div>
-    <div css={s.selectedSection} style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}>
+    <div css={s.selectedSection} style={{ borderRight: 'none' }}>
       <button css={s.chatBtn} type="button" onClick={() =>{console.log("버튼 클릭됨!");setAiOpen(true)}}>
         <img src={chatbotImg} alt="AI 챗봇 열기" />
       </button>

@@ -28,7 +28,7 @@ export const layout = css`
 export const selectedSection = css`
   
   padding: 20px;
-  border-right: 1px solid ${colors.border};
+  border-right: 1px solid ${colors.background};
   background-color: ${colors.card};
   min-width: 260px;
   position: sticky;

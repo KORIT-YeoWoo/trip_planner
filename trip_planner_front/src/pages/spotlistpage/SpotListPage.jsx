@@ -27,6 +27,7 @@ function SpotListPage() {
   const [selectedId, setSelectedId] = useState([]); //여행지 선택 관리
   const [wishListId, setWishListId] = useState([]); //찜 선택관리
   const [loading, setLoading] = useState(false); 
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTitle, setSearchTitle] = useState(""); //검색관리
   const CATEGORY_OPTIONS=["전체","문화•체험","카페","식당"]; //카테고리 옵션
@@ -55,17 +56,15 @@ function SpotListPage() {
     setDetailSpot(spot);
     setIsDetailOpen(true);
 
+    setIsDetailLoading(true); // ✅ 로딩 시작
     try {
-      // 2) 상세 API로 description 포함 데이터 다시 받기
       const res = await getSpotById(spot.spotId);
-
-      // axios 인터셉터가 response.data를 자동 추출하는 구조라서
-      // res가 ApiResponse일 가능성이 큼 -> res.data가 진짜 spot
       const fullSpot = res?.data ?? res;
-
-      setDetailSpot(fullSpot); // ✅ description 포함된 데이터로 교체
+      setDetailSpot(fullSpot);
     } catch (e) {
       console.error("관광지 상세 조회 실패:", e);
+    } finally {
+      setIsDetailLoading(false); // ✅ 로딩 종료
     }
   };
 
@@ -340,6 +339,7 @@ function SpotListPage() {
     <SpotDetailModal
       isOpen={isDetailOpen}
       spot={detailSpot}
+      isLoading={isDetailLoading}
       onClose={closeDetail}
     />
     <OpenaiModal 

@@ -2,7 +2,6 @@ package com.korit.trip_planner_back.mapper;
 
 import com.korit.trip_planner_back.entity.Itinerary;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 

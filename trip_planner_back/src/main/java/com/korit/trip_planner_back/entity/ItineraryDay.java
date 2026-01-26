@@ -19,5 +19,5 @@ public class ItineraryDay {
     private LocalTime startTime;
     private LocalTime endTime;
     private LocalDate date;
-    private String aiComment;
+    private String aiComment;            // AI 코멘트
 }

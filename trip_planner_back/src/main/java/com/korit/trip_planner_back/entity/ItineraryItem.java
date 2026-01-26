@@ -1,3 +1,4 @@
+// entity/ItineraryItem.java (기존 파일 수정)
 package com.korit.trip_planner_back.entity;
 
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ public class ItineraryItem {
     private Integer itemId;
     private Integer itineraryId;
     private Integer day;
-    private Integer spotId;
+    private Integer spotId;              // NULL 가능 (MEAL일 때)
     private Integer sequenceOrder;
     private LocalTime arrivalTime;
     private LocalTime departureTime;
@@ -25,6 +26,8 @@ public class ItineraryItem {
     private Integer travelTime;
     private Double travelDistance;
     private Integer cost;
-    private String routePath;
+    private String itemType;             // "SPOT", "MEAL"
+    private String itemName;             // 식사 이름
+
     private LocalDateTime createdAt;
 }

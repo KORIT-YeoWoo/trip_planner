@@ -1,5 +1,6 @@
 package com.korit.trip_planner_back.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.time.LocalTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ScheduleItemDto {
     private int order;
     private String type; // 유형 - SPOT: 관광지, MEAL: 식사, ACCOMMODATION: 숙소

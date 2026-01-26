@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItineraryRespDto {
-    private int itineraryId;
+    private Integer itineraryId;
     private int userId;
     private LocalDate startDate;
     private LocalDate endDate;

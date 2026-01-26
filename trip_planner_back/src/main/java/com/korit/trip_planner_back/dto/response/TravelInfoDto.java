@@ -13,8 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 public class TravelInfoDto {
 
-    private double distance;
-    private int duration;
+    private Double distance;
+    private Integer duration;
     private String transportType; // 교통수단 - CAR, PUBLIC, WALK
     private List<List<Double>> path;
 
@@ -26,14 +26,22 @@ public class TravelInfoDto {
 
     // 이동 정보 요약
     public String getSummary() {
-        return String.format("%.1fkm, %d분 (%s)",
-                distance,
+        if (transportType == null || duration == null || distance == null) {
+            return null;
+        }
+
+        return String.format("%s %d분 • %.1fkm",
+                getTransportName(),
                 duration,
-                getTransportName());
+                distance);
     }
 
     // 교통수단 한글명
     private String getTransportName() {
+        if (transportType == null) {
+            return "🚗";
+        }
+
         switch (transportType) {
             case "CAR": return "차량";
             case "PUBLIC": return "대중교통";

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,10 @@ public class TspService {
         // 1. 요청 검증
         request.validate();
 
+        if (request.getSpotIds().size() == 1) {
+            return handleSingleSpot(request);
+        }
+        
         // 2. DB에서 관광지 조회
         List<TouristSpot> spots = touristSpotMapper.findAllByIds(request.getSpotIds());
 
@@ -58,6 +63,45 @@ public class TspService {
         enrichWithKakaoApi(response, request);
 
         return response;
+    }
+
+    private TspResponseDto handleSingleSpot(TspRequestDto request) {
+        Integer spotId = request.getSpotIds().get(0);
+
+        log.info("관광지 1개 - 최적화 불필요");
+
+        // 시작점 → 관광지 → 도착점 거리만 계산
+        TouristSpot spot = touristSpotMapper.findById(spotId);
+
+        // 시작점 → 관광지
+        KakaoNaviService.RouteInfo toSpot = kakaoNaviService.getRouteInfo(
+                request.getStartLat(), request.getStartLon(),
+                spot.getLatitude(), spot.getLongitude()
+        );
+
+        double totalDistance = toSpot != null ? toSpot.getDistance() : 0.0;
+        int totalDuration = toSpot != null ? toSpot.getDuration() : 0;
+
+        // 관광지 → 도착점
+        if (request.hasEndPoint()) {
+            KakaoNaviService.RouteInfo toEnd = kakaoNaviService.getRouteInfo(
+                    spot.getLatitude(), spot.getLongitude(),
+                    request.getEndLat(), request.getEndLon()
+            );
+
+            if (toEnd != null) {
+                totalDistance += toEnd.getDistance();
+                totalDuration += toEnd.getDuration();
+            }
+        }
+
+        log.info("단일 관광지 경로: {:.1f}km, {}분", totalDistance, totalDuration);
+
+        return TspResponseDto.builder()
+                .optimizedSpotIds(Collections.singletonList(spotId))
+                .totalActualDistance(totalDistance)
+                .totalDuration(totalDuration)
+                .build();
     }
 
     private TspResponseDto buildResponse(TspRequestDto request, TspAlgorithm.TspResult tspResult) {

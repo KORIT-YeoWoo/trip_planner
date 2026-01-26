@@ -11,6 +11,7 @@ public interface DailyLocationMapper {
     // 숙소 정보 저장
     int insert(DailyLocation dailyLocation);
 
+
     // 일정 ID로 모든 숙소 조회
     List<DailyLocation> findByItineraryId(@Param("itineraryId") Integer itineraryId);
 

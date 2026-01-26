@@ -71,6 +71,7 @@ function SpotListPage() {
   const closeDetail = () => {
     setIsDetailOpen(false);
     setDetailSpot(null);
+    setIsDetailLoading(false);
   };
 
   const handleCreateItinerary = () => {

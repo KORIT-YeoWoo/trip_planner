@@ -5,7 +5,7 @@ import { FaStar, FaRegStar } from "react-icons/fa";
 import * as s from "./styles";
 import { IoSend } from "react-icons/io5";
 
-function SpotDetailModal({ isOpen, spot, onClose, children, onSubmitReview }) {
+function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, onSubmitReview }) {
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState(""); 
@@ -52,7 +52,8 @@ function SpotDetailModal({ isOpen, spot, onClose, children, onSubmitReview }) {
         : `${API_BASE}${rawImageUrl.startsWith("/") ? "" : "/"}${rawImageUrl}`
         : "";
 
-    const description = spot?.description ?? spot?.overview ?? "설명이 아직 없어요.";
+    const description = spot?.description ?? spot?.overview ?? "";
+    const hasDescription = typeof description === "string" ? description.trim().length > 0 : !!description;
     const avgRating = Number(spot?.avgRating ?? spot?.ratingAvg ?? 0);
     const ratingText = `${avgRating.toFixed(1)}/0`;
     const tags = spot?.tags ?? spot?.tagList ?? [];
@@ -124,7 +125,9 @@ function SpotDetailModal({ isOpen, spot, onClose, children, onSubmitReview }) {
                 {tags?.length ? tags.map((t) => <span css={s.tag} key={t}>{t}</span>) : null}
             </div>
 
-            <div css={s.desc}>{description}</div>
+            <div css={s.desc}>
+                {isLoading ? "설명 불러오는 중..." : hasDescription ? description : "설명이 아직 없어요."}
+            </div>
 
             {/* 기존 슬롯 유지 */}
             {children}

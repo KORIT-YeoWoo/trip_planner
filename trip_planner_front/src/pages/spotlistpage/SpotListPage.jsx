@@ -5,6 +5,7 @@ import SpotDetailModal from "../../components/spotdetailmodal/SpotDetailModal"; 
 import chatbotImg from "../../assets/chatbot.png";
 import { 
   getSpots, 
+  getSpotById,
   addBookmark,    
   removeBookmark,   
   getMyFavorites,
@@ -26,6 +27,7 @@ function SpotListPage() {
   const [selectedId, setSelectedId] = useState([]); //여행지 선택 관리
   const [wishListId, setWishListId] = useState([]); //찜 선택관리
   const [loading, setLoading] = useState(false); 
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTitle, setSearchTitle] = useState(""); //검색관리
   const CATEGORY_OPTIONS=["전체","문화•체험","카페","식당"]; //카테고리 옵션
@@ -50,14 +52,26 @@ function SpotListPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [detailSpot, setDetailSpot] = useState(null);
 
-  const openDetail = (spot) => {
+  const openDetail = async (spot) => {
     setDetailSpot(spot);
     setIsDetailOpen(true);
+
+    setIsDetailLoading(true); // ✅ 로딩 시작
+    try {
+      const res = await getSpotById(spot.spotId);
+      const fullSpot = res?.data ?? res;
+      setDetailSpot(fullSpot);
+    } catch (e) {
+      console.error("관광지 상세 조회 실패:", e);
+    } finally {
+      setIsDetailLoading(false); // ✅ 로딩 종료
+    }
   };
 
   const closeDetail = () => {
     setIsDetailOpen(false);
     setDetailSpot(null);
+    setIsDetailLoading(false);
   };
 
   const handleCreateItinerary = () => {
@@ -326,6 +340,7 @@ function SpotListPage() {
     <SpotDetailModal
       isOpen={isDetailOpen}
       spot={detailSpot}
+      isLoading={isDetailLoading}
       onClose={closeDetail}
     />
     <OpenaiModal 

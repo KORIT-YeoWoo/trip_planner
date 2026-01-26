@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight"
 import "highlight.js/styles/github-dark.css";
 import { HashLoader } from "react-spinners";
-
+import spotsData from "../../data/jeju_spot.json";
 import { sendTextOpenai } from "./openapiApi";
 import { BsFillSendFill } from "react-icons/bs";
 
@@ -40,24 +40,52 @@ function OpenaiApiModal() {
     const [isLoading, setIsLoading] = useState(false);
     const chatEndRef = useRef(null);
 
+    const getContextData=(question)=>{
+        let filtered = [];
+       if (question.includes("맛집") || question.includes("식당") || question.includes("먹을")) {
+            filtered = spotsData.filter(s => s.category === "식당");
+        } else if (question.includes("체험") || question.includes("체험") || question.includes("박물관")) {
+            filtered = spotsData.filter(s => s.category === "문화•체험");
+        
+        }else if (question.includes("카페") || question.includes("커피") || question.includes("디저트") || question.includes("차")) {
+            filtered = spotsData.filter(s => s.category === "카페");
+    } 
+        else if (question.includes("바다") || question.includes("오름") || question.includes("풍경") || question.includes("자연")) {
+            filtered = spotsData.filter(s => s.category === "자연");
+        } else {
+            // 키워드가 없으면 전체에서 랜덤하게 혹은 상위 10개
+            filtered = spotsData;
+        }
+
+        // 최대 10개만 추출 (토큰 절약 및 정확도 향상)
+        return filtered.slice(0, 10).map(s => ({
+            name: s.title,
+            addr: s.address,
+            desc: s.description,
+            price: s.price
+        }));
+    };
+
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatData, isLoading]);
+  
 
-
-    const buildPrompt = (message, max = 8) => {
-        const t = message.slice(-max);
-        const history = t
-            .map((m) => `${m.type === "question" ? "사용자" : "제주 여행지 상담사"}: ${m.content}`)
-            .join("\n");
-
+const buildPrompt = (message, context) => {
+        const lastQuestion = message[message.length - 1].content;
+        
         return [
-            "당신은 제주도의 구석구석을 잘 아는 '제주 여행지 추천 전문가'입니다.",
-            "사용자에게 뻔한 동선 위주의 일정보다는, 사용자의 취향에 딱 맞는 매력적인 여행지, 맛집, 카페를 테마별로 추천해 주는 데 집중하세요.",
-            "추천할 때는 해당 장소가 왜 좋은지, 어떤 사람에게 어울리는지 이유를 상세하고 친절하게 설명해 주세요.",
-            "답변은 항상 한국어로 작성하고, 마치 친한 친구에게 보물 같은 장소를 알려주듯 다정하게 답변해 주세요.",
+            "당신은 제주도 여행 전문가입니다.",
+            "사용자의 질문에 대해 아래 [참고 데이터]에 있는 장소들을 우선적으로 활용해서 추천해 주세요.",
+            "데이터에 없는 장소라도 제주도 전문가로서 추가 제안은 가능하지만, 데이터 내 장소는 상세히 설명해 주세요.",
+            "말투는 민아 님에게 이야기하듯 아주 다정하고 친근하게 하세요.",
             "",
-            history, // 2. historyText에서 history로 변수명 일치시킴
+            "### [참고 데이터] ###",
+            JSON.stringify(context, null, 2),
+            "",
+            "### [사용자 질문] ###",
+            lastQuestion,
+            "",
             "제주 여행지 상담사:"
         ].join("\n");
     };
@@ -77,20 +105,18 @@ function OpenaiApiModal() {
         const last = chatData[chatData.length - 1];
         if (!last || last.type !== "question") return;
 
-        // 3. buildPrompt 호출 및 인자 전달
-        const p = buildPrompt(chatData, 10);
+        // 🌟 중요: 질문(last.content)을 기반으로 컨텍스트를 먼저 가져와야 합니다!
+        const context = getContextData(last.content); 
+        
+        // buildPrompt에 숫자 10이 아니라 실제 context 배열을 넘겨줍니다.
+        const p = buildPrompt(chatData, context); 
         
         sendTextOpenai(p).then((r) => {
-            // 4. API 응답 구조에 맞춰 데이터 추출 (보통 r.choices[0].message.content)
-            // 만약 이전 답변 형식을 유지하신다면 r.output_text 그대로 사용
             const aiResponse = r.choices ? r.choices[0].message.content : r.output_text;
             
             setChatData((prev) => [
                 ...prev,
-                {
-                    type: "answer",
-                    content: aiResponse ?? "",
-                },
+                { type: "answer", content: aiResponse ?? "" },
             ]);
         }).catch((error) => {
             console.error("open ai error", error);

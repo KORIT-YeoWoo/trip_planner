@@ -314,6 +314,11 @@ export const chatBtn = css`
   background-color: white;   
   cursor: pointer;
 
+  position: fixed;
+  bottom: 30px;     
+  right: 30px;       
+  z-index: 9999;
+
   width: 56px;
   height: 56px;
   border-radius: 50%;      
@@ -321,7 +326,7 @@ export const chatBtn = css`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto; 
+
 
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s;

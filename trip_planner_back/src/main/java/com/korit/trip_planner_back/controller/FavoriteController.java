@@ -1,13 +1,10 @@
 package com.korit.trip_planner_back.controller;
 
-import com.korit.trip_planner_back.entity.Favorite;
-import com.korit.trip_planner_back.mapper.FavoriteMapper;
 import com.korit.trip_planner_back.security.PrincipalUser;
+import com.korit.trip_planner_back.service.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @RestController
@@ -15,32 +12,25 @@ import java.time.LocalDateTime;
 @CrossOrigin(origins = "http://localhost:5173")
 public class FavoriteController {
 
-    private final FavoriteMapper favoriteMapper;
+    private final FavoriteService favoriteService; // Mapper 대신 Service를 주입!
 
     @GetMapping("")
-    public ResponseEntity<?>getFavorites(){
+    public ResponseEntity<?> getFavorites() {
         int userId = PrincipalUser.getAuthenticatedPrincipalUser().getUser().getUserId();
-        return ResponseEntity.ok().body(favoriteMapper.findByUserId(userId));
+        return ResponseEntity.ok().body(favoriteService.getFavorites(userId));
     }
 
     @PostMapping("/{spotId}")
-
-    public ResponseEntity<?> addFavorite(@PathVariable Integer spotId){
+    public ResponseEntity<?> addFavorite(@PathVariable Integer spotId) {
         int userId = PrincipalUser.getAuthenticatedPrincipalUser().getUser().getUserId();
-        Favorite favorite = Favorite.builder()
-                        .spotId(spotId).userId(userId).createdAt(LocalDateTime.now()).build();
-
-        System.out.println("---------------------------");
-        System.out.println("spotID:"+spotId);
-        System.out.println("---------------------------");
-        favoriteMapper.insert(favorite);
-
+        favoriteService.addFavorite(userId, spotId);
         return ResponseEntity.ok().body("성공");
     }
+
     @DeleteMapping("/{spotId}")
-    public ResponseEntity<?> removeFavorite(@PathVariable Integer spotId){
+    public ResponseEntity<?> removeFavorite(@PathVariable Integer spotId) {
         int userId = PrincipalUser.getAuthenticatedPrincipalUser().getUser().getUserId();
-        favoriteMapper.deleteById(userId,spotId);
+        favoriteService.removeFavorite(userId, spotId);
         return ResponseEntity.ok().body("삭제성공");
     }
 }

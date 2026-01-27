@@ -144,8 +144,10 @@ export const tag = css`
 
 export const desc = css`
     margin-top: 4px;
+    padding: 15px;
     font-size: 14px;
     color: #333;
+    border-bottom: 1px solid black;
     line-height: 1.6;
     white-space: pre-wrap;
 `;
@@ -228,4 +230,41 @@ export const sendBtn = (enabled) => css`
     &:hover {
         filter: ${enabled ? "brightness(0.98)" : "none"};
     }
+`;
+
+export const comment = css`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+`;
+
+export const commentItem = css`
+  background: #fff;
+  border: 1px solid #eadfd6;
+  border-radius: 14px;
+  padding: 12px 14px;
+`;
+
+export const commentTop = css`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+`;
+
+export const commentName = css`
+  font-weight: 900;
+  color: #222;
+`;
+
+export const commentStars = css`
+  color: #f47a20;
+  font-weight: 900;
+`;
+
+export const commentContent = css`
+  color: #333;
+  white-space: pre-wrap;
+  line-height: 1.5;
 `;

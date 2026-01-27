@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.korit.trip_planner_back.mapper.CommentMapper">
+
+    <insert id="insertComment">
+        INSERT INTO comments (
+        spot_id,
+        user_id,
+        content,
+        star_score,
+        created_at
+        ) VALUES (
+        #{req.spotId},
+        #{userId},
+        #{req.content},
+        #{req.starScore},
+        NOW()
+        )
+    </insert>
+    <select id="findBySpotId"
+            resultType="com.korit.trip_planner_back.dto.response.CommentJoinUser">
+
+        SELECT
+        c.comment_id    AS commentId,
+        c.spot_id       AS spotId,
+        c.user_id       AS userId,
+        u.name          AS username,
+        c.star_score    AS starScore,
+        c.content       AS content,
+        c.created_at    AS createdAt
+        FROM comments c
+        JOIN users u ON u.user_id = c.user_id
+        WHERE c.spot_id = #{spotId}
+        ORDER BY c.created_at DESC
+
+    </select>
+
+</mapper>

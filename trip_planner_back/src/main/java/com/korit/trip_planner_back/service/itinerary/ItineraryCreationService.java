@@ -3,6 +3,7 @@ package com.korit.trip_planner_back.service.itinerary;
 import com.korit.trip_planner_back.dto.ai.AIScheduleResponse;
 import com.korit.trip_planner_back.dto.request.DailyLocationDto;
 import com.korit.trip_planner_back.dto.request.ItineraryReqDto;
+import com.korit.trip_planner_back.dto.request.ItinerarySaveDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
 import com.korit.trip_planner_back.dto.response.ItineraryRespDto;
 import com.korit.trip_planner_back.dto.response.ScheduleItemDto;
@@ -343,6 +344,128 @@ public class ItineraryCreationService {
 
         int totalSpots = days.stream()
                 .mapToInt(d -> d.getItems().size())  // ✅ SPOT만 있으니 items.size()
+                .sum();
+
+        return ItineraryRespDto.builder()
+                .itineraryId(itinerary.getItineraryId())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .budget(request.getBudget())
+                .transport(request.getTransport())
+                .partyType(request.getPartyType())
+                .days(days)
+                .totalDistance(totalDistance)
+                .totalDuration(totalDuration)
+                .totalCost(totalCost)
+                .totalSpots(totalSpots)
+                .build();
+    }
+
+    /**
+     * 일정 저장 (DB)
+     */
+    @Transactional
+    public ItineraryRespDto save(ItinerarySaveDto request) {
+        log.info("=== 일정 저장 시작 ===");
+        log.info("여행 기간: {} ~ {}, {}일",
+                request.getStartDate(), request.getEndDate(), request.getDays().size());
+
+        // 1. 검증
+        validator.validateSaveRequest(request);
+
+        // 2. ItinerarySaveDto → ItineraryReqDto 변환
+        ItineraryReqDto reqDto = ItineraryReqDto.builder()
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .budget(request.getBudget())
+                .transport(request.getTransport())
+                .partyType(request.getPartyType())
+                .dailyLocations(request.getDailyLocations())
+                .build();
+
+        // 3. Itinerary 엔티티 생성 및 저장
+        Itinerary itinerary = persistenceService.saveItinerary(reqDto);
+        log.info("Itinerary 저장 완료: ID={}", itinerary.getItineraryId());
+
+        // 4. DailyLocation 저장
+        persistenceService.saveDailyLocations(itinerary.getItineraryId(), request.getDailyLocations());
+
+        // 5. Day별 일정 저장
+        persistenceService.saveDaySchedules(itinerary.getItineraryId(), request.getDays());
+
+        // 6. 저장된 일정에 itineraryId 추가
+        List<DayScheduleDto> savedDays = request.getDays();
+
+        // 7. 최종 응답 생성
+        ItineraryRespDto response = buildResponseForSave(itinerary, request, savedDays);
+
+        log.info("=== 일정 저장 완료: ID={}, {}일 ===",
+                itinerary.getItineraryId(), savedDays.size());
+
+        return response;
+    }
+
+    /**
+     * 저장 응답 생성 (ItinerarySaveDto용)
+     */
+    private ItineraryRespDto buildResponseForSave(
+            Itinerary itinerary,
+            ItinerarySaveDto request,
+            List<DayScheduleDto> days) {
+
+        double totalDistance = days.stream()
+                .mapToDouble(d -> d.getTotalDistance() != null ? d.getTotalDistance() : 0.0)
+                .sum();
+
+        int totalDuration = days.stream()
+                .mapToInt(d -> d.getTotalDuration() != null ? d.getTotalDuration() : 0)
+                .sum();
+
+        int totalCost = days.stream()
+                .mapToInt(d -> d.getTotalCost() != null ? d.getTotalCost() : 0)
+                .sum();
+
+        int totalSpots = days.stream()
+                .mapToInt(d -> d.getItems().size())
+                .sum();
+
+        return ItineraryRespDto.builder()
+                .itineraryId(itinerary.getItineraryId())  // ✅ DB에 저장된 ID
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .budget(request.getBudget())
+                .transport(request.getTransport())
+                .partyType(request.getPartyType())
+                .days(days)
+                .totalDistance(totalDistance)
+                .totalDuration(totalDuration)
+                .totalCost(totalCost)
+                .totalSpots(totalSpots)
+                .build();
+    }
+
+    /**
+     * 최종 응답 생성 (ItinerarySaveDto용 오버로드)
+     */
+    private ItineraryRespDto buildResponse(
+            Itinerary itinerary,
+            ItinerarySaveDto request,
+            List<DayScheduleDto> days) {
+
+        double totalDistance = days.stream()
+                .mapToDouble(d -> d.getTotalDistance() != null ? d.getTotalDistance() : 0.0)
+                .sum();
+
+        int totalDuration = days.stream()
+                .mapToInt(d -> d.getTotalDuration() != null ? d.getTotalDuration() : 0)
+                .sum();
+
+        int totalCost = days.stream()
+                .mapToInt(d -> d.getTotalCost() != null ? d.getTotalCost() : 0)
+                .sum();
+
+        int totalSpots = days.stream()
+                .mapToInt(d -> d.getItems().size())
                 .sum();
 
         return ItineraryRespDto.builder()

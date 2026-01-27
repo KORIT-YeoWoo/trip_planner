@@ -18,6 +18,8 @@
             #{travelTime},
             #{travelDistance},
             #{cost},
+            #{itemType},
+            #{itemName},
             now())
     </insert>
     <delete id="deleteByDay">
@@ -45,6 +47,8 @@
             travel_time,
             travel_distance,
             cost,
+            item_type,
+            item_name,
             created_at
         FROM itinerary_items
         WHERE

@@ -1,6 +1,7 @@
 package com.korit.trip_planner_back.service.itinerary;
 
 import com.korit.trip_planner_back.dto.request.ItineraryReqDto;
+import com.korit.trip_planner_back.dto.request.ItinerarySaveDto;
 import com.korit.trip_planner_back.entity.TouristSpot;
 import com.korit.trip_planner_back.mapper.TouristSpotMapper;
 import lombok.RequiredArgsConstructor;
@@ -81,6 +82,31 @@ public class ItineraryValidator {
     public void validateDeleteRequest(List<Integer> remainingSpotIds) {
         if (remainingSpotIds == null || remainingSpotIds.isEmpty()) {
             throw new IllegalArgumentException("최소 1개 이상의 관광지가 필요합니다.");
+        }
+    }
+    /**
+     * 일정 저장 요청 검증
+     */
+    public void validateSaveRequest(ItinerarySaveDto request) {
+        if (!request.isValid()) {
+            throw new IllegalArgumentException("일정 데이터가 올바르지 않습니다.");
+        }
+
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new IllegalArgumentException("시작일이 종료일보다 늦습니다.");
+        }
+
+        if (request.getDays() == null || request.getDays().isEmpty()) {
+            throw new IllegalArgumentException("저장할 일정이 없습니다.");
+        }
+
+        if (request.getDailyLocations() == null || request.getDailyLocations().isEmpty()) {
+            throw new IllegalArgumentException("위치 정보가 없습니다.");
+        }
+
+        // Day 개수와 dailyLocations 개수 일치 확인
+        if (request.getDays().size() != request.getDailyLocations().size()) {
+            throw new IllegalArgumentException("일정과 위치 정보 개수가 일치하지 않습니다.");
         }
     }
 }

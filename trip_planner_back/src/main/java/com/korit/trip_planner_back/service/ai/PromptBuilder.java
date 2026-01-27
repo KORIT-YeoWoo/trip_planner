@@ -24,7 +24,7 @@ public class PromptBuilder {
 
         int totalSpots = spots.size();
         int minPerDay = Math.max(1, totalSpots / travelDays - 1);  // 최소값
-        int maxPerDay = Math.min(6, (int) Math.ceil((double) totalSpots / travelDays) + 1);  // 최대값
+        int maxPerDay = 5;  // 최대값
 
         sb.append("당신은 제주도 여행 플래너입니다.\n\n");
 
@@ -40,7 +40,7 @@ public class PromptBuilder {
 
         int remaining = totalSpots;
         for (int i = 1; i <= travelDays; i++) {
-            int recommended = Math.min(6, (int) Math.ceil((double) remaining / (travelDays - i + 1)));
+            int recommended = Math.min(5, (int) Math.ceil((double) remaining / (travelDays - i + 1)));
             sb.append("- Day ").append(i).append(": ").append(recommended).append("개 권장\n");
             remaining -= recommended;
         }
@@ -102,6 +102,7 @@ public class PromptBuilder {
         sb.append("5. 동부(경도 126.7↑) ↔ 서부(경도 126.3↓) 같은 날 배정 금지\n");
         sb.append("6. 관광지를 균등하게 분배 (한 날에 몰아넣지 말 것)\n");
         sb.append("7. 빈 날짜가 없어야 합니다 (모든 날짜에 관광지 배정)\n\n");
+        sb.append("8. 하루 최대 5개의 관광지까지만 배치할 수 있습니다. 초과시 가장 이동거리가 먼 곳을 제외하세요.\n\n");
 
         // ✅ 응답 형식 (식사 제거)
         sb.append("### 응답 형식 (JSON만, 설명 없이)\n");

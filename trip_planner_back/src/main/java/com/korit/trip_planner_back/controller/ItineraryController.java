@@ -2,6 +2,7 @@ package com.korit.trip_planner_back.controller;
 
 import com.korit.trip_planner_back.dto.request.DurationUpdateDto;
 import com.korit.trip_planner_back.dto.request.ItineraryReqDto;
+import com.korit.trip_planner_back.dto.request.ItinerarySaveDto;
 import com.korit.trip_planner_back.dto.request.ReorderRequestDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
 import com.korit.trip_planner_back.dto.response.ItineraryRespDto;
@@ -29,13 +30,27 @@ public class ItineraryController {
         System.out.println("📍 dailyLocations 개수: " + request.getDailyLocations().size());
 
         log.info("일정 생성 요청: {} ~ {}, 관광지 {}개",
-            request.getStartDate(),
-            request.getEndDate(),
-            request.getSpotIds() != null ? request.getSpotIds().size() : 0);
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getSpotIds() != null ? request.getSpotIds().size() : 0);
         ItineraryRespDto result = itineraryService.createItinerary(request);
 
         log.info("일정 생성 완료: {}일",
                 request.getTravelDays());
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/save")
+    @Operation(summary = "일정 저장", description = "생성된 일정을 DB에 저장")
+    public ResponseEntity<ItineraryRespDto> saveItinerary(@RequestBody ItinerarySaveDto request) {
+        log.info("일정 저장 요청: {} ~ {}, {}일",
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getDays().size());
+
+        ItineraryRespDto result = itineraryService.saveItinerary(request);
+
+        log.info("일정 저장 완료: itineraryId={}", result.getItineraryId());
         return ResponseEntity.ok(result);
     }
 
@@ -47,18 +62,18 @@ public class ItineraryController {
             @RequestBody ReorderRequestDto request) {
 
         log.info("일정 순서 변경 요청: itinerary={}, day={}, items={}",
-            itineraryId, day, request.getSpotIds().size());
+                itineraryId, day, request.getSpotIds().size());
 
         DayScheduleDto result = itineraryService.reorderDaySchedule(
-            itineraryId,
-            day,
-            request.getSpotIds()
+                itineraryId,
+                day,
+                request.getSpotIds()
         );
 
         log.info("일정 순서 변경 완료: day={}",day);
         return  ResponseEntity.ok(result);
     }
-    // 일정 항목의 체류 시간 변경
+
     @PutMapping("/{itineraryId}/days/{day}/items/{spotId}/duration")
     public ResponseEntity<DayScheduleDto> updateItemDuration(
             @PathVariable Integer itineraryId,

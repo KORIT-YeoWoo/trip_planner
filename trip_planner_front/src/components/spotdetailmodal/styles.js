@@ -40,13 +40,14 @@ export const modal = css`
     @media (max-width: 920px) {
         height: min(760px, 92vh);
         grid-template-columns: 1fr;
-        grid-template-rows: 320px 1fr;
+        grid-template-rows: 320px minmax(0, 1fr);
     }
 `;
 
 export const left = css`
     position: relative;
     background: #f3f3f3;
+    min-height: 0;
 `;
 
 export const image = css`
@@ -72,7 +73,21 @@ export const right = css`
     display: flex;
     flex-direction: column;
     gap: 10px;
+
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+`;
+
+export const scrollArea = css`
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+
     overflow: auto;
+
+    /* 선택: 스크롤이 너무 딱 붙어 보이면 */
+    padding-right: 4px;
 `;
 
 export const topRow = css`
@@ -150,8 +165,30 @@ export const desc = css`
     white-space: pre-wrap;
 `;
 
+export const descWrap = css`
+    margin-top: 10px;
+`;
+
+export const descText = css`
+    margin-top: 4px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.6;
+    white-space: pre-wrap;
+`;
+
+export const descLoading = css`
+    font-size: 14px;
+    color: #666;
+`;
+
+export const descEmpty = css`
+    font-size: 14px;
+    color: #777;
+`;
+
 export const reviewSection = css`
-    margin-top: auto; /* ✅ 오른쪽 영역 맨 아래로 내려가게 */
+    flex: 0 0 auto;
     padding-top: 14px;
     display: flex;
     flex-direction: column;

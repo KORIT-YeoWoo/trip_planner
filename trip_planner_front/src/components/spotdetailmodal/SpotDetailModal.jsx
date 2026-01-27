@@ -107,47 +107,66 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
 
             {/* RIGHT */}
             <div css={s.right}>
-            <div css={s.topRow}>
+
+            {/* 🔼 스크롤 영역 (설명/리뷰목록만 스크롤) */}
+            <div css={s.scrollArea}>
+
+                {/* ✅ topRow는 제목+닫기만 */}
+                <div css={s.topRow}>
                 <div css={s.titleBlock}>
-                <div css={s.title}>{title}</div>
-                <div css={s.ratingRow}>
+                    <div css={s.title}>{title}</div>
+                    <div css={s.ratingRow}>
                     <FaStar size={16} />
                     <span css={s.ratingText}>{ratingText}</span>
-                </div>
+                    </div>
                 </div>
 
                 <button css={s.closeBtn} onClick={onClose} aria-label="닫기">
-                <FiX size={18} />
+                    <FiX size={18} />
                 </button>
-            </div>
+                </div>
+                
+                {/* ✅ 태그는 topRow 밖 */}
+                <div css={s.tagRow}>
+                {tags?.length ? tags.map((t) => (
+                    <span css={s.tag} key={t}>{t}</span>
+                )) : null}
+                </div>
 
-            <div css={s.tagRow}>
-                {tags?.length ? tags.map((t) => <span css={s.tag} key={t}>{t}</span>) : null}
-            </div>
+                {/* ✅ 설명도 topRow 밖 */}
+                <div css={s.descWrap}>
+                {isLoading && <div css={s.descLoading}>설명 불러오는 중...</div>}
 
-            <div css={s.desc}>
-                {isLoading ? "설명 불러오는 중..." : hasDescription ? description : "설명이 아직 없어요."}
-            </div>
+                {!isLoading && hasDescription && (
+                    <p css={s.descText}>{description}</p>
+                )}
 
-            {/* 기존 슬롯 유지 */}
-            {children}
-            <div css={s.reviewSection}>
-                <div
-                    css={s.starInputRow}
-                    aria-label="별점 선택"
-                    onMouseLeave={() => setHoverRating(0)} // ✅ 별 영역 벗어나면 프리뷰 해제
-                >
-                    {[1, 2, 3, 4, 5].map((n) => {
-                        const active = previewValue >= n; // ✅ 프리뷰 기준으로 채우기
-                        const Icon = active ? FaStar : FaRegStar;
+                {!isLoading && !hasDescription && (
+                    <div css={s.descEmpty}>설명이 아직 없어요.</div>
+                )}
+                </div>
 
-                        return (
+                        {/* ✅ 기존 리뷰 목록 (children) */}
+                        {children}
+                    </div>
+
+                    {/* 🔽 하단 고정 영역 */}
+                    <div css={s.reviewSection}>
+                        <div
+                        css={s.starInputRow}
+                        onMouseLeave={() => setHoverRating(0)}
+                        >
+                        {[1, 2, 3, 4, 5].map((n) => {
+                            const active = previewValue >= n;
+                            const Icon = active ? FaStar : FaRegStar;
+
+                            return (
                             <button
                                 key={n}
                                 type="button"
                                 css={s.starBtn(active)}
-                                onMouseEnter={() => setHoverRating(n)} // ✅ 호버 프리뷰
-                                onFocus={() => setHoverRating(n)}      // ✅ 키보드 접근성
+                                onMouseEnter={() => setHoverRating(n)}
+                                onFocus={() => setHoverRating(n)}
                                 onBlur={() => setHoverRating(0)}
                                 onClick={() => {
                                 setRating((prev) => (prev === n ? 0 : n));
@@ -157,21 +176,21 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
                             >
                                 <Icon size={30} />
                             </button>
-                        );
-                    })}
-                </div>
+                            );
+                        })}
+                        </div>
 
-                    <div css={s.commentBar}>
-                        <textarea
-                            css={s.commentInput}
-                            placeholder="리뷰를 작성해보세요."
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            onKeyDown={onCommentKeyDown}
-                            rows={1}
-                        />
+                        <div css={s.commentBar}>
+                            <textarea
+                                css={s.commentInput}
+                                placeholder="리뷰를 작성해보세요."
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                onKeyDown={onCommentKeyDown}
+                                rows={1}
+                            />
                             <button
-                                type="button"   
+                                type="button"
                                 css={s.sendBtn(canSubmit)}
                                 onClick={submitReview}
                                 aria-label="댓글 전송"

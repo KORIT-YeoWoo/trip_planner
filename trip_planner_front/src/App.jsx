@@ -15,6 +15,7 @@ import OAuth2CallbackPage from "./pages/OAuth2CallbackPage/OAuth2CallbackPage";
 import MyPage from "./pages/mypage/MyPage";
 import TosPage from "./pages/tospage/TosPage";
 import MyStylePage from "./pages/mystylepage/MyStylePage";
+import MyItinerariesPage from "./pages/myitinerariespage/MyItinerariesPage";
 
 export default function App() {
   return <>
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/favorites" element={<FavoritePage />} />
           <Route path="/ai/chat" element={<AiChatPage />} />
           <Route path="/my" element={<MyPage />} />
+          <Route path="/my/itineraries" element={<MyItinerariesPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/my/style" element={<MyStylePage />} />
           <Route path="/tos" element={<TosPage />} />

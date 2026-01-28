@@ -1,6 +1,7 @@
 package com.korit.trip_planner_back.service;
 
 import com.korit.trip_planner_back.dto.request.ItineraryReqDto;
+import com.korit.trip_planner_back.dto.request.ItinerarySaveDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
 import com.korit.trip_planner_back.dto.response.ItineraryRespDto;
 import com.korit.trip_planner_back.service.itinerary.DayScheduleService;
@@ -36,6 +37,18 @@ public class ItineraryService {
                 request.getSpotIds().size());
 
         return creationService.create(request);
+    }
+
+    /**
+     * 일정 저장
+     */
+    public ItineraryRespDto saveItinerary(ItinerarySaveDto request) {
+        log.info("=== 일정 저장 요청: {} ~ {}, {}일 ===",
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getDays().size());
+
+        return creationService.save(request);
     }
 
     /**

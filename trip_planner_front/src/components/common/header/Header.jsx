@@ -8,12 +8,23 @@ export default function Header() {
   const navigate = useNavigate();
   const [hoveredLink, setHoveredLink] = useState(null);
   const [isButtonHover, setIsButtonHover] = useState(false);
-  const { user, isAuthenticated, logout, loading } = useAuth();
+  
+  // useAuth에서 필요한 상태와 함수를 가져옵니다.
+  const { user, isAuthenticated, logout, loading, openLoginModal } = useAuth();
 
   const handleLogout = () => {
     if (window.confirm('로그아웃 하시겠습니까?')) {
       logout();
       navigate('/');
+    }
+  };
+
+  // '여행 계획 세우기' 버튼 클릭 핸들러
+  const handlePlanClick = () => {
+    if (isAuthenticated) {
+      navigate("/spots"); // 로그인 되어 있으면 이동
+    } else {
+      openLoginModal(); // 로그인 안 되어 있으면 팝업!
     }
   };
 
@@ -51,17 +62,18 @@ export default function Header() {
                   </button>
                 </>
               ) : (
-                <Link
-                  to="/login"
+                <div
                   css={{
                     ...s.navLink,
                     ...(hoveredLink === "login" ? s.navLinkHover : {}),
+                    cursor: "pointer"
                   }}
                   onMouseEnter={() => setHoveredLink("login")}
                   onMouseLeave={() => setHoveredLink(null)}
+                  onClick={openLoginModal}
                 >
                   로그인
-                </Link>
+                </div>
               )}
             </>
           )}
@@ -73,7 +85,7 @@ export default function Header() {
             }}
             onMouseEnter={() => setIsButtonHover(true)}
             onMouseLeave={() => setIsButtonHover(false)}
-            onClick={() => navigate("/spots")}
+            onClick={handlePlanClick} // [수정] 바로 navigate 하지 않고 핸들러 실행
           >
             여행 계획 세우기
           </button>

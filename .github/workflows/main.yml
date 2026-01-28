@@ -38,14 +38,14 @@ jobs:
   
       - name: Springboot Build
         run: |
-          cd ~/trip_planner_back
+          cd trip_planner_back
           echo ${{env.APPLICATION_SECRET}} | base64 --decode > ./src/main/resources/application-secret.yml
           chmod 777 ./mvnw
           ./mvnw clean package -Dtestskip
 
       - name: Springboot Docker image build
         run: |
-          cd ~/trip_planner_back
+          cd trip_planner_back
           docker build -t ${{env.DOCKER_USERNAME}}/springboot-app:latest .
 
       - name: Springboot Docker image push
@@ -55,7 +55,7 @@ jobs:
 
       - name: React Docker image build
         run: |
-          cd ~/trip_planner_front
+          cd trip_planner_front
           echo ${{env.REACT_ENV}} | base64 --decode > .env
           docker build -t ${{env.DOCKER_USERNAME}}/react-app:latest .
           

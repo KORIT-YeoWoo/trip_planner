@@ -64,6 +64,7 @@ export const overlay = css`
   z-index: 100;
   overflow: hidden;
 `;
+
 export const styleContent = css`
   width: 90%;
   
@@ -85,5 +86,26 @@ export const styleContent = css`
     text-align: left;
     margin:20px ;
   }
+`;
+
+export const loading = css`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    
+    .spinner {
+        font-size: 18px;
+        color: #666;
+    }
+`;
+
+export const error = css`
+    padding: 40px;
+    text-align: center;
+    color: #e74c3c;
+    background-color: #ffe8e8;
+    border-radius: 8px;
+    margin-top: 20px;
 `;
 

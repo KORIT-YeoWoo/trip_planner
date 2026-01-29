@@ -20,17 +20,8 @@ public class UserService {
     public User createUser(Authentication authentication){
         PrincipalUser principalUser = (PrincipalUser) authentication.getPrincipal();
         User user = principalUser.getUser();
-        user.setNickname(null);
         userMapper.insert(user);
         return user;
     }
 
-    public void updateNickname(int userId, String newNickname) {
-        User user = User.builder()
-                .userId(userId)
-                .nickname(newNickname)
-                .build();
-
-        userMapper.updateNickname(user);
-    }
 }

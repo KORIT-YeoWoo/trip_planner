@@ -19,4 +19,5 @@ public interface ItineraryMapper {
 
     void deleteById(Integer itineraryId);
 
+    List<Itinerary> findByUserId(Integer userId);
 }

@@ -21,16 +21,4 @@ public class UserController {
         return ResponseEntity.ok(principalUser.getUser());
     }
 
-    @PatchMapping("/nickname")
-    public ResponseEntity<?> updateNickname(
-            @AuthenticationPrincipal PrincipalUser principalUser,
-            @RequestBody Map<String, String> request) {
-
-        String newNickname = request.get("nickname");
-        int userId = principalUser.getUser().getUserId();
-
-        userService.updateNickname(userId, newNickname);
-
-        return ResponseEntity.ok("Success");
-    }
 }

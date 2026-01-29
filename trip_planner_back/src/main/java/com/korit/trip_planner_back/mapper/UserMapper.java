@@ -11,7 +11,6 @@ public interface UserMapper {
     // 회원조회
     User findByUserId(int userId);
     User findByOauth2Id(String oauth2Id);
-    User findByNickname(String nickname);
 
     // 닉네임 값 넣기
     void updateNickname(User user);

@@ -16,7 +16,6 @@ public class User {
     private int userId;
     private String oauth2Id;
     private String name;
-    private String nickname;
     private int age;
     private String gender;
     private String phone;

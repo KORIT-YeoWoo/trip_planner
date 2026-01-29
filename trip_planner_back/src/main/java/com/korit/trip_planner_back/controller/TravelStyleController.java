@@ -20,15 +20,10 @@ public class TravelStyleController {
     private final TravelStyleService travelStyleService;
 
     @GetMapping("/my")
-    @Operation(summary = "내 여행 스타일 조회")
     public ResponseEntity<TravelStyleDTO> getMyTravelStyle() {
-        // ✅ 임시: 테스트용 userId 하드코딩
-        Integer userId = 3;  // 또는 DB에 있는 실제 userId
-
+        Integer userId = 3; // ✅ 콘솔에 찍힌 userId 사용
         log.info("여행 스타일 조회 요청: userId={}", userId);
-
         TravelStyleDTO result = travelStyleService.analyzeTravelStyle(userId);
-
         return ResponseEntity.ok(result);
     }
 

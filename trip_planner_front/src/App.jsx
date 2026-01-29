@@ -9,7 +9,7 @@ import FullScreenLayout from "./components/common/layouts/FullScreenLayout";
 import FavoritePage from "./pages/favoritepage/FavoritePage";
 import AiChatPage from "./pages/aichatpage/AiChatPage";
 
-import OAuth2CallbackPage from "./pages/OAuth2CallbackPage/OAuth2CallbackPage";
+import OAuth2CallbackPage from "./pages/oauth2callbackpage/OAuth2CallbackPage";
 import MyPage from "./pages/mypage/MyPage";
 import TosPage from "./pages/tospage/TosPage";
 import MyStylePage from "./pages/mystylepage/MyStylePage";

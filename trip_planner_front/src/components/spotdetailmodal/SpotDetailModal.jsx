@@ -5,10 +5,23 @@ import { FaStar, FaRegStar } from "react-icons/fa";
 import * as s from "./styles";
 import { IoSend } from "react-icons/io5";
 
+import { useQuery } from "@tanstack/react-query";
+import { createComment, getCommentsBySpotId } from "../../apis/commentApi";
+
+
 function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, onSubmitReview }) {
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState(""); 
+    const spotId = spot?.spotId ?? spot?.id;
+
+    const { data: commentResp, refetch } = useQuery({
+        queryKey: ["comments", spotId],
+        queryFn: () => getCommentsBySpotId(spotId),
+        enabled: !!spotId && isOpen,
+    });
+
+    const comments = commentResp?.data ?? [];
     
 
     useEffect(() => {
@@ -61,22 +74,26 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
     const handleOverlayClick = () => onClose?.();
     const handleModalClick = (e) => e.stopPropagation();
 
-    const canSubmit = rating > 0 || comment.trim().length > 0;
+    const canSubmit = rating > 0 && comment.trim().length > 0;
 
     const submitReview = async () => {
         if (!canSubmit) return;
+        console.log("comment",comment.trim());
+        console.log("제출",rating);
 
         const payload = {
         spotId: spot?.spotId ?? spot?.id,
-        rating,
+        starScore: rating,
         content: comment.trim(),
         };
 
         try {
         if (onSubmitReview) {
             await onSubmitReview(payload);
+            await createComment(payload);
+            await refetch();
         } else {
-            console.log("review payload:", payload);
+            await createComment(payload);
         }
         setRating(0);
         setComment("");
@@ -132,6 +149,25 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
             {/* 기존 슬롯 유지 */}
             {children}
             <div css={s.reviewSection}>
+                <div css={s.comment}>
+                    {comments.length === 0 ? (
+                        <div>아직 리뷰가 없어요.</div>
+                        ) : (
+                        comments.map((c) => (
+                        <div key={c.commentId} css={s.commentItem}>
+                            <div css={s.commentTop}>
+                            <span css={s.commentName}>{c.username}</span>
+                            <span css={s.commentStars}>
+                                {"★".repeat(c.starScore)}
+                                {"☆".repeat(5 - c.starScore)}
+                            </span>
+                            </div>
+                            <div css={s.commentContent}>{c.content}</div>
+                        </div>
+                        ))
+                    )}
+
+                </div>
                 <div
                     css={s.starInputRow}
                     aria-label="별점 선택"

@@ -1,0 +1,65 @@
+name: GCP-VM-CICD
+
+on:
+  push:
+    branches: [deploy-minseok, deploy_hyeok, deploy-mina, deploy-sungeun]
+  pull_request:
+    branches: [deploy-minseok, deploy_hyeok, deploy-mina, deploy-sungeun]
+
+jobs:
+  build-deplot-minseok:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: "환경변수 세팅"
+        run: |
+          if[ ${{github.ref}} == 'refs/heads/deploy-minseok' ]; then
+          
+            echo "GCP_VM_HOST=${{secrets.GCP_VM_HOST_MINSEOK}}" >> $GITHUB_ENV
+            echo "GCP_VM_USERNAME= ${{secrets.GCP_VM_USERNAME_MINSEOK}}" >> $GITHUB_ENV
+            echo "GCP_VM_SSHKEY= ${{secrets.GCP_VM_SSHKEY_MINSEOK}}" >> $GITHUB_ENV
+            echo "DOCKER_USERNAME= ${{secrets.DOCKER_USERNAME_MINSEOK}}" >> $GITHUB_ENV
+            echo "DOCKER_PASSWORD= ${{secrets.DOCKER_PASSWORD_MINSEOK}}" >> $GITHUB_ENV
+            echo "APPLICATION_SECRET= ${{secrets.APPLICATION_SECRET_MINSEOK}}" >> $GITHUB_ENV
+            echo "REACT_ENV= ${{secrets.REACT_ENV_MINSEOK}}" >> $GITHUB_ENV
+  
+          # elif[ ${{github.ref}} == 'refs/heads/deploy-minseok']; then
+          #   echo "TEST=abcdef" >> $GITHUB_ENV
+          fi
+      - name: checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          ref: ${{github.ref}}
+
+      - name: install JDK
+        uses: actions/setup-java@v5.2.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+  
+      - name: Springboot Build
+        run: |
+          cd trip_planner_back
+          echo ${{env.APPLICATION_SECRET}} | base64 --decode > ./src/main/resources/application-secret.yml
+          chmod 777 ./mvnw
+          ./mvnw clean package -Dtestskip
+
+      - name: Springboot Docker image build
+        run: |
+          cd trip_planner_back
+          docker build -t ${{env.DOCKER_USERNAME}}/springboot-app:latest .
+
+      - name: Springboot Docker image push
+        run: |
+          echo "${{env.DOCKER_PASSWORD}}" | docker login -u ${{env.DOCKER_USERNAME}} --password-stdin
+          docker push ${{env.DOCKER_USERNAME}}/springboot-app:latest
+
+      - name: React Docker image build
+        run: |
+          cd trip_planner_front
+          echo ${{env.REACT_ENV}} | base64 --decode > .env
+          docker build -t ${{env.DOCKER_USERNAME}}/react-app:latest .
+          
+
+      - name: React Docker image push
+        run: |
+          docker push ${{env.DOCKER_USERNAME}}/react-app:latest

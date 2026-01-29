@@ -2,8 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import MainPage from "./pages/mainpage/MainPage";
 import SpotListPage from "./pages/spotlistpage/SpotListPage";
 import NotFoundPage from "./pages/notfoundpage/NotFoundPage";
-import TravelInfoPage from "./pages/travelInfoPage/TravelInfoPage";
-import LoadingPage from './pages/loadingpage/LoadingPage'; // 주석 해제 (Route에서 사용 중)
+import LoadingPage from './pages/loadingpage/LoadingPage';
 import ItineraryDetailPage from "./pages/itinerarydetailpage/ItineraryDetailPage";
 import MainLayout from "./components/common/layouts/MainLayout";
 import FullScreenLayout from "./components/common/layouts/FullScreenLayout";
@@ -17,7 +16,8 @@ import MyStylePage from "./pages/mystylepage/MyStylePage";
 import MyItinerariesPage from "./pages/myitinerariespage/MyItinerariesPage";
 
 // 로그인 모달 컴포넌트
-import LoginModal from "./components/loginModal/LoginModal"; 
+import LoginModal from "./components/loginModal/LoginModal";
+import TravelInfoPage from "./pages/travelinfopage/TravelInfoPage.jsx";
 
 export default function App() {
   return (

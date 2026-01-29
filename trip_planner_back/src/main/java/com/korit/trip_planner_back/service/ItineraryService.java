@@ -3,7 +3,10 @@ package com.korit.trip_planner_back.service;
 import com.korit.trip_planner_back.dto.request.ItineraryReqDto;
 import com.korit.trip_planner_back.dto.request.ItinerarySaveDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
+import com.korit.trip_planner_back.dto.response.ItineraryListDto;
 import com.korit.trip_planner_back.dto.response.ItineraryRespDto;
+import com.korit.trip_planner_back.entity.Itinerary;
+import com.korit.trip_planner_back.mapper.ItineraryMapper;
 import com.korit.trip_planner_back.service.itinerary.DayScheduleService;
 import com.korit.trip_planner_back.service.itinerary.ItineraryCreationService;
 import com.korit.trip_planner_back.service.itinerary.ItineraryQueryService;
@@ -26,6 +29,7 @@ public class ItineraryService {
     private final ItineraryCreationService creationService;
     private final ItineraryQueryService queryService;
     private final DayScheduleService dayScheduleService;
+    private final ItineraryMapper itineraryMapper;
 
     /**
      * 일정 생성 (AI 중심)
@@ -95,5 +99,28 @@ public class ItineraryService {
 
         log.info("=== Day {} 관광지 삭제: spotId={} ===", day, spotId);
         return dayScheduleService.deleteSpot(itineraryId, day, spotId);
+    }
+
+    public List<ItineraryListDto> getMyItineraries(Integer userId) {
+        log.info("=== 내 일정 목록 조회 요청: userId={} ===", userId);
+        return queryService.findMyItineraries(userId);
+    }
+
+    public void deleteItinerary(Integer itineraryId, Integer userId) {
+        log.info("=== 일정 삭제: ID={}, userId={} ===", itineraryId, userId);
+
+        // 권한 확인 (내 일정만 삭제 가능)
+        Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
+
+        if (itinerary == null) {
+            throw new RuntimeException("일정을 찾을 수 없습니다.");
+        }
+
+        if (!itinerary.getUserId().equals(userId)) {
+            throw new RuntimeException("권한이 없습니다.");
+        }
+
+        itineraryMapper.deleteById(itineraryId);
+        log.info("일정 삭제 완료: ID={}", itineraryId);
     }
 }

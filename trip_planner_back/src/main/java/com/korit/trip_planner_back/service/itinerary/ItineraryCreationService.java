@@ -31,9 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * 일정 생성 서비스 (AI 중심)
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,7 +38,7 @@ public class ItineraryCreationService {
 
     private final ItineraryValidator validator;
     private final TspService tspService;
-    private final KakaoNaviService kakaoNaviService;  // ✅ 추가
+    private final KakaoNaviService kakaoNaviService;
     private final ItineraryPersistenceService persistenceService;
     private final TouristSpotMapper touristSpotMapper;
 

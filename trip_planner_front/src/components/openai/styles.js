@@ -5,10 +5,10 @@ export const aiChatLayout = (open) => css`
     display: ${open ? "flex" : "none"};
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100vw;
+    right: 0;
+
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.6);
+    
     justify-content: center;
     align-items: center;
     z-index: 9999;
@@ -16,7 +16,8 @@ export const aiChatLayout = (open) => css`
 
 
 export const aiChatContainer = css`
-    width: 450px;
+    border: 1px solid oklch(0.92 0.01 85);
+    width: 350px;
     height: 700px;
     background-color: white;
     border-radius: 20px;
@@ -24,7 +25,7 @@ export const aiChatContainer = css`
     flex-direction: column; 
     overflow: hidden;      
     position: relative;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+
 `;
 
 

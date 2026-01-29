@@ -2,7 +2,7 @@ package com.korit.trip_planner_back.controller;
 
 import com.korit.trip_planner_back.dto.request.CommentReqDto;
 import com.korit.trip_planner_back.dto.response.ApiResponseDto;
-import com.korit.trip_planner_back.entity.Comment;
+
 import com.korit.trip_planner_back.security.PrincipalUser;
 import com.korit.trip_planner_back.service.CommentService;
 import lombok.RequiredArgsConstructor;

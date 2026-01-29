@@ -6,7 +6,7 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="userId">
         insert into users
-        values(default, #{oauth2Id}, #{name}, #{nickname}, #{age},
+        values(default, #{oauth2Id}, #{name}, #{age},
         #{gender}, #{phone}, #{email}, #{provider}, #{role}, #{profileImg}, now())
     </insert>
 
@@ -15,7 +15,6 @@
             user_id as userId,
             oauth2_id as oauth2Id,
             name,
-            nickname,
             age,
             gender,
             phone,
@@ -35,7 +34,6 @@
             user_id as userId,
             oauth2_id as oauth2Id,
             name,
-            nickname,
             age,
             gender,
             phone,
@@ -49,34 +47,5 @@
         where
             oauth2_id = #{oauth2Id}
     </select>
-
-    <select id="findByNickname" resultType="com.korit.trip_planner_back.entity.User">
-        select
-            user_id as userId,
-            oauth2_id as oauth2Id,
-            name,
-            nickname,
-            age,
-            gender,
-            phone,
-            email,
-            provider,
-            role,
-            profile_img as profileImg,
-            created_at as createdAt
-        from
-            users
-        where
-            nickname = #{nickname}
-    </select>
-
-    <update id="updateNickname">
-        UPDATE
-            users
-        SET
-            nickname = #{nickname}
-        WHERE
-            user_id = #{userId}
-    </update>
 
 </mapper>

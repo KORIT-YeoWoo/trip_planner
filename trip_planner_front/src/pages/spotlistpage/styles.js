@@ -165,6 +165,7 @@ export const searchBar = css`
   gap: 10px;
   align-items: center;
   margin: 10px 0 16px;
+  width: 96%;
 `;
 
 export const searchInput = css`

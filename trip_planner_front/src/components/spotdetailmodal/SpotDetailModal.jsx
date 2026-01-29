@@ -1,12 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import React, { useEffect, useMemo, useState } from "react";
+import  { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import * as s from "./styles";
 import { IoSend } from "react-icons/io5";
 
 import { useQuery } from "@tanstack/react-query";
-import { createComment, getCommentsBySpotId } from "../../apis/commentApi";
+import { createComment, getCommentsBySpotId ,getRatingSummaryBySpotId} from "../../apis/commentApi";
 
 
 function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, onSubmitReview }) {
@@ -22,6 +22,13 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
     });
 
     const comments = commentResp?.data ?? [];
+
+    const { data: ratingResp, refetch: refetchRating } = useQuery({
+        queryKey: ["ratingSummary", spotId],
+        queryFn: () => getRatingSummaryBySpotId(spotId),
+        enabled: !!spotId && isOpen,
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
     
 
     useEffect(() => {
@@ -67,8 +74,9 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
 
     const description = spot?.description ?? spot?.overview ?? "";
     const hasDescription = typeof description === "string" ? description.trim().length > 0 : !!description;
-    const avgRating = Number(spot?.avgRating ?? spot?.ratingAvg ?? 0);
-    const ratingText = `${avgRating.toFixed(1)}/0`;
+    const avgRating = ratingResp?.data?.avgRating ?? 0;
+    const ratingText = `${avgRating.toFixed(1)}/5`;
+
     const tags = spot?.tags ?? spot?.tagList ?? [];
 
     const handleOverlayClick = () => onClose?.();
@@ -77,7 +85,8 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
     const canSubmit = rating > 0 && comment.trim().length > 0;
 
     const submitReview = async () => {
-        if (!canSubmit) return;
+        if (!canSubmit || isSubmitting) return;
+        setIsSubmitting(true);
         console.log("comment",comment.trim());
         console.log("제출",rating);
 
@@ -92,14 +101,19 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
             await onSubmitReview(payload);
             await createComment(payload);
             await refetch();
+            await refetchRating();
         } else {
             await createComment(payload);
+            await refetch();
+            await refetchRating();
         }
         setRating(0);
         setComment("");
         } catch (e) {
         console.error(e);
         alert("리뷰 등록 중 문제가 발생했어요.");
+        }finally{
+            setIsSubmitting(false);
         }
     };
 
@@ -149,25 +163,29 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
             {/* 기존 슬롯 유지 */}
             {children}
             <div css={s.reviewSection}>
-                <div css={s.comment}>
-                    {comments.length === 0 ? (
-                        <div>아직 리뷰가 없어요.</div>
-                        ) : (
-                        comments.map((c) => (
-                        <div key={c.commentId} css={s.commentItem}>
-                            <div css={s.commentTop}>
-                            <span css={s.commentName}>{c.username}</span>
-                            <span css={s.commentStars}>
-                                {"★".repeat(c.starScore)}
-                                {"☆".repeat(5 - c.starScore)}
-                            </span>
+                <div css={s.commentWrapper}>
+                    <div css={s.comment}>
+                        {comments.length === 0 ? (
+                            <div>아직 리뷰가 없어요.</div>
+                            ) : (
+                            comments.map((c) => (
+                            <div key={c.commentId} css={s.commentItem}>
+                                <div css={s.commentTop}>
+                                <span css={s.commentName}>{c.username}</span>
+                                <span css={s.commentStars}>
+                                    {"★".repeat(c.starScore)}
+                                    {"☆".repeat(5 - c.starScore)}
+                                </span>
+                                </div>
+                                <div css={s.commentContent}>{c.content}</div>
                             </div>
-                            <div css={s.commentContent}>{c.content}</div>
-                        </div>
-                        ))
-                    )}
+                            ))
+                        )}
+
+                    </div>
 
                 </div>
+                
                 <div
                     css={s.starInputRow}
                     aria-label="별점 선택"
@@ -210,6 +228,7 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
                                 type="button"   
                                 css={s.sendBtn(canSubmit)}
                                 onClick={submitReview}
+                                disabled={!canSubmit || isSubmitting}
                                 aria-label="댓글 전송"
                             >
                                 <IoSend size={16} />

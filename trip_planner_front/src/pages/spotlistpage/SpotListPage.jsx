@@ -12,7 +12,8 @@ import {
   removeFavorites,
   addFavorites
 } from "../../apis/spotApi";// 민석님의 API 함수
-
+import { useQueries } from "@tanstack/react-query";
+import { getRatingSummaryBySpotId } from "../../apis/commentApi"
 import { PiMountains } from "react-icons/pi";
 import { MdOutlineSurfing } from "react-icons/md";
 import { IoRestaurantOutline, IoCafeOutline, IoLogoWechat } from "react-icons/io5"; 
@@ -159,6 +160,14 @@ function SpotListPage() {
     );
   };// 여행지 id를 받아서 선택된 id 에 넣는데 이전에 있던 아이디이면 제외하고 배열 만들기
   //  없으면 기존 prev 에 추가
+  const ratingQueries = useQueries({
+    queries: filteredSpots.map((spot) => ({
+      queryKey: ["ratingSummary", spot.spotId],
+      queryFn: () => getRatingSummaryBySpotId(spot.spotId),
+    })),
+  });
+
+
 
 
   const toggleWish = async(id)=>{
@@ -249,7 +258,7 @@ function SpotListPage() {
 
     {/* 오른쪽: 전체 관광지 목록 (여기서 선택) */}
     <div style={{ padding:20, flex:3 }}>
-      <h1>관광지 목록</h1>
+      <h1 style={{ paddingLeft: 40 }}>관광지 목록</h1>
 
       <div css={s.searchBar}>
         <input
@@ -276,9 +285,11 @@ function SpotListPage() {
       </div>
 
       <div css={s.grid}>
-        {filteredSpots.map((r) => {
+        {filteredSpots.map((r,index) => {
           const isSelected = selectedId.includes(r.spotId);
           const isWished = wishListId.includes(r.spotId);
+          const ratingData = ratingQueries[index]?.data?.data;
+          const avgRating = ratingData?.avgRating ?? 0;
 
           return (
             <div
@@ -309,7 +320,10 @@ function SpotListPage() {
                 </button>
               </div>
                 <div css={s.cardBody}>
-                  <div css={s.title}>{r.title}</div>
+                  <div css={s.title}>
+                    {r.title}
+                    <span css={s.rating}>⭐ {avgRating.toFixed(1)}</span>
+                  </div>
                   <div css={s.info}>
                     <span>$ {r.price}원</span>
                     <span><LuAlarmClock /> {r.spotDuration}분</span>

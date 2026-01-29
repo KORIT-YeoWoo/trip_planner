@@ -31,7 +31,6 @@ export default function App() {
           <Route path="/ai/chat" element={<AiChatPage />} />
           <Route path="/my" element={<MyPage />} />
           <Route path="/my/itineraries" element={<MyItinerariesPage />} />
-          <Route path="/login" element={<LoginPage />} />
           <Route path="/my/style" element={<MyStylePage />} />
           <Route path="/tos" element={<TosPage />} />
           <Route path="/auth/oauth2/callback" element={<OAuth2CallbackPage />} />

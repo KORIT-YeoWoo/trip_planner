@@ -20,4 +20,6 @@ public interface ItineraryItemMapper {
             @Param("day") Integer day,
             @Param("spotId") Integer spotId
     );
+
+    List<ItineraryItem> findByItineraryId(Integer itineraryId);
 }

@@ -57,4 +57,25 @@
         ORDER BY
             sequence_order ASC
     </select>
+    <select id="findByItineraryId" resultType="ItineraryItem">
+        SELECT
+            item_id,
+            itinerary_id,
+            day,
+            spot_id,
+            sequence_order,
+            arrival_time,
+            departure_time,
+            duration,
+            original_duration,
+            travel_time,
+            travel_distance,
+            cost,
+            item_type,
+            item_name,
+            created_at
+        FROM itinerary_items
+        WHERE itinerary_id = #{itineraryId}
+        ORDER BY day ASC, sequence_order ASC
+    </select>
 </mapper>

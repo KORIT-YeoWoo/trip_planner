@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import MainPage from "./pages/mainpage/MainPage";
 import SpotListPage from "./pages/spotlistpage/SpotListPage";
 import NotFoundPage from "./pages/notfoundpage/NotFoundPage";
-import TravelInfoPage from "./pages/travelInfoPage/TravelInfoPage";
+import TravelInfoPage from "./pages/travelinfopage/TravelInfoPage";
 import LoadingPage from './pages/loadingpage/LoadingPage'; // 주석 해제 (Route에서 사용 중)
 import ItineraryDetailPage from "./pages/itinerarydetailpage/ItineraryDetailPage";
 import MainLayout from "./components/common/layouts/MainLayout";

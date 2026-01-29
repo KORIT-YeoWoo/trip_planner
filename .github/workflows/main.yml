@@ -12,18 +12,48 @@ jobs:
     steps:
       - name: "환경변수 세팅"
         run: |
-          if[ ${{github.ref}} == 'refs/heads/deploy-minseok' ]; then
+          if [ ${{github.ref}} == 'refs/heads/deploy-minseok' ]; then
           
             echo "GCP_VM_HOST=${{secrets.GCP_VM_HOST_MINSEOK}}" >> $GITHUB_ENV
-            echo "GCP_VM_USERNAME= ${{secrets.GCP_VM_USERNAME_MINSEOK}}" >> $GITHUB_ENV
-            echo "GCP_VM_SSHKEY= ${{secrets.GCP_VM_SSHKEY_MINSEOK}}" >> $GITHUB_ENV
-            echo "DOCKER_USERNAME= ${{secrets.DOCKER_USERNAME_MINSEOK}}" >> $GITHUB_ENV
-            echo "DOCKER_PASSWORD= ${{secrets.DOCKER_PASSWORD_MINSEOK}}" >> $GITHUB_ENV
-            echo "APPLICATION_SECRET= ${{secrets.APPLICATION_SECRET_MINSEOK}}" >> $GITHUB_ENV
-            echo "REACT_ENV= ${{secrets.REACT_ENV_MINSEOK}}" >> $GITHUB_ENV
+            echo "GCP_VM_USERNAME=${{secrets.GCP_VM_USERNAME_MINSEOK}}" >> $GITHUB_ENV
+            echo "GCP_VM_SSHKEY=${{secrets.GCP_VM_SSHKEY_MINSEOK}}" >> $GITHUB_ENV
+            echo "DOCKER_USERNAME=${{secrets.DOCKER_USERNAME_MINSEOK}}" >> $GITHUB_ENV
+            echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_MINSEOK}}" >> $GITHUB_ENV
+            echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_MINSEOK}}" >> $GITHUB_ENV
+            echo "REACT_ENV=${{secrets.REACT_ENV_MINSEOK}}" >> $GITHUB_ENV
   
-          # elif[ ${{github.ref}} == 'refs/heads/deploy-minseok']; then
-          #   echo "TEST=abcdef" >> $GITHUB_ENV
+          elif [ ${{github.ref}} == 'refs/heads/deploy-mina']; then
+          
+            echo "GCP_VM_HOST=${{secrets.GCP_VM_HOST_MINA}}" >> $GITHUB_ENV
+            echo "GCP_VM_USERNAME=${{secrets.GCP_VM_USERNAME_MINA}}" >> $GITHUB_ENV
+            echo "GCP_VM_SSHKEY=${{secrets.GCP_VM_SSHKEY_MINA}}" >> $GITHUB_ENV
+            echo "DOCKER_USERNAME=${{secrets.DOCKER_USERNAME_MINA}}" >> $GITHUB_ENV
+            echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_MINA}}" >> $GITHUB_ENV
+            echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_MINA}}" >> $GITHUB_ENV
+            echo "REACT_ENV=${{secrets.REACT_ENV_MINA}}" >> $GITHUB_ENV
+            echo "REACT_ENV=${{secrets.REACT_ENV_MINA}}" >> $GITHUB_ENV
+  
+          elif [ ${{github.ref}} == 'refs/heads/deploy_hyeok']; then
+          
+            echo "GCP_VM_HOST=${{secrets.GCP_VM_HOST_HYEOK}}" >> $GITHUB_ENV
+            echo "GCP_VM_USERNAME=${{secrets.GCP_VM_USERNAME_HYEOK}}" >> $GITHUB_ENV
+            echo "GCP_VM_SSHKEY=${{secrets.GCP_VM_SSHKEY_HYEOK}}" >> $GITHUB_ENV
+            echo "DOCKER_USERNAME=${{secrets.DOCKER_USERNAME_HYEOK}}" >> $GITHUB_ENV
+            echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_HYEOK}}" >> $GITHUB_ENV
+            echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_HYEOK}}" >> $GITHUB_ENV
+            echo "REACT_ENV=${{secrets.REACT_ENV_HYEOK}}" >> $GITHUB_ENV
+            echo "REACT_ENV=${{secrets.REACT_ENV_HYEOK}}" >> $GITHUB_ENV
+  
+          elif [ ${{github.ref}} == 'refs/heads/deploy-sungeun']; then
+          
+            echo "GCP_VM_HOST=${{secrets.GCP_VM_HOST_SUNGEUN}}" >> $GITHUB_ENV
+            echo "GCP_VM_USERNAME=${{secrets.GCP_VM_USERNAME_SUNGEUN}}" >> $GITHUB_ENV
+            echo "GCP_VM_SSHKEY=${{secrets.GCP_VM_SSHKEY_SUNGEUN}}" >> $GITHUB_ENV
+            echo "DOCKER_USERNAME=${{secrets.DOCKER_USERNAME_SUNGEUN}}" >> $GITHUB_ENV
+            echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_SUNGEUN}}" >> $GITHUB_ENV
+            echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_SUNGEUN}}" >> $GITHUB_ENV
+            echo "REACT_ENV=${{secrets.REACT_ENV_SUNGEUN}}" >> $GITHUB_ENV
+            
           fi
       - name: checkout
         uses: actions/checkout@v6.0.2
@@ -57,7 +87,7 @@ jobs:
         run: |
           cd trip_planner_front
           echo ${{env.REACT_ENV}} | base64 --decode > .env
-          docker build -t ${{env.DOCKER_USERNAME}}/react-app:latest .
+          docker build --no-cache -t ${{env.DOCKER_USERNAME}}/react-app:latest .
           
 
       - name: React Docker image push

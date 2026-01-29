@@ -1,11 +1,11 @@
 /** @jsxImportSource @emotion/react */
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import * as s from "./styles";
 import { IoSend } from "react-icons/io5";
 import { useQuery } from "@tanstack/react-query";
-import { createComment, getCommentsBySpotId } from "../../apis/commentApi";
+import { createComment, getCommentsBySpotId ,getRatingSummaryBySpotId} from "../../apis/commentApi";
 
 function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, onSubmitReview }) {
     const [rating, setRating] = useState(0);
@@ -21,13 +21,13 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
 
     const comments = commentResp?.data ?? [];
 
-    const maskName = (name) => {
-        if (!name) return "익명";
-        const len = name.length;
-        if (len <= 1) return name;
-        if (len === 2) return name[0] + "*";
-        return name[0] + "*".repeat(len - 2) + name[len - 1];
-    };
+    const { data: ratingResp, refetch: refetchRating } = useQuery({
+        queryKey: ["ratingSummary", spotId],
+        queryFn: () => getRatingSummaryBySpotId(spotId),
+        enabled: !!spotId && isOpen,
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    
 
     useEffect(() => {
         if (!isOpen) return;
@@ -57,13 +57,19 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
     const imageUrl = rawImageUrl ? (rawImageUrl.startsWith("http") ? rawImageUrl : `${API_BASE}${rawImageUrl.startsWith("/") ? "" : "/"}${rawImageUrl}`) : "";
     const description = spot?.description ?? spot?.overview ?? "";
     const hasDescription = typeof description === "string" ? description.trim().length > 0 : !!description;
-    const avgRating = Number(spot?.avgRating ?? spot?.ratingAvg ?? 0);
+    const avgRating = ratingResp?.data?.avgRating ?? 0;
+    const ratingText = `${avgRating.toFixed(1)}/5`;
+
     const tags = spot?.tags ?? spot?.tagList ?? [];
 
     const canSubmit = rating > 0 && comment.trim().length > 0;
 
     const submitReview = async () => {
-        if (!canSubmit) return;
+        if (!canSubmit || isSubmitting) return;
+        setIsSubmitting(true);
+        console.log("comment",comment.trim());
+        console.log("제출",rating);
+
         const payload = {
             spotId: spotId,
             starScore: rating,
@@ -76,11 +82,19 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
             }
             await createComment(payload);
             await refetch();
-            setRating(0);
-            setComment("");
+            await refetchRating();
+        } else {
+            await createComment(payload);
+            await refetch();
+            await refetchRating();
+        }
+        setRating(0);
+        setComment("");
         } catch (e) {
-            console.error(e);
-            alert("리뷰 등록 중 문제가 발생했어요.");
+        console.error(e);
+        alert("리뷰 등록 중 문제가 발생했어요.");
+        }finally{
+            setIsSubmitting(false);
         }
     };
 
@@ -118,40 +132,60 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
                         {isLoading ? "설명 불러오는 중..." : hasDescription ? description : "설명이 아직 없어요."}
                     </div>
 
-                    {children}
-
-                    <div css={s.reviewSection}>
-                        <div css={s.comment}>
-                            {comments.length === 0 ? (
-                                <div>아직 리뷰가 없어요.</div>
+            {/* 기존 슬롯 유지 */}
+            {children}
+            <div css={s.reviewSection}>
+                <div css={s.commentWrapper}>
+                    <div css={s.comment}>
+                        {comments.length === 0 ? (
+                            <div>아직 리뷰가 없어요.</div>
                             ) : (
-                                comments.map((c) => (
-                                    <div key={c.commentId} css={s.commentItem}>
-                                        <div css={s.commentTop}>
-                                            <span css={s.commentName}>{maskName(c.username)}</span>
-                                            <span css={s.commentStars}>
-                                                {"★".repeat(c.starScore)}{"☆".repeat(5 - c.starScore)}
-                                            </span>
-                                        </div>
-                                        <div css={s.commentContent}>{c.content}</div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                            comments.map((c) => (
+                            <div key={c.commentId} css={s.commentItem}>
+                                <div css={s.commentTop}>
+                                <span css={s.commentName}>{c.username}</span>
+                                <span css={s.commentStars}>
+                                    {"★".repeat(c.starScore)}
+                                    {"☆".repeat(5 - c.starScore)}
+                                </span>
+                                </div>
+                                <div css={s.commentContent}>{c.content}</div>
+                            </div>
+                            ))
+                        )}
 
-                        <div css={s.starInputRow} onMouseLeave={() => setHoverRating(0)}>
-                            {[1, 2, 3, 4, 5].map((n) => (
-                                <button
-                                    key={n}
-                                    type="button"
-                                    css={s.starBtn(previewValue >= n)}
-                                    onMouseEnter={() => setHoverRating(n)}
-                                    onClick={() => setRating(n === rating ? 0 : n)}
-                                >
-                                    {previewValue >= n ? <FaStar size={30} /> : <FaRegStar size={30} />}
-                                </button>
-                            ))}
-                        </div>
+                    </div>
+
+                </div>
+                
+                <div
+                    css={s.starInputRow}
+                    aria-label="별점 선택"
+                    onMouseLeave={() => setHoverRating(0)} // ✅ 별 영역 벗어나면 프리뷰 해제
+                >
+                    {[1, 2, 3, 4, 5].map((n) => {
+                        const active = previewValue >= n; // ✅ 프리뷰 기준으로 채우기
+                        const Icon = active ? FaStar : FaRegStar;
+
+                        return (
+                            <button
+                                key={n}
+                                type="button"
+                                css={s.starBtn(active)}
+                                onMouseEnter={() => setHoverRating(n)} // ✅ 호버 프리뷰
+                                onFocus={() => setHoverRating(n)}      // ✅ 키보드 접근성
+                                onBlur={() => setHoverRating(0)}
+                                onClick={() => {
+                                setRating((prev) => (prev === n ? 0 : n));
+                                setHoverRating(0);
+                                }}
+                                aria-label={`${n}점`}
+                            >
+                                <Icon size={30} />
+                            </button>
+                        );
+                    })}
+                </div>
 
                         <div css={s.commentBar}>
                             <textarea
@@ -166,7 +200,8 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
                                 type="button"
                                 css={s.sendBtn(canSubmit)}
                                 onClick={submitReview}
-                                disabled={!canSubmit}
+                                disabled={!canSubmit || isSubmitting}
+                                aria-label="댓글 전송"
                             >
                                 <IoSend size={16} />
                             </button>

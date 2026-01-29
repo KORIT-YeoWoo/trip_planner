@@ -72,7 +72,8 @@ export const right = css`
     display: flex;
     flex-direction: column;
     gap: 10px;
-    overflow: auto;
+   min-height: 0; 
+    overflow: hidden; 
 `;
 
 export const topRow = css`
@@ -153,11 +154,14 @@ export const desc = css`
 `;
 
 export const reviewSection = css`
-    margin-top: auto; /* ✅ 오른쪽 영역 맨 아래로 내려가게 */
+  flex: 1;        /* ✅ right 안에서 남는 공간 전부 차지 */
+  min-height: 0;
+
     padding-top: 14px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+   
 `;
 
 export const starInputRow = css`
@@ -267,4 +271,22 @@ export const commentContent = css`
   color: #333;
   white-space: pre-wrap;
   line-height: 1.5;
+`;
+
+export const commentWrapper = css`
+  flex: 1;
+  min-height: 0;        /* ⭐ 이것도 중요 */
+  overflow-y: auto;     /* ✅ 댓글만 스크롤 */
+  padding-right: 8px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 `;

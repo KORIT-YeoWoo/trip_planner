@@ -3,6 +3,7 @@ package com.korit.trip_planner_back.controller;
 import com.korit.trip_planner_back.dto.request.CommentReqDto;
 import com.korit.trip_planner_back.dto.response.ApiResponseDto;
 
+import com.korit.trip_planner_back.dto.response.RatingSummaryResp;
 import com.korit.trip_planner_back.security.PrincipalUser;
 import com.korit.trip_planner_back.service.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,12 @@ public class CommentController {
     @GetMapping("/api/comments/spots/{spotId}")
     public ApiResponseDto<?> getComments(@PathVariable int spotId) {
         return ApiResponseDto.success(commentService.getCommentsBySpotId(spotId));
+    }
+    @GetMapping("/api/comments/spots/{spotId}/rating-summary")
+    public ApiResponseDto<RatingSummaryResp> getRatingsSummary(
+            @PathVariable int spotId
+    ){
+        return ApiResponseDto.success(commentService.getRatingSummary(spotId));
     }
 
 }

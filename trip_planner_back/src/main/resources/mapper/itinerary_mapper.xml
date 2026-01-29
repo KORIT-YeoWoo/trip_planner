@@ -9,7 +9,7 @@
         INSERT INTO itineraries
         (user_id, start_date, end_date, budget, transport, party_type, total_cost, created_at)
         VALUES
-        (#{userId}, #{startDate}, #{endDate}, #{budget}, #{transport}, #{partyType}, #{title}, #{totalCost}, NOW())
+        (#{userId}, #{startDate}, #{endDate}, #{budget}, #{transport}, #{partyType}, #{totalCost}, NOW())
     </insert>
 
     <select id="findByItineraryId" resultType="itinerary">
@@ -21,7 +21,6 @@
             budget,
             transport,
             party_type AS partyType,
-            title,
             total_cost AS totalCost,
             created_at AS createdAt
         FROM
@@ -39,7 +38,6 @@
             budget,
             transport,
             party_type AS partyType,
-            title,
             total_cost AS totalCost,
             created_at AS createdAt
         FROM
@@ -54,7 +52,6 @@
             budget,
             transport,
             party_type AS partyType,
-            title,
             total_cost AS totalCost,
             created_at AS createdAt
         FROM
@@ -73,7 +70,6 @@
             budget = #{budget},
             transport = #{transport},
             party_type = #{partyType},
-            title = #{title},
             total_cost = #{totalCost}
         WHERE
             itinerary_id = #{itineraryId}

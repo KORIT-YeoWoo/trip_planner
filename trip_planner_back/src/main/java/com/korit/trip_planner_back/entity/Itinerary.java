@@ -22,7 +22,6 @@ public class Itinerary {
     private String transport;         // 이동수단
     private String partyType;         // 동행 유형
     private Integer totalCost;        // 총 비용
-    private String title;
     private LocalDateTime createdAt;  // 생성일시
 
     private String startLocationName;  // 출발지 이름

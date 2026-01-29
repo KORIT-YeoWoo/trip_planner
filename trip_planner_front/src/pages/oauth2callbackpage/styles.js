@@ -14,8 +14,13 @@ export const loadingContainer = css`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
   background-color: #f8f9fa;
+  z-index: 9999;
 `;
 
 export const spinner = css`
@@ -32,4 +37,5 @@ export const loadingText = css`
   font-size: 1.2rem;
   color: #374151;
   font-weight: 500;
+  text-align: center;
 `;

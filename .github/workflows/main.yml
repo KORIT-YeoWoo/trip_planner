@@ -87,7 +87,7 @@ jobs:
         run: |
           cd trip_planner_front
           echo ${{env.REACT_ENV}} | base64 --decode > .env
-          docker build -t ${{env.DOCKER_USERNAME}}/react-app:latest .
+          docker build --no-cache -t ${{env.DOCKER_USERNAME}}/react-app:latest .
           
 
       - name: React Docker image push

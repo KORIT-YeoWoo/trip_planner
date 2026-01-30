@@ -1,13 +1,11 @@
-import axios from "axios";
+import instance from "../configs/axios";
 
 export const getTravelStyle = async () => {
-    const token = localStorage.getItem('accessToken');
-    const response = await axios.get('/api/travel-style/my', {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
-    
-    console.log('API 응답:', response.data);
-    return response.data;
+    try {
+        const response = await instance.get('/api/travel-style/my');
+        return response.data || response;
+    } catch (error) {
+        console.error('getTravelStyle 에러:', error);
+        throw error;
+    }
 };

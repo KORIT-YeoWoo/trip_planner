@@ -1,34 +1,40 @@
 /** @jsxImportSource @emotion/react */
 import * as s from './styles';
 
-// 타입별 이미지 매핑
+import influencerImg from '../../assets/influencer.png';
+import foodieImg from '../../assets/foodie.png';
+import explorerImg from '../../assets/explorer.png';
+import driverImg from '../../assets/driver.png';
+import flexImg from '../../assets/flex.png';
+import vacationImg from '../../assets/vacation.png';
+import costEffectiveImg from '../../assets/cost-effective.png';
+import healingImg from '../../assets/healing.png';
+import balanceImg from '../../assets/balance.png';
+
 const typeImages = {
-    INFLUENCER: '/images/styles/influencer.png',
-    FOODIE: '/images/styles/foodie.png',
-    EXPLORER: '/images/styles/explorer.png',
-    DRIVER: '/images/styles/driver.png',
-    FLEX: '/images/styles/flex.png',
-    VACATION: '/images/styles/vacation.png',
-    COST_EFFECTIVE: '/images/styles/cost-effective.png',
-    HEALING: '/images/styles/healing.png',
-    BALANCE: '/images/styles/balance.png'
+    INFLUENCER: influencerImg,
+    FOODIE: foodieImg,
+    EXPLORER: explorerImg,
+    DRIVER: driverImg,
+    FLEX: flexImg,
+    VACATION: vacationImg,
+    COST_EFFECTIVE: costEffectiveImg,
+    HEALING: healingImg,
+    BALANCE: balanceImg
 };
 
 function TravelStyleCard({ type, typeName, description }) {
     return (
-        <div css={s.styleCard}>
-            <div css={s.characterSection}>
+        <div css={s.leftCard}>
+            <div css={s.characterCircle}>
                 <img 
-                    src={typeImages[type] || '/images/styles/default.png'} 
+                    src={typeImages[type] || driverImg} 
                     alt={typeName}
-                    css={s.characterImage}
+                    css={s.characterImg}
                 />
             </div>
-
-            <div css={s.infoSection}>
-                <h2 css={s.typeName}>{typeName}</h2>
-                <p css={s.typeDescription}>{description}</p>
-            </div>
+            <h2 css={s.cardTypeName}>{typeName}</h2>
+            <p css={s.cardDescription}>{description}</p>
         </div>
     );
 }

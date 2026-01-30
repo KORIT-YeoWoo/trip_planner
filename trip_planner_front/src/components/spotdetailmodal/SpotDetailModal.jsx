@@ -64,11 +64,10 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
 
     const canSubmit = rating > 0 && comment.trim().length > 0;
 
+
     const submitReview = async () => {
         if (!canSubmit || isSubmitting) return;
         setIsSubmitting(true);
-        console.log("comment",comment.trim());
-        console.log("제출",rating);
 
         const payload = {
             spotId: spotId,
@@ -79,21 +78,19 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
         try {
             if (onSubmitReview) {
                 await onSubmitReview(payload);
+            } else {
+                await createComment(payload);
             }
-            await createComment(payload);
+
             await refetch();
             await refetchRating();
-        } else {
-            await createComment(payload);
-            await refetch();
-            await refetchRating();
-        }
-        setRating(0);
-        setComment("");
+
+            setRating(0);
+            setComment("");
         } catch (e) {
-        console.error(e);
-        alert("리뷰 등록 중 문제가 발생했어요.");
-        }finally{
+            console.error(e);
+            alert("리뷰 등록 중 문제가 발생했어요.");
+        } finally {
             setIsSubmitting(false);
         }
     };

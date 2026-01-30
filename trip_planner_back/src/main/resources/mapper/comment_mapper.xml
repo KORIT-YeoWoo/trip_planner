@@ -37,5 +37,15 @@
         ORDER BY c.created_at DESC
 
     </select>
+    <select id="getRatingSummary"
+            resultType="com.korit.trip_planner_back.dto.response.RatingSummaryResp">
+        SELECT
+        IFNULL(AVG(star_score), 0) AS avgRating,
+        COUNT(*) AS reviewCount
+        FROM comments
+        WHERE spot_id = #{spotId}
+    </select>
+
+
 
 </mapper>

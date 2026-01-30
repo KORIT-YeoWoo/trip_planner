@@ -10,7 +10,8 @@ function MyItinerariesPage() {
     const navigate = useNavigate();
     const [itineraries, setItineraries] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const API_BASE = import.meta.env.VITE_API_BASE_URL;
+    
     useEffect(() => {
         fetchMyItineraries();
     }, []);
@@ -20,7 +21,7 @@ function MyItinerariesPage() {
             const token = localStorage.getItem('AccessToken');
             
             const response = await axios.get(
-                'http://localhost:8080/api/itinerary/my',
+                '${API_BASE}/api/itinerary/my',
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -62,7 +63,7 @@ function MyItinerariesPage() {
             const token = localStorage.getItem('AccessToken');
             
             await axios.delete(
-                `http://localhost:8080/api/itinerary/${itineraryId}`,
+                `${API_BASE}/api/itinerary/${itineraryId}`,
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`

@@ -7,11 +7,12 @@ import { FcGoogle } from "react-icons/fc";
 
 function LoginModal() {
     const { isLoginModalOpen, closeLoginModal } = useAuth();
+    const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
     if (!isLoginModalOpen) return null;
 
     const handleOAuth2LoginOnClick = (clientName) => {
-        window.location.href = `http://localhost:8080/oauth2/authorization/${clientName}`;
+        window.location.href = `${API_BASE}/oauth2/authorization/${clientName}`;
     };
 
     return (

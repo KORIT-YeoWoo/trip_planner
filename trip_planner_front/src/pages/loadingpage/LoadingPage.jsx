@@ -16,7 +16,7 @@ function LoadingPage() {
     const [progress, setProgress] = useState(1);
     const [isApiComplete, setIsApiComplete] = useState(false);
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
     const phase = useMemo(() => {
         if (progress <= 50) return 1;

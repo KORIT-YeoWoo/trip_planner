@@ -5,7 +5,9 @@ import com.korit.trip_planner_back.dto.request.ItineraryReqDto;
 import com.korit.trip_planner_back.dto.request.ItinerarySaveDto;
 import com.korit.trip_planner_back.dto.request.ReorderRequestDto;
 import com.korit.trip_planner_back.dto.response.DayScheduleDto;
+import com.korit.trip_planner_back.dto.response.ItineraryListDto;
 import com.korit.trip_planner_back.dto.response.ItineraryRespDto;
+import com.korit.trip_planner_back.security.PrincipalUser;
 import com.korit.trip_planner_back.service.ItineraryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -87,6 +91,24 @@ public class ItineraryController {
 
         return ResponseEntity.ok(result);
     }
+    @DeleteMapping("/{itineraryId}")
+    @Operation(summary = "일정 삭제", description = "일정 전체 삭제")
+    public ResponseEntity<Void> deleteItinerary(@PathVariable Integer itineraryId) {
+        // 권한 체크
+        PrincipalUser principalUser = PrincipalUser.getAuthenticatedPrincipalUser();
+
+        if (principalUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Integer userId = principalUser.getUser().getUserId();
+
+        log.info("일정 삭제 요청: itineraryId={}, userId={}", itineraryId, userId);
+
+        itineraryService.deleteItinerary(itineraryId, userId);
+
+        return ResponseEntity.noContent().build();
+    }
 
     @DeleteMapping("/{itineraryId}/days/{day}/items/{spotId}")
     public ResponseEntity<DayScheduleDto> deleteScheduleItem(
@@ -114,6 +136,24 @@ public class ItineraryController {
         log.info("일정 조회 요청: itineraryId={}", itineraryId);
 
         ItineraryRespDto result = itineraryService.getItinerary(itineraryId);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/my")
+    @Operation(summary = "내 일정 목록", description = "로그인한 사용자의 일정 목록 조회")
+    public ResponseEntity<List<ItineraryListDto>> getMyItineraries() {
+        // 현재 로그인한 사용자 ID 가져오기
+        PrincipalUser principalUser = PrincipalUser.getAuthenticatedPrincipalUser();
+
+        if (principalUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Integer userId = principalUser.getUser().getUserId();
+        log.info("내 일정 목록 조회 요청: userId={}", userId);
+
+        List<ItineraryListDto> result = itineraryService.getMyItineraries(userId);
 
         return ResponseEntity.ok(result);
     }

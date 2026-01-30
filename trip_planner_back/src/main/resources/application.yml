@@ -1,13 +1,43 @@
 spring:
   profiles:
-    active: local
+    active: dev
     group:
-      local: common, secret
-  application:
-    name: trip-planner
+      dev: dev, common, secret
+      minseok: minseok-server, common, secret
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: minseok-server
+
+domain:
+  name:
+    http: http://localhost:80
+    https: https://localhost:443
+
+app:
+  cors:
+    allowed-origins:
+      - "http://localhost"
+---
 
 server:
   port: 8080
+
+spring:
+  application:
+    name: trip-planner
+  config:
+    activate:
+      on-profile: common
 
 # 스웨거 설정
 springdoc:

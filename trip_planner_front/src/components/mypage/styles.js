@@ -10,7 +10,7 @@ const colors = {
 };
 
 export const container = css`
-    width: 279px; /* 사이드바 너비에 맞춤 */
+    width: 279px; 
     background-color: ${colors.white};
     border-radius: 20px;
     border: 1px solid ${colors.border};
@@ -34,7 +34,7 @@ export const profileWrapper = css`
     gap: 8px;
 `;
 
-export const nicknameDisplay = css`
+export const nameDisplay = css`
     display: flex;
     align-items: center;
     gap: 8px;
@@ -49,51 +49,6 @@ export const userEmail = css`
     margin: 0;
     font-size: 13px;
     opacity: 0.9;
-`;
-
-/* 닉네임 수정 폼 */
-export const nicknameEdit = css`
-    display: flex;
-    gap: 5px;
-    justify-content: center;
-`;
-
-export const nicknameInput = css`
-    width: 120px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    border: none;
-    font-size: 14px;
-`;
-
-export const saveButton = css`
-    background: ${colors.white};
-    color: ${colors.primary};
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-`;
-
-export const cancelButton = css`
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-`;
-
-export const editButton = css`
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid white;
-    color: white;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    &:hover { background: white; color: ${colors.primary}; }
 `;
 
 const menuItem = css`

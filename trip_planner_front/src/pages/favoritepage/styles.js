@@ -63,7 +63,7 @@ export const card = (select) => css`
   border-radius: ${colors.radius};
   overflow: hidden;
   padding:0px;
-  aspect-ratio: 1 / 1;
+  
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
   transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -80,6 +80,7 @@ export const imageWrapper = css`
   position: relative;
   width: 100%;
   min-height: 0;
+  aspect-ratio: 1 / 1;
   flex: 1;
   overflow: hidden;
   flex-shrink: 0;

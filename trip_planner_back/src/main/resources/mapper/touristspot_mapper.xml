@@ -72,6 +72,7 @@
             price,
             is_island,
             created_at
+
         FROM
             tourist_spots
         ORDER BY

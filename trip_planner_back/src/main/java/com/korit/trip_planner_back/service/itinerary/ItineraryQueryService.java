@@ -1,10 +1,7 @@
 // service/itinerary/ItineraryQueryService.java
 package com.korit.trip_planner_back.service.itinerary;
 
-import com.korit.trip_planner_back.dto.response.DayScheduleDto;
-import com.korit.trip_planner_back.dto.response.ItineraryRespDto;
-import com.korit.trip_planner_back.dto.response.ScheduleItemDto;
-import com.korit.trip_planner_back.dto.response.TravelInfoDto;
+import com.korit.trip_planner_back.dto.response.*;
 import com.korit.trip_planner_back.entity.*;
 import com.korit.trip_planner_back.mapper.*;
 import lombok.RequiredArgsConstructor;
@@ -212,15 +209,73 @@ public class ItineraryQueryService {
 
         return daySchedule;
     }
-
     /**
-     * 사용자별 일정 목록 조회 (추가 기능)
+     * 내 일정 목록 조회
      */
-//    public List<ItineraryRespDto> findByUserId(Integer userId) {
-//        List<Itinerary> itineraries = itineraryMapper.findByUserId(userId);
-//
-//        return itineraries.stream()
-//                .map(itinerary -> findById(itinerary.getItineraryId()))
-//                .collect(Collectors.toList());
-//    }
+    public List<ItineraryListDto> findMyItineraries(Integer userId) {
+        log.info("=== 내 일정 목록 조회: userId={} ===", userId);
+
+        // 1. 사용자의 일정 목록
+        List<Itinerary> itineraries = itineraryMapper.findByUserId(userId);
+
+        if (itineraries.isEmpty()) {
+            log.info("일정이 없습니다: userId={}", userId);
+            return new ArrayList<>();
+        }
+
+        // 2. 각 일정의 상세 정보 조회
+        List<ItineraryListDto> result = new ArrayList<>();
+
+        for (Itinerary itinerary : itineraries) {
+            // 관광지 개수 조회
+            List<ItineraryItem> items = itineraryItemMapper.findByItineraryId(itinerary.getItineraryId());
+
+            int totalSpots = (int) items.stream()
+                    .filter(item -> "SPOT".equals(item.getItemType()))
+                    .count();
+
+            // 첫 번째 관광지 이미지 (썸네일)
+            String thumbnailUrl = null;
+            if (!items.isEmpty()) {
+                Integer firstSpotId = items.stream()
+                        .filter(item -> "SPOT".equals(item.getItemType()))
+                        .findFirst()
+                        .map(ItineraryItem::getSpotId)
+                        .orElse(null);
+
+                if (firstSpotId != null) {
+                    TouristSpot spot = touristSpotMapper.findById(firstSpotId);
+                    if (spot != null && spot.getSpotImg() != null && !spot.getSpotImg().isEmpty()) {
+                        thumbnailUrl = spot.getSpotImg();
+                    }
+                }
+            }
+
+            // DTO 생성
+            ItineraryListDto dto = ItineraryListDto.builder()
+                    .itineraryId(itinerary.getItineraryId())
+                    .startDate(itinerary.getStartDate())
+                    .endDate(itinerary.getEndDate())
+                    .budget(itinerary.getBudget())
+                    .transport(itinerary.getTransport())
+                    .partyType(itinerary.getPartyType())
+                    .totalCost(itinerary.getTotalCost())
+                    .totalSpots(totalSpots)
+                    .dayCount(ItineraryListDto.calculateDays(
+                            itinerary.getStartDate(),
+                            itinerary.getEndDate()
+                    ))
+                    .thumbnailUrl(thumbnailUrl)
+                    .title(ItineraryListDto.generateTitle(
+                            itinerary.getStartDate(),
+                            itinerary.getEndDate()
+                    ))
+                    .build();
+
+            result.add(dto);
+        }
+
+        log.info("=== 일정 목록 조회 완료: {}개 ===", result.size());
+        return result;
+    }
 }

@@ -24,3 +24,7 @@ export const createComment = async (data) => {
 
 export const getCommentsBySpotId = (spotId) =>
   instance.get(`/api/comments/spots/${spotId}`);
+
+
+export const getRatingSummaryBySpotId = (spotId)=>
+  instance.get(`/api/comments/spots/${spotId}/rating-summary`);

@@ -165,6 +165,8 @@ export const searchBar = css`
   gap: 10px;
   align-items: center;
   margin: 10px 0 16px;
+  width: 90%;
+  padding-left: 40px;
 `;
 
 export const searchInput = css`
@@ -186,6 +188,7 @@ export const categoryBar = css`
   gap: 8px;
   flex-wrap: wrap;
   margin: 8px 0 24px;
+  padding-left: 40px;
 `;
 
 export const categoryBtn = (active) => css`
@@ -421,4 +424,10 @@ export const sclick = css`
         background-color: #ccc;
         cursor: default;
     }
+`;
+export const rating = css`
+  margin-left: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #f47a20;
 `;

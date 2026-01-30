@@ -39,6 +39,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> {
             auth.requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll();
             auth.requestMatchers("/api/auth/me").authenticated(); // 헤더 정보용
+            auth.requestMatchers("/api/travel-style/**").permitAll();
             auth.anyRequest().permitAll();
         });
 

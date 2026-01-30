@@ -64,7 +64,7 @@ function TosPage() {
 
             <div 
                 css={s.bar}
-                style={{ borderLeft: '1px solid #e00000', borderRight: 'none' }}
+                style={{ borderRight: 'none' }}
             ></div>
         </div>
     );

@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TravelInfoDto {
+public class    TravelInfoDto {
 
     private Double distance;
     private Integer duration;

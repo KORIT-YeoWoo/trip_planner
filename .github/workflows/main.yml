@@ -31,7 +31,6 @@ jobs:
             echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_MINA}}" >> $GITHUB_ENV
             echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_MINA}}" >> $GITHUB_ENV
             echo "REACT_ENV=${{secrets.REACT_ENV_MINA}}" >> $GITHUB_ENV
-            echo "REACT_ENV=${{secrets.REACT_ENV_MINA}}" >> $GITHUB_ENV
   
           elif [ ${{github.ref}} == 'refs/heads/deploy_hyeok' ]; then
           
@@ -41,7 +40,6 @@ jobs:
             echo "DOCKER_USERNAME=${{secrets.DOCKER_USERNAME_HYEOK}}" >> $GITHUB_ENV
             echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_HYEOK}}" >> $GITHUB_ENV
             echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_HYEOK}}" >> $GITHUB_ENV
-            echo "REACT_ENV=${{secrets.REACT_ENV_HYEOK}}" >> $GITHUB_ENV
             echo "REACT_ENV=${{secrets.REACT_ENV_HYEOK}}" >> $GITHUB_ENV
   
           elif [ ${{github.ref}} == 'refs/heads/deploy-sungeun' ]; then

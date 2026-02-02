@@ -2,16 +2,18 @@ spring:
   profiles:
     active: dev
     group:
-      dev: dev, common, secret
-      minseok: minseok-server, common, secret
+      dev: dev, common, secret-dev
+      minseok: minseok-server, common, secret-prod
+      mina: mina-server, common, secret-prod
+      hyeok: hyeok-server, common, secret-prod
 
 ---
+
 spring:
   config:
     activate:
       on-profile: dev
     import: "classpath:application-secret-dev.yml"
-
 
 ---
 spring:
@@ -21,13 +23,42 @@ spring:
 
 domain:
   name:
-    http: http://localhost:80
-    https: https://localhost:443
+    http: http://rasche.store
+    https: https://rasche.store
 
 app:
   cors:
     allowed-origins:
-      - "http://localhost"
+      - "http://rasche.store"
+---
+config:
+  activate:
+    on-profile: mina-server
+
+domain:
+  name:
+    http: http://mina127.store
+    https: https://mina127.store
+
+app:
+  cors:
+    allowed-origins:
+      - "http://mina127.store"
+---
+
+config:
+  activate:
+    on-profile: hyeok-server
+
+domain:
+  name:
+    http: http://koyeh.store
+    https: https://koyeh.store
+
+app:
+  cors:
+    allowed-origins:
+      - "http://koyeh.store"
 ---
 
 server:

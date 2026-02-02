@@ -53,7 +53,7 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
     const previewValue = hoverRating > 0 ? hoverRating : rating;
     const title = spot?.title ?? spot?.name ?? "관광지";
     const rawImageUrl = spot?.spotImg ?? spot?.mainImage ?? spot?.firstImage ?? spot?.imageUrl ?? "";
-    const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+    const API_BASE = import.meta.env.VITE_API_BASE_URL;
     const imageUrl = rawImageUrl ? (rawImageUrl.startsWith("http") ? rawImageUrl : `${API_BASE}${rawImageUrl.startsWith("/") ? "" : "/"}${rawImageUrl}`) : "";
     const description = spot?.description ?? spot?.overview ?? "";
     const hasDescription = typeof description === "string" ? description.trim().length > 0 : !!description;

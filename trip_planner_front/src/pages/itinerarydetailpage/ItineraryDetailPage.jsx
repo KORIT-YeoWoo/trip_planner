@@ -59,6 +59,8 @@ function ItineraryDetailPage() {
     const mapRef = useRef(null);
     const overlaysRef = useRef([]);
     const polylineRef = useRef(null);
+    
+    const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
     // SDK 로드
     useEffect(() => {
@@ -273,7 +275,7 @@ function ItineraryDetailPage() {
         try {
             setLoading(true);
             const response = await axios.get(
-                `http://localhost:8080/api/itinerary/${currentItineraryId}`
+                `${API_BASE}/api/itinerary/${currentItineraryId}`
             );
             
             if (response.data && response.data.days) {
@@ -306,7 +308,7 @@ function ItineraryDetailPage() {
             const token = localStorage.getItem('AccessToken');
 
             const response = await axios.post(
-                'http://localhost:8080/api/itinerary/save',
+                `${API_BASE}/api/itinerary/save`,
                 {
                     startDate: itineraryData.startDate,
                     endDate: itineraryData.endDate,
@@ -379,7 +381,7 @@ function ItineraryDetailPage() {
             });
             
             const response = await axios.delete(
-                `http://localhost:8080/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${spotId}`
+                `${API_BASE}/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${spotId}`
             );
             
             console.log('✅ 삭제 성공!');
@@ -426,7 +428,7 @@ function ItineraryDetailPage() {
         
         try {
             const response = await fetch(
-                `http://localhost:8080/api/itinerary/${currentItineraryId}/days/${currentDayNumber}/reorder`,
+                `${API_BASE}/api/itinerary/${currentItineraryId}/days/${currentDayNumber}/reorder`,
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -491,7 +493,7 @@ function ItineraryDetailPage() {
         // ✅ 저장 후: DB에 반영
         try {
             const response = await axios.put(
-                `http://localhost:8080/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${spotId}/duration`,
+                `${API_BASE}/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${spotId}/duration`,
                 { duration: newDuration }
             );
 

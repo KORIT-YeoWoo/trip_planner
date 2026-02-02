@@ -1,3 +1,7 @@
 trip_planner_front/.env.development
 trip_planner_front/.env.production
+<<<<<<< HEAD
 trip_planner_back/src/main/resources/application-secret-dev.yml trip_planner_back/src/main/resources/application-secret-prod.yml
+=======
+trip_planner_back/src/main/resources/application-secret-*.yml
+>>>>>>> 1cb6872959fdadd25524ebdef2ac7efac9bdcc36

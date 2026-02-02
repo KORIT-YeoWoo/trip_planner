@@ -10,13 +10,13 @@ import { sendTextOpenai } from "./openapiApi";
 import { BsFillSendFill } from "react-icons/bs";
 
 function TypingEffect({text, speed = 30}){
-    const [displayText, setDisplayText] = useState("");
-    const indexRef = useRef(0);
+    const [displayText, setDisplayText] = useState("");// 화면에 보여줄 타이핑 된 문자열
+    const indexRef = useRef(0); //렌더링 바뀌어도 값 유지 , 몇번째 글자까지 썼는지 기억하는것
 
     useEffect(() => {
-        setDisplayText("");
-        indexRef.current = 0;
-        const chars = Array.from(text || "");
+        setDisplayText(""); // 빈 문자열로 초기화
+        indexRef.current = 0;//인덱스 0으로 초기화 => 이젠 타이핑 리셋
+        const chars = Array.from(text || ""); // 문자열을 한 글자씩 쪼갬  
         const timer = setInterval(() => {
             if(indexRef.current < chars.length){
                 setDisplayText((prev) => prev + chars[indexRef.current++]);
@@ -25,7 +25,7 @@ function TypingEffect({text, speed = 30}){
             }
         }, speed);
         return () => clearInterval(timer);
-    }, [text, speed]);
+    }, [text, speed]); // 텍스트가 바뀌면 실행
 
     return (
         <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
@@ -35,10 +35,10 @@ function TypingEffect({text, speed = 30}){
 }
 
 function OpenaiApiModal() {
-    const [inputValue, setInputValue] = useState("");
-    const [chatData, setChatData] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const chatEndRef = useRef(null);
+    const [inputValue, setInputValue] = useState(""); // 입력하고 있는 값
+    const [chatData, setChatData] = useState([]); // 채팅한 기록을 담는 배열
+    const [isLoading, setIsLoading] = useState(false); 
+    const chatEndRef = useRef(null);// 채팅을 맨 아래로 내리는 상태값
 
     const getContextData=(question)=>{
         let filtered = [];
@@ -58,7 +58,7 @@ function OpenaiApiModal() {
         }
 
         // 최대 10개만 추출 (토큰 절약 및 정확도 향상)
-        return filtered.slice(0, 10).map(s => ({
+        return filtered.slice(0, 10).map(s => ({ // 걸러진 여행지를 10개씩 가져옴
             name: s.title,
             addr: s.address,
             desc: s.description,

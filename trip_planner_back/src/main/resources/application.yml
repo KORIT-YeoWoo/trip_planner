@@ -6,6 +6,7 @@ spring:
       minseok: minseok-server, common, secret-prod
       mina: mina-server, common, secret-prod
       hyeok: hyeok-server, common, secret-prod
+      sungeun: sungeun-server, common, secret-prod
 
 ---
 
@@ -58,6 +59,21 @@ app:
   cors:
     allowed-origins:
       - "http://koyeh.store"
+---
+
+config:
+  activate:
+    on-profile: sungeun-server
+
+domain:
+  name:
+    http: http://yeowoo.store
+    https: https://yeowoo.store
+
+app:
+  cors:
+    allowed-origins:
+      - "http://yeowoo.store"
 ---
 
 server:

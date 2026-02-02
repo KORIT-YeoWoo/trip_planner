@@ -21,7 +21,7 @@ export const searchInputWrapper = css`
 `;
 
 export const searchInput = css`
-  width: 100%;
+  width: 96%;
   padding: 12px 16px;
   border: 1px solid #ddd;
   border-radius: 8px;

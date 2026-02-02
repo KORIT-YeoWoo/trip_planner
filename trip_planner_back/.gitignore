@@ -1,5 +1,5 @@
 ### API Keys & Secrets ###
-application-secret.yml
+application-secret*.yml
 
 HELP.md
 target/

@@ -21,7 +21,7 @@ function MyItinerariesPage() {
             const token = localStorage.getItem('AccessToken');
             
             const response = await axios.get(
-                '${API_BASE}/api/itinerary/my',
+                `${API_BASE}/api/itinerary/my`,
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`

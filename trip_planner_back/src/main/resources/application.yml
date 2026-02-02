@@ -10,6 +10,7 @@ spring:
   config:
     activate:
       on-profile: dev
+    import: "classpath:application-secret-dev.yml"
 
 
 ---

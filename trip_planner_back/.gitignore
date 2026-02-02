@@ -1,6 +1,6 @@
 ### API Keys & Secrets ###
 application-secret.yml
-**/src/main/resources/application-secret*.yml
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar

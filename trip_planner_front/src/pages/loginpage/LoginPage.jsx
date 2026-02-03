@@ -18,28 +18,22 @@ function LoginPage() {
     return (
         <div css={s.layout}>
             <div css={s.container}>
-                {/* 왼쪽: 배경 이미지 영역 */}
                 <div css={s.leftBackground}></div>
-
-                {/* 오른쪽: 로그인 폼 영역 */}
                 <div css={s.rightBackground}>
                     <h1>로그인</h1>
                     <p>여행 계획의 시작, 서비스에 로그인하세요.</p>
                     
                     <div>
-                        {/* 네이버 버튼 */}
                         <button css={s.naver} onClick={() => handleOAuth2LoginOnClick("naver")}>
                             <SiNaver />
                             네이버로 시작하기
                         </button>
 
-                        {/* 카카오 버튼 */}
                         <button css={s.kakao} onClick={() => handleOAuth2LoginOnClick("kakao")}>
                             <RiKakaoTalkFill />
                             카카오로 시작하기
                         </button>
 
-                        {/* 구글 버튼 */}
                         <button css={s.google} onClick={() => handleOAuth2LoginOnClick("google")}>
                             <FcGoogle />
                             Google로 시작하기

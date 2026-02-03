@@ -7,14 +7,14 @@ export const layout = css`
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100vh; /* 화면 전체 높이 사용 */
+    height: 100vh; 
     background-color: #f5f5f5;
 `;
 
 export const container = css`
     display: flex;
     border-radius: 15px;
-    width: 900px; /* 고정 너비로 안정감 부여 */
+    width: 900px;
     height: 600px;
     background-color: #ffffff;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -22,7 +22,7 @@ export const container = css`
 `;
 
 export const leftBackground = css`
-    flex: 1; /* 왼쪽 영역 유연하게 확장 */
+    flex: 1;
     background-image: url(${loginBg});
     background-position: center;
     background-repeat: no-repeat;
@@ -43,9 +43,9 @@ export const leftBackground = css`
 export const rightBackground = css`
     display: flex;
     flex-direction: column;
-    justify-content: center; /* 세로 중앙 정렬 */
+    justify-content: center;
     align-items: center;
-    width: 450px; /* 로그인 폼 너비 고정 */
+    width: 450px;
     padding: 60px;
 
     & > h1 {
@@ -65,7 +65,7 @@ export const rightBackground = css`
         display: flex;
         flex-direction: column;
         width: 100%;
-        gap: 12px; /* 버튼 간격 */
+        gap: 12px;
 
         & > button {
             display: flex;
@@ -73,7 +73,7 @@ export const rightBackground = css`
             align-items: center;
             gap: 10px;
             width: 100%;
-            height: 48px; /* 버튼 높이 상향 */
+            height: 48px;
             border: 1px solid #dbdbdb;
             border-radius: 8px;
             cursor: pointer;

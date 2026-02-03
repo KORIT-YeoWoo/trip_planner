@@ -35,7 +35,7 @@ function TravelInfoPage() {
 
   const 총인원수 = 인원.성인 + 인원.아동;
 
-  // ✅ 날짜를 YYYY-MM-DD 형식으로 변환하는 헬퍼 함수 (시간대 문제 해결)
+  //  날짜를 YYYY-MM-DD 형식으로 변환하는 헬퍼 함수 (시간대 문제 해결)
   const formatDateToYYYYMMDD = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -105,7 +105,7 @@ function TravelInfoPage() {
           : null
       }));
       
-      console.log(`✅ ${기간.박}박${기간.일}일 → 위치정보 ${locations.length}개 생성`);
+      console.log(` ${기간.박}박${기간.일}일 → 위치정보 ${locations.length}개 생성`);
       set위치정보(locations);
     }
   }, [기간.일, 기간.박]);
@@ -155,7 +155,7 @@ function TravelInfoPage() {
       return;
     }
 
-    // ✅ 시간대 문제 해결한 날짜 변환
+    //  시간대 문제 해결한 날짜 변환
     const startDateStr = formatDateToYYYYMMDD(선택된날짜범위[0]);
     const endDateStr = formatDateToYYYYMMDD(선택된날짜범위[1]);
     
@@ -176,7 +176,7 @@ function TravelInfoPage() {
           
           return {
             day: index + 1,
-            date: formatDateToYYYYMMDD(날짜),  // ✅ 여기도 수정
+            date: formatDateToYYYYMMDD(날짜),  //  여기도 수정
             startTime: `${String(시간.시작).padStart(2, '0')}:00`,
             endTime: `${String(시간.종료).padStart(2, '0')}:00`
           };

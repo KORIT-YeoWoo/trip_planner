@@ -43,7 +43,6 @@ export default function App() {
         </Route>
       </Routes>
 
-      {/* 전역 로그인 모달: Routes 바깥에 두어 어디서든 팝업이 뜰 수 있게 함 */}
       <LoginModal />
     </>
   );

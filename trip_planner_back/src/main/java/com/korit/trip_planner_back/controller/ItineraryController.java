@@ -30,9 +30,6 @@ public class ItineraryController {
     @PostMapping("/generate")
     @Operation(summary = "일정 생성", description = "여행 일정 자동 생성 (TSP 최적화)")
     public ResponseEntity<ItineraryRespDto> generateItinerary(@RequestBody ItineraryReqDto request) {
-        System.out.println("📅 요청받은 날짜: " + request.getStartDate() + " ~ " + request.getEndDate());
-        System.out.println("📍 dailyLocations 개수: " + request.getDailyLocations().size());
-
         log.info("일정 생성 요청: {} ~ {}, 관광지 {}개",
                 request.getStartDate(),
                 request.getEndDate(),

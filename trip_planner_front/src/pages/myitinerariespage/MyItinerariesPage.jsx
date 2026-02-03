@@ -28,12 +28,10 @@ function MyItinerariesPage() {
                     }
                 }
             );
-            
-            console.log('✅ 내 일정 조회:', response.data);
             setItineraries(response.data || []);
             
         } catch (error) {
-            console.error('❌ 일정 조회 실패:', error);
+            console.error('일정 조회 실패:', error);
             if (error.response?.status === 401) {
                 alert('로그인이 필요합니다.');
                 navigate('/login');
@@ -51,7 +49,7 @@ function MyItinerariesPage() {
         });
     };
 
-    // ✅ 삭제 핸들러
+    //  삭제 핸들러
     const handleDelete = async (e, itineraryId) => {
         e.stopPropagation(); // 부모 클릭 이벤트 막기
 
@@ -70,14 +68,12 @@ function MyItinerariesPage() {
                     }
                 }
             );
-
-            console.log('✅ 일정 삭제 완료:', itineraryId);
             
             // 화면에서 즉시 제거
             setItineraries(prev => prev.filter(item => item.itineraryId !== itineraryId));
             
         } catch (error) {
-            console.error('❌ 일정 삭제 실패:', error);
+            console.error('일정 삭제 실패:', error);
             alert('일정 삭제에 실패했습니다.');
         }
     };
@@ -118,7 +114,6 @@ function MyItinerariesPage() {
                                         css={s.listItem}
                                         onClick={() => handleItemClick(itinerary.itineraryId)}
                                     >
-                                        {/* 썸네일 */}
                                         <div css={s.thumbnail}>
                                             {itinerary.thumbnailUrl ? (
                                                 <img src={itinerary.thumbnailUrl} alt="썸네일" />
@@ -126,8 +121,6 @@ function MyItinerariesPage() {
                                                 <div css={s.emptyThumbnail}>🦊</div>
                                             )}
                                         </div>
-
-                                        {/* 정보 */}
                                         <div css={s.info}>
                                             <div css={s.infoHeader}>
                                                 <h3>{itinerary.title}</h3>
@@ -143,8 +136,6 @@ function MyItinerariesPage() {
                                                 <span css={s.tag}>{itinerary.partyType}</span>
                                             </div>
                                         </div>
-
-                                        {/* ✅ 삭제 버튼 */}
                                         <button 
                                             css={s.deleteBtn}
                                             onClick={(e) => handleDelete(e, itinerary.itineraryId)}

@@ -23,6 +23,6 @@ public class TouristSpot {
     private String openingHrs;  // 영업 시작시간
     private String contact;     // 연락처
     private String spotImg;
-    private boolean isIsland;   // 섬인가?
+    private boolean isIsland;   // 섬 여부
     private LocalDateTime createdAt;
 }

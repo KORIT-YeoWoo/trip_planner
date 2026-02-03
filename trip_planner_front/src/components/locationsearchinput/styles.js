@@ -98,7 +98,7 @@ export const clearButton = css`
   }
 `;
 
-// ✅ 검색 결과 (중요 수정!)
+//  검색 결과 (중요 수정!)
 export const searchResults = css`
   position: absolute;
   top: 100%;
@@ -111,10 +111,10 @@ export const searchResults = css`
   border-top: none;
   border-radius: 0 0 8px 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;  /* ✅ 높은 z-index */
+  z-index: 1000;  /*  높은 z-index */
   margin-top: -1px;
   
-  /* ✅ 스크롤바 스타일 */
+  /*  스크롤바 스타일 */
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -139,7 +139,7 @@ export const resultItem = css`
   cursor: pointer;
   transition: background 0.2s;
   border-bottom: 1px solid #f0f0f0;
-  background: #fff;  /* ✅ 배경 명시 */
+  background: #fff;  /*  배경 명시 */
 
   &:last-child {
     border-bottom: none;

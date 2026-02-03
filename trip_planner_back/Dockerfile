@@ -4,4 +4,3 @@ ARG PROFILE
 WORKDIR /app
 COPY ${JAR_FILE} /app.jar
 ENTRYPOINT ["java","-Dspring.profiles.active=${PROFILE}", "-jar", "/app.jar"]
-# java -jar

@@ -158,7 +158,7 @@ export const dragHandle = css`
 export const deleteZone = (isActive, isOver) => css`
     position: sticky;
     bottom: 20px;
-    width: calc(100%-40px);  // ✅ 좌우 20px씩 여백
+    width: calc(100%-40px);  //  좌우 20px씩 여백
     height: ${isActive ? '40px' : '0'};
     padding: ${isActive ? '20px' : '0'};
     margin: ${isActive ? '10px' : '0'};
@@ -202,7 +202,7 @@ export const editDurationBtn = css`
     color: #ff6b35;
 `;
 
-// ✅ 팝업 백드롭 (투명한 배경)
+//  팝업 백드롭 (투명한 배경)
 export const durationPopupBackdrop = css`
     position: fixed;
     top: 0;
@@ -214,7 +214,7 @@ export const durationPopupBackdrop = css`
 
 `;
 
-// ✅ 심플한 슬라이더 팝업
+// 심플한 슬라이더 팝업
 export const durationPopup = css`
     position: fixed;
     top: 50%;

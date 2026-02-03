@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { global } from './styles/global';
 import { Global } from '@emotion/react';
-import { AuthProvider } from './contexts/AuthContext'; // ✅ 추가
+import { AuthProvider } from './contexts/AuthContext'; 
 
 const queryClient = new QueryClient({
     defaultOptions: {

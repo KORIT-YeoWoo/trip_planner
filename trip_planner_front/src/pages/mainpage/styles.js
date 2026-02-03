@@ -77,7 +77,7 @@ export const mascot = css`
 export const subtitleWrap = css`
     display: flex;
     justify-content: center;
-    perspective: 56.25rem;       /* 3D “뒤로 넘어감” 느낌 핵심 */
+    perspective: 56.25rem; 
     margin-bottom: 1.25rem;
 `;
 

@@ -4,12 +4,12 @@ const colors = {
   background: "oklch(0.99 0.005 85)",
   foreground: "oklch(0.25 0.02 60)",
   card: "oklch(1 0 0)",
-  primary: "oklch(0.68 0.18 45)", // 브랜드 오렌지/코랄
+  primary: "oklch(0.68 0.18 45)",
   primaryForeground: "oklch(1 0 0)",
   muted: "oklch(0.96 0.01 85)",
   mutedForeground: "oklch(0.55 0.02 60)",
   border: "oklch(0.92 0.01 85)",
-  accent: "oklch(0.9 0.08 45)", // 연한 오렌지
+  accent: "oklch(0.9 0.08 45)",
   radius: "1rem",
 };
 

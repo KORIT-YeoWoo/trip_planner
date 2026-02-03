@@ -35,23 +35,7 @@ function LoadingPage() {
     }, [phase]);
 
     const generateItinerary = async (travelData) => {
-        // ✅ 1. 전체 데이터 확인
-        console.log('🦊 전체 travelData:', travelData);
-        console.log('🦊 selectedSpots:', travelData.selectedSpots);
-        console.log('🦊 travelInfo:', travelData.travelInfo);
-        
-        // ✅ 2. dailyLocations 확인
-        console.log('🦊 dailyLocations:', travelData.travelInfo?.dailyLocations);
-        console.log('🦊 dailyLocations 개수:', travelData.travelInfo?.dailyLocations?.length);
-        
-        // ✅ 3. 각 일차별 확인
-        travelData.travelInfo?.dailyLocations?.forEach((loc, index) => {
-            console.log(`🦊 Day ${index + 1}:`, loc);
-            console.log(`  - 출발지: ${loc.startName} (${loc.startLat}, ${loc.startLon})`);
-            console.log(`  - 도착지: ${loc.endName} (${loc.endLat}, ${loc.endLon})`);
-        });
-
-        // ✅ 4. 백엔드로 전송할 데이터 확인
+        //  백엔드로 전송할 데이터 확인
         const requestData = {
             spotIds: travelData.selectedSpots,
             startDate: travelData.travelInfo.dateRange[0],
@@ -62,10 +46,6 @@ function LoadingPage() {
             dailyLocations: travelData.travelInfo.dailyLocations
         };
         
-        console.log('🦊 전송할 데이터:', requestData);
-        console.log('🦊 dailyLocations 타입:', typeof requestData.dailyLocations);
-        console.log('🦊 dailyLocations isArray:', Array.isArray(requestData.dailyLocations));
-
         try {
             const response = await axios.post(
                 `${API_BASE_URL}/api/itinerary/generate`,
@@ -76,19 +56,15 @@ function LoadingPage() {
                     }
                 }
             );
-            
-            console.log('🦊✨ 백엔드 응답 성공:', response.data);
-            console.log('🦊✨ dailyItineraries 개수:', response.data.days?.length); // 👈 추가
-            console.log('🦊✨ dailyItineraries 전체:', response.data.days); // 👈 추가
-            console.log('🦊✨ itineraryId:', response.data.itineraryId);
+
             return response;
 
         } catch (error) {
-            console.error('🦊❌ API 호출 실패:', error);
+            console.error('❌ API 호출 실패:', error);
             
             if (error.response) {
-                console.error('📛 Response status:', error.response.status);
-                console.error('📛 Response data:', error.response.data);
+                console.error('Response status:', error.response.status);
+                console.error('Response data:', error.response.data);
             }
             
             throw error;

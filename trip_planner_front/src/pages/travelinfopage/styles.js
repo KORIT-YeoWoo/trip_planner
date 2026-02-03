@@ -70,35 +70,29 @@ export const 달력영역 = css`
     }
   }
 
-  /* ⭐ 일요일(첫 번째 열) 빨간색 */
   .react-calendar__month-view__weekdays__weekday:nth-of-type(1) {
     color: #ff4d4d;
   }
 
-  /* ⭐ 토요일(일곱 번째 열) 파란색 */
   .react-calendar__month-view__weekdays__weekday:nth-of-type(7) {
     color: #4d79ff;
   }
 
-  /* 날짜 칸 스타일 */
   .react-calendar__tile {
     font-weight: 600;
     padding: 12px 0;
   }
 
-  /* ⭐ 토요일 날짜 숫자 파란색 */
   .react-calendar__month-view__days__day--neighboringMonth:nth-of-type(7n),
   .react-calendar__month-view__days__day:nth-of-type(7n) {
     color: #4d79ff;
   }
 
-  /* ⭐ 일요일 날짜 숫자 빨간색 (일요일 시작 기준 7n+1) */
   .react-calendar__month-view__days__day--neighboringMonth:nth-of-type(7n + 1),
   .react-calendar__month-view__days__day:nth-of-type(7n + 1) {
     color: #ff4d4d;
   }
 
-  /* 선택된 날짜는 흰색으로 유지 */
   .react-calendar__tile--active {
     background: #ff6b00 !important;
     border-radius: 10px;

@@ -5,7 +5,7 @@ export const createComment = async (data) => {
     const resp = await instance.post("/api/comments", data);
     return resp; // 공용 인터셉터가 ApiResponseDto 그대로 리턴하는 구조
   } catch (err) {
-    // ✅ 공용 axios가 못 까주는 에러를 여기서만 까줌
+    // 공용 axios가 못 까주는 에러를 여기서만 까줌
     const status = err?.response?.status;
     const serverData = err?.response?.data;
 

@@ -1,4 +1,3 @@
-// service/itinerary/ItineraryQueryService.java
 package com.korit.trip_planner_back.service.itinerary;
 
 import com.korit.trip_planner_back.dto.response.*;
@@ -11,9 +10,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 일정 조회 서비스
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,11 +21,8 @@ public class ItineraryQueryService {
     private final TouristSpotMapper touristSpotMapper;
     private final DailyLocationMapper dailyLocationMapper;
 
-    /**
-     * 일정 단건 조회
-     */
+    // 일정 단건 조회
     public ItineraryRespDto findById(Integer itineraryId) {
-        log.info("=== 일정 조회 시작: ID={} ===", itineraryId);
 
         // 1. 일정 기본 정보
         Itinerary itinerary = itineraryMapper.findByItineraryId(itineraryId);
@@ -68,7 +61,7 @@ public class ItineraryQueryService {
                 .sum();
 
         // 5. 최종 응답
-        ItineraryRespDto response = ItineraryRespDto.builder()
+        return ItineraryRespDto.builder()
                 .itineraryId(itinerary.getItineraryId())
                 .startDate(itinerary.getStartDate())
                 .endDate(itinerary.getEndDate())
@@ -81,15 +74,9 @@ public class ItineraryQueryService {
                 .totalCost(totalCost)
                 .totalSpots(totalSpots)
                 .build();
-
-        log.info("=== 일정 조회 완료: {}일, {}개 관광지 ===", days.size(), totalSpots);
-
-        return response;
     }
 
-    /**
-     * Day 일정 생성
-     */
+    // Day 일정 생성
     private DayScheduleDto buildDaySchedule(Integer itineraryId, ItineraryDay day) {
         // 1. Day의 items 조회
         List<ItineraryItem> items = itineraryItemMapper.findByDayId(
@@ -98,7 +85,6 @@ public class ItineraryQueryService {
         );
 
         if (items.isEmpty()) {
-            log.warn("Day {}에 항목이 없습니다", day.getDayNumber());
             return DayScheduleDto.builder()
                     .day(day.getDayNumber())
                     .date(day.getDate())
@@ -138,7 +124,6 @@ public class ItineraryQueryService {
                 // 관광지
                 TouristSpot spot = spotMap.get(item.getSpotId());
                 if (spot == null) {
-                    log.warn("관광지를 찾을 수 없습니다: spotId={}", item.getSpotId());
                     continue;
                 }
 
@@ -179,7 +164,6 @@ public class ItineraryQueryService {
                         .build();
 
             } else {
-                log.warn("알 수 없는 item_type: {}", item.getItemType());
                 continue;
             }
 
@@ -209,17 +193,13 @@ public class ItineraryQueryService {
 
         return daySchedule;
     }
-    /**
-     * 내 일정 목록 조회
-     */
-    public List<ItineraryListDto> findMyItineraries(Integer userId) {
-        log.info("=== 내 일정 목록 조회: userId={} ===", userId);
 
+    // 내 일정 목록 조회
+    public List<ItineraryListDto> findMyItineraries(Integer userId) {
         // 1. 사용자의 일정 목록
         List<Itinerary> itineraries = itineraryMapper.findByUserId(userId);
 
         if (itineraries.isEmpty()) {
-            log.info("일정이 없습니다: userId={}", userId);
             return new ArrayList<>();
         }
 
@@ -274,8 +254,6 @@ public class ItineraryQueryService {
 
             result.add(dto);
         }
-
-        log.info("=== 일정 목록 조회 완료: {}개 ===", result.size());
         return result;
     }
 }

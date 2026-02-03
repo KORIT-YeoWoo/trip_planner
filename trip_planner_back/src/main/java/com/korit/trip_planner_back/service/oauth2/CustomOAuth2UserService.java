@@ -1,4 +1,4 @@
-package com.korit.trip_planner_back.service;
+package com.korit.trip_planner_back.service.oauth2;
 
 import com.korit.trip_planner_back.entity.User;
 import com.korit.trip_planner_back.mapper.UserMapper;

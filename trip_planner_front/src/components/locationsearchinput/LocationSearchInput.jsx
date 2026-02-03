@@ -97,7 +97,7 @@ const LocationSearchInput = ({
             {selectedPlace ? (
                 <div css={s.selectedPlace}>
                     <div css={s.placeInfo}>
-                        <div css={s.placeName}>✅ {selectedPlace.name}</div>
+                        <div css={s.placeName}> {selectedPlace.name}</div>
                         <div css={s.placeAddress}>{selectedPlace.address}</div>
                     </div>
                     <button

@@ -48,21 +48,14 @@ public class ItineraryCreationService {
     private final AIResponseParser aiResponseParser;
     private final OrderDecisionService orderDecisionService;
 
-    /**
-     * 일정 생성 (AI 중심)
-     */
+    // 일정 생성 (AI 중심)
     @Transactional
     public ItineraryRespDto create(ItineraryReqDto request) {
-        log.info("=== 일정 생성 시작 (AI 중심 방식) ===");
-        log.info("여행 기간: {}박{}일, 관광지: {}개",
-                request.getNights(), request.getTravelDays(), request.getSpotIds().size());
-
         // 1. 검증
         validator.validateCreateRequest(request);
 
         // 3. 관광지 조회
         List<TouristSpot> allSpots = touristSpotMapper.findAllByIds(request.getSpotIds());
-        log.info("관광지 조회 완료: {}개", allSpots.size());
 
         // 4. AI - 날짜별 그룹핑
         AIScheduleResponse aiResponse = callAIScheduler(allSpots, request);
@@ -71,13 +64,7 @@ public class ItineraryCreationService {
         List<DayScheduleDto> days = processDays(aiResponse, request, allSpots);
 
         // 7. 최종 응답
-        ItineraryRespDto response = buildResponseWithoutId(request, days);
-
-        log.info("=== 일정 생성 완료: {}일, 총 {}개 항목 ===",
-                days.size(),
-                days.stream().mapToInt(d -> d.getItems().size()).sum());
-
-        return response;
+        return buildResponseWithoutId(request, days);
     }
 
     private ItineraryRespDto buildResponseWithoutId(
@@ -101,7 +88,7 @@ public class ItineraryCreationService {
                 .sum();
 
         return ItineraryRespDto.builder()
-                .itineraryId(null)  // ✅ null
+                .itineraryId(null)
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .budget(request.getBudget())
@@ -114,13 +101,10 @@ public class ItineraryCreationService {
                 .totalSpots(totalSpots)
                 .build();
     }
-    /**
-     * AI 스케줄러 호출
-     */
+
+    // AI 스케줄러 호출
     private AIScheduleResponse callAIScheduler(List<TouristSpot> spots, ItineraryReqDto request) {
         try {
-            log.info("=== AI 스케줄링 시작 ===");
-
             // 프롬프트 생성
             String prompt = promptBuilder.buildSchedulePrompt(
                     spots,
@@ -138,23 +122,14 @@ public class ItineraryCreationService {
                     request.getTravelDays()
             );
 
-            log.info("AI 스케줄링 완료:");
-            log.info("  ├─ 배정: {}일", aiResponse.getDays().size());
-            log.info("  └─ 제외: {}개 ({})",
-                    aiResponse.getExcluded().size(),
-                    aiResponse.getExcludeReason());
-
             return aiResponse;
 
         } catch (Exception e) {
-            log.error("AI 스케줄링 실패: {}", e.getMessage(), e);
             throw new RuntimeException("AI 일정 생성 실패", e);
         }
     }
 
-    /**
-     * 각 Day 처리
-     */
+    // 각 Day 처리
     private List<DayScheduleDto> processDays(
             AIScheduleResponse aiResponse,
             ItineraryReqDto request,
@@ -167,7 +142,6 @@ public class ItineraryCreationService {
                 .collect(Collectors.toMap(TouristSpot::getSpotId, s -> s));
 
         for (AIScheduleResponse.DaySchedule aiDay : aiResponse.getDays()) {
-            log.info("=== Day {} 처리 시작 ===", aiDay.getDay());
 
             // SPOT만 추출
             List<Integer> spotIds = aiDay.getItems().stream()
@@ -208,7 +182,7 @@ public class ItineraryCreationService {
                     .map(spotMap::get)
                     .collect(Collectors.toList());
 
-            // ✅ 관광지만으로 일정 생성
+            // 관광지만으로 일정 생성
             DayScheduleDto daySchedule = buildDaySchedule(
                     aiDay.getDay(),
                     request.getStartDate().plusDays(aiDay.getDay() - 1),
@@ -221,19 +195,12 @@ public class ItineraryCreationService {
             );
 
             days.add(daySchedule);
-
-            log.info("=== Day {} 처리 완료: {} ~ {} ===",
-                    aiDay.getDay(),
-                    daySchedule.getStartTime(),
-                    daySchedule.getEndTime());
         }
 
         return days;
     }
 
-    /**
-     * ✅ Day 일정 생성 (관광지만)
-     */
+    // Day 일정 생성 (관광지만)
     private DayScheduleDto buildDaySchedule(
             int day,
             java.time.LocalDate date,
@@ -241,8 +208,6 @@ public class ItineraryCreationService {
             double startLat, double startLon,
             double endLat, double endLon,
             String transport) {
-
-        log.info("=== Day {} 일정 생성 시작 ===", day);
 
         List<ScheduleItemDto> items = new ArrayList<>();
         LocalTime currentTime = LocalTime.of(9, 0);
@@ -319,9 +284,7 @@ public class ItineraryCreationService {
         return result;
     }
 
-    /**
-     * 최종 응답 생성
-     */
+    // 최종 응답 생성
     private ItineraryRespDto buildResponse(
             Itinerary itinerary,
             ItineraryReqDto request,
@@ -340,7 +303,7 @@ public class ItineraryCreationService {
                 .sum();
 
         int totalSpots = days.stream()
-                .mapToInt(d -> d.getItems().size())  // ✅ SPOT만 있으니 items.size()
+                .mapToInt(d -> d.getItems().size())
                 .sum();
 
         return ItineraryRespDto.builder()
@@ -358,15 +321,9 @@ public class ItineraryCreationService {
                 .build();
     }
 
-    /**
-     * 일정 저장 (DB)
-     */
+    // 일정 저장 (DB)
     @Transactional
     public ItineraryRespDto save(ItinerarySaveDto request) {
-        log.info("=== 일정 저장 시작 ===");
-        log.info("여행 기간: {} ~ {}, {}일",
-                request.getStartDate(), request.getEndDate(), request.getDays().size());
-
         // 1. 검증
         validator.validateSaveRequest(request);
 
@@ -382,7 +339,6 @@ public class ItineraryCreationService {
 
         // 3. Itinerary 엔티티 생성 및 저장
         Itinerary itinerary = persistenceService.saveItinerary(reqDto);
-        log.info("Itinerary 저장 완료: ID={}", itinerary.getItineraryId());
 
         // 4. DailyLocation 저장
         persistenceService.saveDailyLocations(itinerary.getItineraryId(), request.getDailyLocations());
@@ -402,9 +358,7 @@ public class ItineraryCreationService {
         return response;
     }
 
-    /**
-     * 저장 응답 생성 (ItinerarySaveDto용)
-     */
+    // 저장 응답 생성 (ItinerarySaveDto용)
     private ItineraryRespDto buildResponseForSave(
             Itinerary itinerary,
             ItinerarySaveDto request,
@@ -427,7 +381,7 @@ public class ItineraryCreationService {
                 .sum();
 
         return ItineraryRespDto.builder()
-                .itineraryId(itinerary.getItineraryId())  // ✅ DB에 저장된 ID
+                .itineraryId(itinerary.getItineraryId())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .budget(request.getBudget())
@@ -441,9 +395,7 @@ public class ItineraryCreationService {
                 .build();
     }
 
-    /**
-     * 최종 응답 생성 (ItinerarySaveDto용 오버로드)
-     */
+    // 최종 응답 생성 (ItinerarySaveDto용 오버로드)
     private ItineraryRespDto buildResponse(
             Itinerary itinerary,
             ItinerarySaveDto request,

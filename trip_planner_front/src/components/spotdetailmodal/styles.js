@@ -154,7 +154,7 @@ export const desc = css`
 `;
 
 export const reviewSection = css`
-  flex: 1;        /* ✅ right 안에서 남는 공간 전부 차지 */
+  flex: 1;        /*  right 안에서 남는 공간 전부 차지 */
   min-height: 0;
 
     padding-top: 14px;
@@ -276,7 +276,7 @@ export const commentContent = css`
 export const commentWrapper = css`
   flex: 1;
   min-height: 0;        /* ⭐ 이것도 중요 */
-  overflow-y: auto;     /* ✅ 댓글만 스크롤 */
+  overflow-y: auto;     /*  댓글만 스크롤 */
   padding-right: 8px;
 
   &::-webkit-scrollbar {

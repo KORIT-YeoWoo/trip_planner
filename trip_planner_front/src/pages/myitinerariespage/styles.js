@@ -11,7 +11,7 @@ const colors = {
   border: "oklch(0.92 0.01 85)",
   accent: "oklch(0.9 0.08 45)",
   radius: "1rem",
-  danger: "#ff4d4d", // ✅ 삭제 버튼 색상
+  danger: "#ff4d4d", //  삭제 버튼 색상
 };
 
 export const layout = css`
@@ -188,7 +188,7 @@ export const tag = css`
     font-weight: 600;
 `;
 
-// ✅ 삭제 버튼 (화살표 대체)
+//  삭제 버튼 (화살표 대체)
 export const deleteBtn = css`
     display: flex;
     align-items: center;

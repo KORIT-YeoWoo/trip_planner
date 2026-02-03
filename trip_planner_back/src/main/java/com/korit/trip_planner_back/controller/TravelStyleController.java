@@ -30,7 +30,6 @@ public class TravelStyleController {
         }
 
         Integer userId = principalUser.getUser().getUserId();
-        log.info("여행 스타일 조회 요청: userId={}", userId);
 
         TravelStyleDTO result = travelStyleService.analyzeTravelStyle(userId);
 

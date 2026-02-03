@@ -9,9 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-/**
- * GPT 응답 파싱
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -19,9 +16,7 @@ public class AIResponseParser {
 
     private final ObjectMapper objectMapper;
 
-    /**
-     * GPT 응답 → AIScheduleResponse 파싱
-     */
+    // GPT 응답 → AIScheduleResponse 파싱
     public AIScheduleResponse parse(String gptResponse, int travelDays) {
         try {
             log.info("=== GPT 응답 파싱 시작 ===");
@@ -71,9 +66,7 @@ public class AIResponseParser {
         }
     }
 
-    /**
-     * JSON 추출 (마크다운 제거)
-     */
+    // JSON 추출 (마크다운 제거)
     private String extractJson(String text) {
         // ```json ... ``` 제거
         int jsonStart = text.indexOf("```json");
@@ -98,9 +91,7 @@ public class AIResponseParser {
         return text.substring(firstBrace, lastBrace + 1);
     }
 
-    /**
-     * DaySchedule 파싱
-     */
+    // DaySchedule 파싱
     private AIScheduleResponse.DaySchedule parseDaySchedule(JsonNode dayNode) {
         int day = dayNode.path("day").asInt();
         String reasoning = dayNode.path("reasoning").asText("");
@@ -121,9 +112,7 @@ public class AIResponseParser {
                 .build();
     }
 
-    /**
-     * ScheduleItem 파싱
-     */
+    // ScheduleItem 파싱
     private AIScheduleResponse.ScheduleItem parseScheduleItem(JsonNode itemNode) {
         String type = itemNode.path("type").asText("");
 
@@ -147,12 +136,10 @@ public class AIResponseParser {
         return builder.build();
     }
 
-    /**
-     * 응답 검증
-     */
+    // 응답 검증
     private void validateResponse(List<AIScheduleResponse.DaySchedule> days, int expectedDays) {
         if (days.size() != expectedDays) {
-            log.warn("⚠️ 날짜 수 불일치: 기대 {}일, 실제 {}일", expectedDays, days.size());
+            log.warn("날짜 수 불일치: 기대 {}일, 실제 {}일", expectedDays, days.size());
         }
 
         // 모든 날짜에 최소 1개 SPOT 있는지 확인

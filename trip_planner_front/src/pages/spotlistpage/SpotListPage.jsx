@@ -6,12 +6,11 @@ import chatbotImg from "../../assets/chatbot.png";
 import { 
   getSpots, 
   getSpotById,
-  addBookmark,    
-  removeBookmark,   
   getMyFavorites,
   removeFavorites,
   addFavorites
-} from "../../apis/spotApi";// 민석님의 API 함수
+} from "../../apis/spotApi";
+
 import { useQueries } from "@tanstack/react-query";
 import { getRatingSummaryBySpotId } from "../../apis/commentApi"
 import { PiMountains } from "react-icons/pi";
@@ -33,6 +32,7 @@ function SpotListPage() {
   const [searchTitle, setSearchTitle] = useState(""); //검색관리
   const CATEGORY_OPTIONS=["전체","문화•체험","카페","식당"]; //카테고리 옵션
   const CATEGORY_ICONS = {
+
     //카테고리 아이콘
     "전체":null,
     "문화•체험":<MdOutlineSurfing />  ,
@@ -43,10 +43,7 @@ function SpotListPage() {
   //chatbot 싱태관리
   const [aiOpen, setAiOpen] = useState(false);
 
-
-
-
-  // navigate 추가 (민석)
+  // navigate 추가
   const navigate = useNavigate();
 
   // 관광지상세 추가
@@ -57,7 +54,7 @@ function SpotListPage() {
     setDetailSpot(spot);
     setIsDetailOpen(true);
 
-    setIsDetailLoading(true); // ✅ 로딩 시작
+    setIsDetailLoading(true); //  로딩 시작
     try {
       const res = await getSpotById(spot.spotId);
       const fullSpot = res?.data ?? res;
@@ -65,7 +62,7 @@ function SpotListPage() {
     } catch (e) {
       console.error("관광지 상세 조회 실패:", e);
     } finally {
-      setIsDetailLoading(false); // ✅ 로딩 종료
+      setIsDetailLoading(false); //  로딩 종료
     }
   };
 
@@ -333,8 +330,8 @@ function SpotListPage() {
                       type="button"
                       css={s.detailBtn}
                       onClick={(e) => {
-                        e.stopPropagation();   // ✅ 카드 선택 클릭 막기
-                        openDetail(r);         // ✅ 모달 오픈
+                        e.stopPropagation();   //  카드 선택 클릭 막기
+                        openDetail(r);         //  모달 오픈
                       }}
                     >
                       상세보기

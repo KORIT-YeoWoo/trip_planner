@@ -21,12 +21,12 @@ export const overlay = css`
 export const container = css`
     display: flex;
     border-radius: 15px;
-    width: 800px; /* 팝업인 점을 감안해 살짝 축소 */
+    width: 800px; 
     height: 500px;
     background-color: #ffffff;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    position: relative; /* 닫기 버튼 배치용 */
+    position: relative;
 `;
 
 // 닫기 버튼 추가 (선택 사항)
@@ -67,7 +67,7 @@ export const rightBackground = css`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 380px; /* 좌측 이미지와 균형을 위해 살짝 조정 */
+    width: 380px; 
     padding: 40px;
 
     & > h1 {

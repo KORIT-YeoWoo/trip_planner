@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-/**
- * 일정 목록용 DTO (간단한 정보만)
- */
+// 일정 목록용 DTO (간단한 정보만)
 @Data
 @Builder
 @NoArgsConstructor

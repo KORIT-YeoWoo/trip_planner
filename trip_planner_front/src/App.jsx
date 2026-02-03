@@ -15,7 +15,6 @@ import TosPage from "./pages/tospage/TosPage";
 import MyStylePage from "./pages/mystylepage/MyStylePage";
 import MyItinerariesPage from "./pages/myitinerariespage/MyItinerariesPage";
 
-// 로그인 모달 컴포넌트
 import LoginModal from "./components/loginModal/LoginModal";
 import TravelInfoPage from "./pages/travelinfopage/TravelInfoPage.jsx";
 

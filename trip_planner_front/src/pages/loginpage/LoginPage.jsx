@@ -6,12 +6,10 @@ import { RiKakaoTalkFill } from "react-icons/ri";
 import { FcGoogle } from "react-icons/fc";
 
 function LoginPage() {
-    // 내부 페이지 이동이 필요할 때를 대비해 유지 (예: 홈으로 가기)
     const navigate = useNavigate();
     const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
     const handleOAuth2LoginOnClick = (clientName) => {
-        // OAuth2 인증 시작점 (Spring Security 기본 엔드포인트)
         window.location.href = `${API_BASE}/oauth2/authorization/${clientName}`;
     };
 

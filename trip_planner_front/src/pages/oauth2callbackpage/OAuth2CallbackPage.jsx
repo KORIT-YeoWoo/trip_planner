@@ -8,10 +8,9 @@ function OAuth2CallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
-  const hasProcessed = useRef(false); // ✅ 중복 실행 방지
+  const hasProcessed = useRef(false); 
 
   useEffect(() => {
-    // ✅ 이미 처리했으면 리턴
     if (hasProcessed.current) return;
     hasProcessed.current = true;
 
@@ -23,14 +22,11 @@ function OAuth2CallbackPage() {
 
       if (accessToken) {
         try {
-          // ✅ 1. 토큰 저장
           localStorage.setItem("AccessToken", accessToken);
           console.log("✅ 토큰 저장 완료:", accessToken);
 
-          // ✅ 2. 사용자 정보 갱신
           await refreshUser();
 
-          // ✅ 3. 메인 페이지로 이동
           setTimeout(() => {
             navigate("/", { replace: true });
           }, 500);
@@ -48,7 +44,7 @@ function OAuth2CallbackPage() {
     };
 
     handleOAuth2Callback();
-  }, []); // ✅ searchParams, navigate, refreshUser 의존성 제거
+  }, []); 
 
   return (
     <div css={s.loadingContainer}>

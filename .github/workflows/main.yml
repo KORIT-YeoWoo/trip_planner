@@ -2,9 +2,9 @@ name: GCP-VM-CICD
 
 on:
   push:
-    branches: [deploy-minseok, deploy_hyeok, deploy-mina, deploy-sungeun]
+    branches: [deploy-minseok, deploy-hyeok, deploy-mina, deploy-sungeun]
   pull_request:
-    branches: [deploy-minseok, deploy_hyeok, deploy-mina, deploy-sungeun]
+    branches: [deploy-minseok, deploy-hyeok, deploy-mina, deploy-sungeun]
 
 jobs:
   build-deplot-minseok:
@@ -32,7 +32,7 @@ jobs:
             echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_MINA}}" >> $GITHUB_ENV
             echo "REACT_ENV=${{secrets.REACT_ENV_MINA}}" >> $GITHUB_ENV
   
-          elif [ ${{github.ref}} == 'refs/heads/deploy_hyeok' ]; then
+          elif [ ${{github.ref}} == 'refs/heads/deploy-hyeok' ]; then
           
             echo "GCP_VM_HOST=${{secrets.GCP_VM_HOST_HYEOK}}" >> $GITHUB_ENV
             echo "GCP_VM_USERNAME=${{secrets.GCP_VM_USERNAME_HYEOK}}" >> $GITHUB_ENV
@@ -67,7 +67,7 @@ jobs:
       - name: Springboot Build
         run: |
           cd trip_planner_back
-          echo ${{env.APPLICATION_SECRET}} | base64 --decode > ./src/main/resources/application-secret.yml
+          echo ${{env.APPLICATION_SECRET}} | base64 --decode > ./src/main/resources/application-secret-prod.yml
           chmod 777 ./mvnw
           ./mvnw clean package -Dtestskip
 

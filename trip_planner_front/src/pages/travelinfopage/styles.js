@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 
-export const 전체페이지 = css`
+export const pageContainer = css`
   flex: 1;
   font-family: "Pretendard", -apple-system, sans-serif;
   display: flex;
@@ -12,21 +12,22 @@ export const 전체페이지 = css`
   padding: 20px;
 `;
 
-export const 단계진행바 = css`
+export const stepProgressBar = css`
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 `;
-export const 단계아이템 = (활성) => css`
+
+export const stepItem = (isActive) => css`
   padding: 8px 18px;
   border-radius: 50px;
-  background: ${활성 ? "#FF6B00" : "white"};
-  color: ${활성 ? "white" : "#adb5bd"};
+  background: ${isActive ? "#FF6B00" : "white"};
+  color: ${isActive ? "white" : "#adb5bd"};
   font-weight: 700;
   font-size: 13px;
 `;
 
-export const 메인카드 = css`
+export const mainCard = css`
   background: white;
   border-radius: 25px;
   width: 100%;
@@ -36,19 +37,19 @@ export const 메인카드 = css`
   min-height: 500px;
 `;
 
-export const 카테고리버튼 = (활성) => css`
+export const categoryButton = (isActive) => css`
   flex: 1;
   padding: 15px 0;
   border-radius: 15px;
-  border: 2px solid ${활성 ? "#FF6B00" : "#eee"};
-  background: ${활성 ? "#FFF0E6" : "white"};
-  color: ${활성 ? "#FF6B00" : "#888"};
+  border: 2px solid ${isActive ? "#FF6B00" : "#eee"};
+  background: ${isActive ? "#FFF0E6" : "white"};
+  color: ${isActive ? "#FF6B00" : "#888"};
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
 `;
 
-export const 달력영역 = css`
+export const calendarArea = css`
   flex: 1.2;
   min-width: 340px;
 
@@ -58,7 +59,6 @@ export const 달력영역 = css`
     font-family: inherit;
   }
 
-  /* 요일 레이아웃 및 폰트 */
   .react-calendar__month-view__weekdays {
     text-align: center;
     font-weight: 700;
@@ -70,42 +70,37 @@ export const 달력영역 = css`
     }
   }
 
-  /* ⭐ 일요일(첫 번째 열) 빨간색 */
   .react-calendar__month-view__weekdays__weekday:nth-of-type(1) {
     color: #ff4d4d;
   }
 
-  /* ⭐ 토요일(일곱 번째 열) 파란색 */
   .react-calendar__month-view__weekdays__weekday:nth-of-type(7) {
     color: #4d79ff;
   }
 
-  /* 날짜 칸 스타일 */
   .react-calendar__tile {
     font-weight: 600;
     padding: 12px 0;
   }
 
-  /* ⭐ 토요일 날짜 숫자 파란색 */
   .react-calendar__month-view__days__day--neighboringMonth:nth-of-type(7n),
   .react-calendar__month-view__days__day:nth-of-type(7n) {
     color: #4d79ff;
   }
 
-  /* ⭐ 일요일 날짜 숫자 빨간색 (일요일 시작 기준 7n+1) */
   .react-calendar__month-view__days__day--neighboringMonth:nth-of-type(7n + 1),
   .react-calendar__month-view__days__day:nth-of-type(7n + 1) {
     color: #ff4d4d;
   }
 
-  /* 선택된 날짜는 흰색으로 유지 */
   .react-calendar__tile--active {
     background: #ff6b00 !important;
     border-radius: 10px;
     color: white !important;
   }
 `;
-export const 인원설정컨테이너 = css`
+
+export const peopleSettingContainer = css`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -113,7 +108,8 @@ export const 인원설정컨테이너 = css`
   height: 400px;
   gap: 30px;
 `;
-export const 카테고리영역 = css`
+
+export const categoryArea = css`
   width: 100%;
   max-width: 500px;
   label {
@@ -124,29 +120,34 @@ export const 카테고리영역 = css`
     font-size: 18px;
   }
 `;
-export const 카테고리그룹 = css`
+
+export const categoryGroup = css`
   display: flex;
   gap: 10px;
   width: 100%;
 `;
-export const 인원조절영역애니메이션 = css`
+
+export const peopleControlAreaAnimation = css`
   width: 100%;
   max-width: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
-export const 안내문구 = css`
+
+export const guideText = css`
   font-weight: 700;
   color: #ff6b00;
   margin-bottom: 20px;
 `;
-export const 인원조절그룹 = css`
+
+export const peopleControlGroup = css`
   display: flex;
   gap: 20px;
   width: 100%;
 `;
-export const 인원항목 = css`
+
+export const peopleItem = css`
   flex: 1;
   display: flex;
   justify-content: space-between;
@@ -159,7 +160,8 @@ export const 인원항목 = css`
     font-weight: 700;
   }
 `;
-export const 카운터 = css`
+
+export const counter = css`
   display: flex;
   align-items: center;
   gap: 15px;
@@ -179,11 +181,13 @@ export const 카운터 = css`
     font-size: 18px;
   }
 `;
-export const 콘텐츠가로배치 = css`
+
+export const contentHorizontalLayout = css`
   display: flex;
   gap: 30px;
 `;
-export const 상세일정박스 = css`
+
+export const detailScheduleBox = css`
   flex: 1;
   background: #fafafa;
   border-radius: 18px;
@@ -192,13 +196,15 @@ export const 상세일정박스 = css`
   display: flex;
   flex-direction: column;
 `;
-export const 일차리스트컨테이너 = css`
+
+export const dayListContainer = css`
   display: flex;
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
 `;
-export const 일차항목박스 = css`
+
+export const dayItemBox = css`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -206,36 +212,42 @@ export const 일차항목박스 = css`
   background: white;
   border-radius: 12px;
   border: 1px solid #eee;
-  .일차텍스트 {
+  .dayText {
     font-weight: 700;
   }
 `;
-export const 시간설정영역 = css`
+
+export const timeSettingArea = css`
   display: flex;
   gap: 5px;
   align-items: center;
 `;
-export const 시간셀렉트 = css`
+
+export const timeSelect = css`
   border: 1px solid #ff6b00;
   border-radius: 5px;
   color: #ff6b00;
   font-weight: 600;
   padding: 2px 4px;
 `;
-export const 통합페이지컨테이너 = css`
+
+export const integratedPageContainer = css`
   display: flex;
   gap: 30px;
 `;
-export const 왼쪽섹션 = css`
+
+export const leftSection = css`
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 25px;
 `;
-export const 오른쪽섹션 = css`
+
+export const rightSection = css`
   flex: 1;
 `;
-export const 그룹 = css`
+
+export const group = css`
   label {
     display: block;
     font-weight: 700;
@@ -243,41 +255,47 @@ export const 그룹 = css`
     color: #555;
   }
 `;
-export const 버튼그룹 = css`
+
+export const buttonGroup = css`
   display: flex;
   gap: 10px;
 `;
-export const 이동버튼 = (활성) =>
+
+export const transportButton = (isActive) =>
   css`
     flex: 1;
     padding: 15px;
     border-radius: 12px;
-    border: 2px solid ${활성 ? "#FF6B00" : "#eee"};
-    background: ${활성 ? "#FFF0E6" : "white"};
-    color: ${활성 ? "#FF6B00" : "#888"};
+    border: 2px solid ${isActive ? "#FF6B00" : "#eee"};
+    background: ${isActive ? "#FFF0E6" : "white"};
+    color: ${isActive ? "#FF6B00" : "#888"};
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
   `;
-export const 슬라이더영역 = css`
+
+export const sliderArea = css`
   input {
     width: 100%;
     accent-color: #ff6b00;
   }
 `;
-export const 금액표시 = css`
+
+export const amountDisplay = css`
   font-size: 28px;
   font-weight: 800;
   color: #ff6b00;
   text-align: center;
   margin: 15px 0 5px;
 `;
-export const 범위안내 = css`
+
+export const rangeGuide = css`
   font-size: 12px;
   color: #bbb;
   text-align: center;
 `;
-export const 추천결과카드 = css`
+
+export const recommendResultCard = css`
   background: #fafafa;
   padding: 25px;
   border-radius: 20px;
@@ -285,7 +303,8 @@ export const 추천결과카드 = css`
     margin-top: 0;
   }
 `;
-export const 결과줄 = css`
+
+export const resultRow = css`
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
@@ -298,7 +317,8 @@ export const 결과줄 = css`
     font-size: 15px;
   }
 `;
-export const 총액바 = css`
+
+export const totalBar = css`
   margin-top: 20px;
   padding-top: 15px;
   text-align: right;
@@ -307,7 +327,8 @@ export const 총액바 = css`
   border-top: 2px dashed #ddd;
   font-size: 18px;
 `;
-export const 네비버튼영역 = css`
+
+export const navButtonArea = css`
   display: flex;
   width: 100%;
   max-width: 900px;
@@ -324,12 +345,14 @@ export const 네비버튼영역 = css`
     font-family: inherit;
   }
 `;
-export const 기간요약헤더 = css`
+
+export const durationSummaryHeader = css`
   font-weight: 800;
   color: #ff6b00;
   margin-bottom: 10px;
 `;
-export const 비어있는상태 = css`
+
+export const emptyState = css`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -337,13 +360,13 @@ export const 비어있는상태 = css`
   color: #ccc;
 `;
 
-export const 위치설정컨테이너 = css`
+export const locationSettingContainer = css`
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
 `;
 
-export const 위치설정제목 = css`
+export const locationSettingTitle = css`
   margin: 0 0 12px 0;
   color: #333;
   font-size: 24px;
@@ -351,7 +374,7 @@ export const 위치설정제목 = css`
   text-align: center;
 `;
 
-export const 위치설정안내 = css`
+export const locationSettingGuide = css`
   color: #666;
   margin-bottom: 30px;
   line-height: 1.6;
@@ -359,15 +382,13 @@ export const 위치설정안내 = css`
   font-size: 15px;
 `;
 
-// Day별 위치 목록
-export const 일차위치목록 = css`
+export const dayLocationList = css`
   display: flex;
   flex-direction: column;
   gap: 20px;
 `;
 
-// Day별 카드
-export const 일차위치카드 = css`
+export const dayLocationCard = css`
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
@@ -380,7 +401,7 @@ export const 일차위치카드 = css`
   }
 `;
 
-export const 일차제목 = css`
+export const dayTitle = css`
   margin: 0 0 20px 0;
   color: #333;
   font-size: 20px;

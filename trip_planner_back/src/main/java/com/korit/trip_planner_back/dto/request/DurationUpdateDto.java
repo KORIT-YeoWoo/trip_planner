@@ -14,6 +14,6 @@ public class DurationUpdateDto {
 
     // 유효성 검증
     public boolean isValid() {
-        return duration >= 10 && duration <= 240;  // 30분 ~ 8시간
+        return duration >= 10 && duration <= 240;  // 10분 ~ 4시간
     }
 }

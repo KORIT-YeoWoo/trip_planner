@@ -113,7 +113,7 @@ export const heartBtn = (isSelected) => css`
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 10; /* 이미지나 여우 아이콘보다 위에 위치 */
+  z-index: 10;
 
   display: flex;
   align-items: center;
@@ -123,7 +123,6 @@ export const heartBtn = (isSelected) => css`
   cursor: pointer;
   padding: 0;
   
-  /* 아이콘 색상 및 그림자 처리 */
   color: ${isSelected ? "#ff4d4d" : "white"}; 
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
   

@@ -162,7 +162,6 @@ export const statValue = css`
     color: #333;
 `;
 
-// ==================== 뱃지+태그 통합 섹션 ====================
 export const badgeTagContainer = css`
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -170,13 +169,6 @@ export const badgeTagContainer = css`
     flex-shrink: 0;
 `;
 
-export const badgeSection = css`
-    /* 왼쪽 영역 */
-`;
-
-export const tagSection = css`
-    /* 오른쪽 영역 */
-`;
 
 export const sectionTitle = css`
     font-size: 14px;

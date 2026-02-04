@@ -65,18 +65,15 @@ function ItineraryDetailPage() {
     // SDK 로드
     useEffect(() => {
         if (window.kakao && window.kakao.maps) {
-            console.log('SDK 이미 준비됨');
             return;
         }
 
-        console.log('카카오맵 SDK 로드 시작');
 
         const script = document.createElement('script');
         script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false`;
         script.async = true;
 
         script.onload = () => {
-            console.log('SDK 스크립트 로드 완료');
             window.kakao.maps.load(() => {
                 console.log('kakao.maps.load 완료');
             });
@@ -96,8 +93,6 @@ function ItineraryDetailPage() {
             console.log('초기화 스킵');
             return;
         }
-
-        console.log('지도 초기화 시작 - Day:', currentDayData.day);
 
         // 이전 요소 제거
         overlaysRef.current.forEach(o => o.setMap(null));
@@ -142,13 +137,13 @@ function ItineraryDetailPage() {
         // 범위 조정
         if (!bounds.isEmpty()) map.setBounds(bounds);
 
-        // ✅ REST API로 경로 탐색
+        //  REST API로 경로 탐색
         if (currentDayData.startLat && currentDayData.startLon && currentDayData.endLat && currentDayData.endLon) {
             fetchDirections(map, currentDayData);
         }
     }, [currentDayData, currentDay]);
 
-    // ✅ Kakao Directions REST API 호출
+    //  Kakao Directions REST API 호출
     const fetchDirections = async (map, dayData) => {
         try {
             const waypoints = dayData.items
@@ -167,9 +162,6 @@ function ItineraryDetailPage() {
             if (waypoints) {
                 params.append('waypoints', waypoints);
             }
-
-            console.log('🚗 경로 탐색 시작:', params.toString());
-
             const response = await fetch(
                 `https://apis-navi.kakaomobility.com/v1/directions?${params}`,
                 {
@@ -182,12 +174,10 @@ function ItineraryDetailPage() {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('❌ Kakao API 에러:', response.status, errorText);
                 throw new Error(`경로 탐색 실패: ${response.status}`);
             }
 
             const result = await response.json();
-            console.log('✅ 경로 탐색 성공!', result);
 
             if (result.routes && result.routes.length > 0) {
                 const route = result.routes[0];
@@ -214,18 +204,15 @@ function ItineraryDetailPage() {
                 });
 
                 polylineRef.current = polyline;
-                console.log('✅ 경로선 그리기 완료 (실선)');
             }
         } catch (error) {
-            console.error('❌ 경로 탐색 실패:', error);
             // 경로 탐색 실패 시 단순 직선으로 표시
             drawSimpleLine(map, dayData);
         }
     };
 
-    // ✅ 경로 탐색 실패 시 대체: 단순 직선
+    //  경로 탐색 실패 시 대체: 단순 직선
     const drawSimpleLine = (map, dayData) => {
-        console.log('⚠️ 단순 직선으로 표시');
         const path = [];
         
         if (dayData.startLat && dayData.startLon) {
@@ -256,21 +243,20 @@ function ItineraryDetailPage() {
         }
     };
 
-    // ✅ 컴포넌트 마운트 시 일정 데이터 불러오기
+    //  컴포넌트 마운트 시 일정 데이터 불러오기
     useEffect(() => {
         if (currentItineraryId) {
-            // ✅ Case 1: DB에 저장된 일정 조회
+            //  Case 1: DB에 저장된 일정 조회
             fetchItinerary();
         } else if (itineraryData?.days) {
-            // ✅ Case 2: 방금 생성된 일정 (state로 전달받음)
-            console.log('📦 state로 전달받은 일정 사용:', itineraryData.days.length, '일');
+            //  Case 2: 방금 생성된 일정 (state로 전달받음)
             setScheduleData(itineraryData.days);
         } else {
             console.error('❌ 일정 데이터가 없습니다!');
         }
     }, [currentItineraryId, itineraryData]);
 
-    // ✅ 일정 데이터 가져오기
+    //  일정 데이터 가져오기
     const fetchItinerary = async () => {
         try {
             setLoading(true);
@@ -279,7 +265,6 @@ function ItineraryDetailPage() {
             );
             
             if (response.data && response.data.days) {
-                console.log('📦 DB에서 일정 조회:', response.data.days.length, '일');
                 setScheduleData(response.data.days);
             }
         } catch (error) {
@@ -290,7 +275,7 @@ function ItineraryDetailPage() {
         }
     };
 
-    // ✅ 일정 저장 핸들러
+    //  일정 저장 핸들러
     const handleSaveItinerary = async () => {
         if (!isAuthenticated) {
             alert('로그인이 필요한 서비스입니다.');
@@ -334,10 +319,9 @@ function ItineraryDetailPage() {
                 }
             );
 
-            console.log('✅ 일정 저장 완료:', response.data);
             alert('일정이 저장되었습니다!');
             
-            // ✅ 저장 후 같은 페이지에서 저장된 데이터로 업데이트
+            //  저장 후 같은 페이지에서 저장된 데이터로 업데이트
             setScheduleData(response.data.days);
 
             navigate('/spots');
@@ -356,11 +340,10 @@ function ItineraryDetailPage() {
         }
     };
 
-    // ✅ 삭제 핸들러 (DB 저장 전에도 로컬에서 삭제 가능)
+    //  삭제 핸들러 (DB 저장 전에도 로컬에서 삭제 가능)
     const handleDelete = async (spotId) => {
         if (!currentItineraryId) {
-            // ✅ 저장 전: 로컬에서만 삭제
-            console.log('🗑️ 로컬 삭제:', spotId);
+            //  저장 전: 로컬에서만 삭제
             setScheduleData(prev => {
                 const newData = [...prev];
                 newData[currentDay] = {
@@ -372,19 +355,12 @@ function ItineraryDetailPage() {
             return;
         }
 
-        // ✅ 저장 후: DB에서 삭제
+        //  저장 후: DB에서 삭제
         try {
-            console.log('🗑️ DB 삭제 요청:', { 
-                itineraryId: currentItineraryId, 
-                day: currentDay + 1, 
-                spotId 
-            });
-            
             const response = await axios.delete(
                 `${API_BASE}/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${spotId}`
             );
             
-            console.log('✅ 삭제 성공!');
             setScheduleData(prev => {
                 const newData = [...prev];
                 newData[currentDay] = response.data;
@@ -397,7 +373,7 @@ function ItineraryDetailPage() {
         }
     };
 
-    // ✅ 순서 변경 핸들러 (DB 저장 전에도 로컬에서 변경 가능)
+    //  순서 변경 핸들러 (DB 저장 전에도 로컬에서 변경 가능)
     const handleReorder = async (newspotIds) => {
         if (!currentDayData) {
             console.error('currentDayData가 없습니다.');
@@ -405,9 +381,6 @@ function ItineraryDetailPage() {
         }
 
         if (!currentItineraryId) {
-            // ✅ 저장 전: 로컬에서만 순서 변경
-            console.log('🔄 로컬 순서 변경:', newspotIds);
-            
             setScheduleData(prev => {
                 const newData = [...prev];
                 const reorderedItems = newspotIds.map(spotId => 
@@ -423,7 +396,7 @@ function ItineraryDetailPage() {
             return;
         }
 
-        // ✅ 저장 후: DB에 반영
+        //  저장 후: DB에 반영
         const currentDayNumber = currentDayData.day;
         
         try {
@@ -456,7 +429,7 @@ function ItineraryDetailPage() {
         }
     };
 
-    // ✅ 시간 포맷팅
+    //  시간 포맷팅
     const formatDuration = (minutes) => {
         if (!minutes || minutes === 0) return "0시간";
         
@@ -468,12 +441,10 @@ function ItineraryDetailPage() {
         return `${hours}시간 ${mins}분`;
     };
 
-    // ✅ 체류 시간 변경 핸들러 (DB 저장 전에도 로컬에서 변경 가능)
+    //  체류 시간 변경 핸들러 (DB 저장 전에도 로컬에서 변경 가능)
     const handleDurationChange = async (spotId, newDuration) => {
         if (!currentItineraryId) {
-            // ✅ 저장 전: 로컬에서만 시간 변경
-            console.log('⏱️ 로컬 시간 변경:', spotId, newDuration);
-            
+            //  저장 전: 로컬에서만 시간 변경
             setScheduleData(prev => {
                 const newData = [...prev];
                 const itemIndex = newData[currentDay].items.findIndex(item => item.spotId === spotId);
@@ -490,14 +461,12 @@ function ItineraryDetailPage() {
             return;
         }
 
-        // ✅ 저장 후: DB에 반영
+        //  저장 후: DB에 반영
         try {
             const response = await axios.put(
                 `${API_BASE}/api/itinerary/${currentItineraryId}/days/${currentDay + 1}/items/${spotId}/duration`,
                 { duration: newDuration }
             );
-
-            console.log('✅ 시간 변경 성공:', response.data);
 
             if (response.data && response.data.day) {
                 setScheduleData(prev => {
@@ -518,7 +487,7 @@ function ItineraryDetailPage() {
         }
     };
 
-    // ✅ 로딩 중이거나 데이터가 없을 때
+    //  로딩 중이거나 데이터가 없을 때
     if (loading) {
         return <div css={s.layout}>
             <div css={s.container}>
@@ -596,7 +565,7 @@ function ItineraryDetailPage() {
                             <h3>{formatDuration(currentDayData?.totalDuration || 0)}</h3>
                         </div>
                     </div>
-                    {/* ✅ 저장 여부에 따라 버튼 변경 */}
+                    {/*  저장 여부에 따라 버튼 변경 */}
                     {!currentItineraryId ? (
                         <button 
                             css={s.createItinerary}

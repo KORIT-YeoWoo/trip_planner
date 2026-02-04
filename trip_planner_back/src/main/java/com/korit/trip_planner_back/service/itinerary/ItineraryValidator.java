@@ -15,9 +15,7 @@ public class ItineraryValidator {
 
     private final TouristSpotMapper touristSpotMapper;
 
-    /**
-     * 일정 생성 요청 검증
-     */
+    // 일정 생성 요청 검증
     public void validateCreateRequest(ItineraryReqDto request) {
         if (request.getStartDate() == null || request.getEndDate() == null) {
             throw new IllegalArgumentException("여행 날짜를 입력해주세요.");
@@ -36,9 +34,7 @@ public class ItineraryValidator {
         }
     }
 
-    /**
-     * 순서 변경 요청 검증
-     */
+    // 순서 변경 요청 검증
     public void validateReorderRequest(List<Integer> spotIds) {
         if (spotIds == null || spotIds.isEmpty()) {
             throw new IllegalArgumentException("관광지 ID 리스트가 비어있습니다.");
@@ -63,9 +59,7 @@ public class ItineraryValidator {
         }
     }
 
-    /**
-     * 체류시간 검증
-     */
+    // 체류시간 검증
     public void validateDuration(Integer duration) {
         if (duration == null) {
             throw new IllegalArgumentException("체류 시간을 입력해주세요.");
@@ -76,17 +70,14 @@ public class ItineraryValidator {
         }
     }
 
-    /**
-     * 관광지 삭제 검증
-     */
+    // 관광지 삭제 검증
     public void validateDeleteRequest(List<Integer> remainingSpotIds) {
         if (remainingSpotIds == null || remainingSpotIds.isEmpty()) {
             throw new IllegalArgumentException("최소 1개 이상의 관광지가 필요합니다.");
         }
     }
-    /**
-     * 일정 저장 요청 검증
-     */
+
+    // 일정 저장 요청 검증
     public void validateSaveRequest(ItinerarySaveDto request) {
         if (!request.isValid()) {
             throw new IllegalArgumentException("일정 데이터가 올바르지 않습니다.");

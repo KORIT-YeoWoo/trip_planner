@@ -68,8 +68,6 @@ public class TspService {
     private TspResponseDto handleSingleSpot(TspRequestDto request) {
         Integer spotId = request.getSpotIds().get(0);
 
-        log.info("관광지 1개 - 최적화 불필요");
-
         // 시작점 → 관광지 → 도착점 거리만 계산
         TouristSpot spot = touristSpotMapper.findById(spotId);
 
@@ -94,8 +92,6 @@ public class TspService {
                 totalDuration += toEnd.getDuration();
             }
         }
-
-        log.info("단일 관광지 경로: {:.1f}km, {}분", totalDistance, totalDuration);
 
         return TspResponseDto.builder()
                 .optimizedSpotIds(Collections.singletonList(spotId))
@@ -244,7 +240,7 @@ public class TspService {
                         segment.getToLon()
                 );
 
-                // ✅ null 체크 (이미 fallback 처리됨)
+                // null 체크 (이미 fallback 처리됨)
                 if (routeInfo != null) {
                     segment.setActualDistance(routeInfo.getDistance());
                     segment.setDuration(routeInfo.getDuration());
@@ -265,15 +261,12 @@ public class TspService {
             }
         }
 
-        // ✅ 일부 실패해도 결과 반환
+        // 일부 실패해도 결과 반환
         if (totalActualDistance > 0) {
             response.setTotalActualDistance(totalActualDistance);
             response.setTotalDuration(totalDuration);
-
-            log.info("Kakao API 완료 - 성공: {}, 실패: {}, 총: {:.1f}km, {}분",
-                    successCount, failCount, totalActualDistance, totalDuration);
         } else {
-            // ✅ 전부 실패해도 직선거리는 있음
+            // 전부 실패해도 직선거리는 있음
             log.warn("Kakao API 전부 실패 - 직선거리만 사용");
         }
     }

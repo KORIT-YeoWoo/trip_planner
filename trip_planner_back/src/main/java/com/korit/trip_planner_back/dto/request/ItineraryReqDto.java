@@ -8,14 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * 일정 생성 요청 DTO
- *
- * ✅ 변경사항:
- * - startLocation 제거
- * - accommodations 제거
- * - dailyLocations 추가 (Day별 출발지/도착지)
- */
+// 일정 생성 요청 DTO
 @Data
 @Builder
 @NoArgsConstructor

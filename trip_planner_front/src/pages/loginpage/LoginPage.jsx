@@ -17,7 +17,6 @@ function LoginPage() {
         <div css={s.layout}>
             <div css={s.container}>
                 <div css={s.leftBackground}></div>
-
                 <div css={s.rightBackground}>
                     <h1>로그인</h1>
                     <p>여행 계획의 시작, 서비스에 로그인하세요.</p>

@@ -11,9 +11,7 @@ import java.util.List;
 @Component
 public class PromptBuilder {
 
-    /**
-     * AI 일정 생성 프롬프트
-     */
+    // AI 일정 생성 프롬프트
     public String buildSchedulePrompt(
             List<TouristSpot> spots,
             List<DailyLocationDto> dailyLocations,
@@ -28,13 +26,10 @@ public class PromptBuilder {
 
         sb.append("당신은 제주도 여행 플래너입니다.\n\n");
 
-        // 기본 정보
         sb.append("### 입력 정보\n");
         sb.append("- 여행 기간: ").append(travelDays - 1).append("박").append(travelDays).append("일\n");
         sb.append("- 이동 수단: ").append(transport).append("\n");
         sb.append("- 총 관광지: ").append(totalSpots).append("개\n\n");
-
-        // ✅ 명확한 분배 가이드
         sb.append("### 📋 관광지 분배 가이드\n");
         sb.append("**중요: 아래 분배 가이드를 반드시 따라야 합니다!**\n");
 
@@ -59,7 +54,7 @@ public class PromptBuilder {
 
             // 섬 여부
             if (spot.isIsland()) {
-                sb.append(", ⭐섬 - 페리 포함 약 6시간 소요");
+                sb.append(", 섬 - 페리 포함 약 6시간 소요");
             }
 
             // 체류 시간
@@ -93,7 +88,7 @@ public class PromptBuilder {
         sb.append("   - 예: \"일출 명소라 아침 첫 일정\", \"체력 소모 커서 오후\"\n");
         sb.append("3. **모든 관광지를 반드시 배치** (excluded는 특별한 경우만 사용)\n\n");
 
-        // ✅ 중요 규칙 강화
+        // 중요 규칙 강화
         sb.append("### ⚠️ 중요 규칙 (반드시 준수!)\n");
         sb.append("1. **모든 관광지를 빠짐없이 배치**해야 합니다.\n");
         sb.append("2. **excluded는 비워두세요.** (정말 불가피한 경우만 사용)\n");
@@ -104,7 +99,7 @@ public class PromptBuilder {
         sb.append("7. 빈 날짜가 없어야 합니다 (모든 날짜에 관광지 배정)\n\n");
         sb.append("8. 하루 최대 5개의 관광지까지만 배치할 수 있습니다. 초과시 가장 이동거리가 먼 곳을 제외하세요.\n\n");
 
-        // ✅ 응답 형식 (식사 제거)
+        // 응답 형식 (식사 제거)
         sb.append("### 응답 형식 (JSON만, 설명 없이)\n");
         sb.append("```json\n");
         sb.append("{\n");
@@ -144,7 +139,7 @@ public class PromptBuilder {
         sb.append("}\n");
         sb.append("```\n\n");
 
-        // ✅ 재확인
+        // 재확인
         sb.append("### ✅ 최종 확인\n");
         sb.append("- 모든 ").append(totalSpots).append("개 관광지가 배치되었는가?\n");
         sb.append("- excluded 배열이 비어있는가?\n");
@@ -154,9 +149,7 @@ public class PromptBuilder {
         return sb.toString();
     }
 
-    /**
-     * 지역 판별
-     */
+    // 지역 판별
     private String getRegion(double lat, double lon) {
         if (lat >= 33.45 && lon >= 126.7) return "동부";
         if (lat >= 33.45 && lon < 126.3) return "서부";

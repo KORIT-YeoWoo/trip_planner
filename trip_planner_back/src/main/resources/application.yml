@@ -29,7 +29,7 @@ domain:
 app:
   cors:
     allowed-origins:
-      - "http://rasche.store"
+      - "https://rasche.store"
 ---
 config:
   activate:

@@ -11,9 +11,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
-/**
- * GPT API 호출 전담 서비스
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,14 +28,8 @@ public class GPTService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    /**
-     * GPT API 호출
-     *
-     * @param prompt 프롬프트
-     * @return GPT 응답 텍스트
-     */
+    // GPT API 호출
     public String callGptApi(String prompt) throws Exception {
-        log.info("=== GPT API 호출 시작 ===");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

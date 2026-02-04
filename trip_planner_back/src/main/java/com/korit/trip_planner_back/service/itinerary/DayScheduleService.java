@@ -28,12 +28,9 @@ public class DayScheduleService {
     private final ItineraryItemMapper itineraryItemMapper;
     private final TouristSpotMapper touristSpotMapper;
 
-    /**
-     * Day 순서 변경
-     */
+    // Day 순서 변경
     @Transactional
     public DayScheduleDto reorder(Integer itineraryId, Integer day, List<Integer> spotIds) {
-        log.info("=== Day {} 순서 변경 시작 ===", day);
 
         // 1. 검증
         validator.validateReorderRequest(spotIds);
@@ -64,19 +61,13 @@ public class DayScheduleService {
 
         // 5. DB 업데이트
         persistenceService.updateDaySchedule(itineraryId, day, newSchedule);
-
-        log.info("=== Day {} 순서 변경 완료 ===", day);
         return newSchedule;
     }
 
-    /**
-     * 체류시간 변경
-     */
+    // 체류시간 변경
     @Transactional
     public DayScheduleDto updateDuration(
             Integer itineraryId, Integer day, Integer spotId, Integer newDuration) {
-
-        log.info("=== Day {} 체류 시간 변경: {} → {}분 ===", day, spotId, newDuration);
 
         // 1. 검증
         validator.validateDuration(newDuration);
@@ -109,18 +100,12 @@ public class DayScheduleService {
 
         // 5. DB 업데이트
         persistenceService.updateDaySchedule(itineraryId, day, newSchedule);
-
-        log.info("=== Day {} 체류 시간 변경 완료 ===", day);
         return newSchedule;
     }
 
-    /**
-     * 관광지 삭제
-     */
+    // 관광지 삭제
     @Transactional
     public DayScheduleDto deleteSpot(Integer itineraryId, Integer day, Integer spotId) {
-        log.info("=== Day {} 관광지 삭제: spotId={} ===", day, spotId);
-
         // 1. 현재 아이템 조회
         List<ItineraryItem> currentItems = itineraryItemMapper
                 .findByDayId(itineraryId, day);
@@ -160,12 +145,8 @@ public class DayScheduleService {
 
         // 7. DB 업데이트
         persistenceService.updateDaySchedule(itineraryId, day, newSchedule);
-
-        log.info("=== Day {} 관광지 삭제 완료 ===", day);
         return newSchedule;
     }
-
-    // ==================== Private 메서드 ====================
 
     private List<TouristSpot> getOrderedSpots(List<Integer> spotIds) {
         List<TouristSpot> spots = touristSpotMapper.findAllByIds(spotIds);

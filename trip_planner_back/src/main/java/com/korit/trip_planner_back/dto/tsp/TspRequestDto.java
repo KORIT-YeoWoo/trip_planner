@@ -35,10 +35,6 @@ public class TspRequestDto {
             throw new IllegalArgumentException("관광지 ID 리스트가 비어있습니다.");
         }
 
-//        if (spotIds.size() < 2) {
-//            throw new IllegalArgumentException("최소 2개 이상의 관광지가 필요합니다.");
-//        }
-
         if (spotIds.size() > 30) {
             throw new IllegalArgumentException("관광지는 최대 30개까지 선택 가능합니다.");
         }

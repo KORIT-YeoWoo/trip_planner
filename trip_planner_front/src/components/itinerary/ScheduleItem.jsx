@@ -13,7 +13,7 @@ function ScheduleItem({ data, order, isFixed = false, onDurationChange }) {
     const duration = data?.duration ?? 0;
     const price = data?.cost ?? 0;
 
-    // ✅ 체류 시간 조정 상태
+    // 체류 시간 조정 상태
     const [isEditingDuration, setIsEditingDuration] = useState(false);
     const [newDuration, setNewDuration] = useState(duration);
 
@@ -34,7 +34,7 @@ function ScheduleItem({ data, order, isFixed = false, onDurationChange }) {
         transition,
     };
 
-    // ✅ 저장 핸들러 (자동 저장)
+    // 저장 핸들러 (자동 저장)
     const handleSave = () => {
         if (newDuration !== duration && onDurationChange) {
             onDurationChange(data.spotId, newDuration);
@@ -42,7 +42,7 @@ function ScheduleItem({ data, order, isFixed = false, onDurationChange }) {
         setIsEditingDuration(false);
     };
 
-    // ✅ 취소 핸들러 (백드롭 클릭 시 자동 저장)
+    // 취소 핸들러 (백드롭 클릭 시 자동 저장)
     const handleCancel = () => {
         if (newDuration !== duration && onDurationChange) {
             onDurationChange(data.spotId, newDuration);
@@ -50,7 +50,7 @@ function ScheduleItem({ data, order, isFixed = false, onDurationChange }) {
         setIsEditingDuration(false);
     };
 
-    // ✅ 시간 포맷팅
+    // 시간 포맷팅
     const formatDuration = (minutes) => {
         if (!minutes || minutes === 0) return "0시간";
         
@@ -113,8 +113,6 @@ function ScheduleItem({ data, order, isFixed = false, onDurationChange }) {
                             )}
                         </div>
                     )}
-
-                    {/* ✅ 기존 가격 표시 (duration과 price가 모두 0이면 안 보이게) */}
                 </div>
                 {!isFixed && (
                     <div css={s.dragHandle} {...attributes} {...listeners}>

@@ -38,13 +38,12 @@ public class KakaoNaviService {
     public RouteInfo getRouteInfo(double originLat, double originLon,
                                   double destLat, double destLon) {
 
-        // ✅ 1. 캐시 키 생성
+        // 캐시 키 생성
         String cacheKey = String.format("%.6f,%.6f-%.6f,%.6f",
                 originLat, originLon, destLat, destLon);
 
-        // ✅ 2. 캐시 확인
+        // 캐시 확인
         if (cache.containsKey(cacheKey)) {
-            log.debug("캐시 히트: {}", cacheKey);
             return cache.get(cacheKey);
         }
 
@@ -82,10 +81,8 @@ public class KakaoNaviService {
             return routeInfo;
 
         } catch (Exception e) {
-            log.warn("Kakao API 실패 → 직선거리 사용: ({},{}) → ({},{})",
-                    originLat, originLon, destLat, destLon);
 
-            // ✅ 4. 실패 시 직선거리 사용
+            // 실패 시 직선거리 사용
             return createFallbackRoute(originLat, originLon, destLat, destLon);
         }
     }
@@ -99,8 +96,6 @@ public class KakaoNaviService {
         // 평균 속도 50km/h 가정
         int duration = (int) Math.ceil((distance / 50.0) * 60);
 
-        log.debug("Fallback 경로: {:.1f}km, {}분 (직선거리 기반)", distance, duration);
-
         return new RouteInfo(distance, duration);
     }
 
@@ -110,7 +105,6 @@ public class KakaoNaviService {
             JsonNode routes = root.get("routes");
 
             if (routes == null || routes.isEmpty()) {
-                log.warn("경로를 찾을 수 없습니다: {}", responseBody);
                 return null;
             }
 

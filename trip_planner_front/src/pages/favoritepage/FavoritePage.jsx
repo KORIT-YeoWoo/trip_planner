@@ -55,7 +55,7 @@ function FavoritePage() {
                 <div css={s.overlay}>
                     
                     <div css={s.favoritContent}>
-                        <h1>♡ 관심 여행지 ♡</h1>
+                        <h1>관심 여행지</h1>
                         {loading ? (
                         <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
                              ) : (

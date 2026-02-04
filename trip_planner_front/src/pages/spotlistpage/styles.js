@@ -1,16 +1,15 @@
 import { css } from "@emotion/react";
 
-// 1. CSS에서 정의된 변수들을 상수로 관리 (여우 브랜드 테마)
 const colors = {
   background: "oklch(0.99 0.005 85)",
   foreground: "oklch(0.25 0.02 60)",
   card: "oklch(1 0 0)",
-  primary: "oklch(0.68 0.18 45)", // 브랜드 오렌지/코랄
+  primary: "oklch(0.68 0.18 45)",
   primaryForeground: "oklch(1 0 0)",
   muted: "oklch(0.96 0.01 85)",
   mutedForeground: "oklch(0.55 0.02 60)",
   border: "oklch(0.92 0.01 85)",
-  accent: "oklch(0.9 0.08 45)", // 연한 오렌지
+  accent: "oklch(0.9 0.08 45)",
   radius: "1rem",
 };
 
@@ -117,7 +116,7 @@ export const removeBtn = css`
 `;
 
 export const card = (select) => css`
-  margin-bottom: 0; /* 그리드 갭이 있으므로 0으로 조정 */
+  margin-bottom: 0;
   padding: 0;
   background-color: ${colors.card};
   border: 2px solid ${select ? colors.primary : "transparent"};
@@ -138,8 +137,7 @@ export const card = (select) => css`
     border-color: ${select ? colors.primary : colors.accent};
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
   }
-  &:active:not(:has(button:active)) { 
-    /* 버튼이 active 상태가 아닐 때만 카드가 active 효과를 받음 */
+  &:active:not(:has(button:active)) {
     transform: translateY(0px) scale(0.98);
   }
 `;
@@ -217,14 +215,14 @@ export const imageWrapper= css`
   position: relative;
   width: 100%;
   
-  height: 280px;        /* 카드 상단 이미지 높이 */
+  height: 280px;
   overflow: hidden;
   background-color: gray;
   
 `;
 export const image = css`
   position: absolute;
-  inset: 0;               /* top:0 left:0 right:0 bottom:0 */
+  inset: 0; 
   width: 100%;
   height: 100%;
   
@@ -252,7 +250,7 @@ export const heartBtn = (isSelected) => css`
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 10; /* 이미지나 여우 아이콘보다 위에 위치 */
+  z-index: 10;
 
   display: flex;
   align-items: center;
@@ -262,7 +260,6 @@ export const heartBtn = (isSelected) => css`
   cursor: pointer;
   padding: 0;
   
-  /* 아이콘 색상 및 그림자 처리 */
   color: ${isSelected ? "#ff4d4d" : "white"}; 
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
   
@@ -392,14 +389,14 @@ export const sinfo = css`
 export const btnwrap = css`
     padding: 20px;
     
-    border-top: 1px solid ${colors.border}; /* 선택 목록과 버튼 사이에 경계선 추가 */
-    background-color: ${colors.card}; /* 배경색 통일 */
+    border-top: 1px solid ${colors.border};
+    background-color: ${colors.card};
     position: sticky;
     bottom: 0;
 `;
 export const sclick = css`
     border: none;
-    width: 100%; /* 부모(btnwrap)가 준 여백 안에서 100%를 차지합니다 */
+    width: 100%;
     padding: 16px;
     border-radius: 12px;
     background-color: ${colors.primary};
@@ -409,8 +406,6 @@ export const sclick = css`
     cursor: pointer;
     transition: transform 0.2s, filter 0.2s;
     
-
-    /* 기존에 가로 스크롤을 유발하던 margin과 calc width는 삭제하세요! */
 
     &:hover { 
         filter: brightness(1.1); 

@@ -158,10 +158,10 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
                 <div
                     css={s.starInputRow}
                     aria-label="별점 선택"
-                    onMouseLeave={() => setHoverRating(0)} // ✅ 별 영역 벗어나면 프리뷰 해제
+                    onMouseLeave={() => setHoverRating(0)} //  별 영역 벗어나면 프리뷰 해제
                 >
                     {[1, 2, 3, 4, 5].map((n) => {
-                        const active = previewValue >= n; // ✅ 프리뷰 기준으로 채우기
+                        const active = previewValue >= n; //  프리뷰 기준으로 채우기
                         const Icon = active ? FaStar : FaRegStar;
 
                         return (
@@ -169,8 +169,8 @@ function SpotDetailModal({ isOpen, spot, onClose, children, isLoading = false, o
                                 key={n}
                                 type="button"
                                 css={s.starBtn(active)}
-                                onMouseEnter={() => setHoverRating(n)} // ✅ 호버 프리뷰
-                                onFocus={() => setHoverRating(n)}      // ✅ 키보드 접근성
+                                onMouseEnter={() => setHoverRating(n)} //  호버 프리뷰
+                                onFocus={() => setHoverRating(n)}      //  키보드 접근성
                                 onBlur={() => setHoverRating(0)}
                                 onClick={() => {
                                 setRating((prev) => (prev === n ? 0 : n));

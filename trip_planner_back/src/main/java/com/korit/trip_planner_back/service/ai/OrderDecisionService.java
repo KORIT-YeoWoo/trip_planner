@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * AI 제안 순서 vs TSP 최적 순서 결정
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -24,18 +21,7 @@ public class OrderDecisionService {
 
     private static final double TOLERANCE_PERCENT = 15.0;  // 15% 허용
 
-    /**
-     * AI 순서 vs TSP 순서 결정
-     *
-     * @param aiDay AI 제안 순서
-     * @param tspResult TSP 계산 결과
-     * @param spots 관광지 Map
-     * @param startLat 출발지 위도
-     * @param startLon 출발지 경도
-     * @param endLat 도착지 위도
-     * @param endLon 도착지 경도
-     * @return 최종 순서 (spotId 리스트)
-     */
+    // AI 순서 vs TSP 순서 결정
     public List<Integer> decide(
             AIScheduleResponse.DaySchedule aiDay,
             TspResponseDto tspResult,
@@ -71,31 +57,15 @@ public class OrderDecisionService {
         // 4. 거리 차이 비교
         double diffPercent = ((aiDistance - tspDistance) / tspDistance) * 100;
 
-        log.info("Day {} 거리 비교:", aiDay.getDay());
-        log.info("  ├─ AI 순서: {:.1f}km", aiDistance);
-        log.info("  ├─ TSP 순서: {:.1f}km", tspDistance);
-        log.info("  └─ 차이: {:.1f}%", diffPercent);
-
         if (diffPercent <= TOLERANCE_PERCENT) {
-            // 차이 15% 이내 → AI 순서 존중
-            log.info("✅ AI 순서 채택 (차이 {:.1f}% ≤ 15%)", diffPercent);
-
-            specialReasons.forEach((spotId, reason) -> {
-                String spotName = spots.get(spotId).getTitle();
-                log.info("  ├─ {}: {}", spotName, reason);
-            });
-
             return aiOrder;
         } else {
             // 차이 15% 초과 → TSP 순서 사용
-            log.warn("⚠️ TSP 순서 채택 (차이 {:.1f}% > 15%, AI 순서는 비효율적)", diffPercent);
             return tspResult.getOptimizedSpotIds();
         }
     }
 
-    /**
-     * 총 이동 거리 계산
-     */
+    // 총 이동 거리 계산
     private double calculateTotalDistance(
             List<Integer> spotIds,
             Map<Integer, TouristSpot> spots,

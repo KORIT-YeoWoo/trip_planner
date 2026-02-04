@@ -8,7 +8,6 @@ function TosPage() {
         <div css={s.layout}> 
             <div css={s.bar}></div>
 
-            {/* 약관 본문 영역 */}
             <div css={s.content}>
                 <h1 css={s.title}>이용약관</h1>
 

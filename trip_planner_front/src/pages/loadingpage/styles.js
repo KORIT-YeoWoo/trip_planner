@@ -11,7 +11,6 @@ export const overlay = css`
     justify-content: center;
     padding: 6vh 1rem;
 
-    /* 스크롤바 유무로 화면 흔들림 방지(브라우저가 지원하면 자동 보정) */
     scrollbar-gutter: stable;
 `;
 
@@ -21,7 +20,7 @@ export const centerWrap = css`
     align-items: center;
 
     width: 100%;
-    max-width: 42.5rem; /* 680px */
+    max-width: 42.5rem;
 `;
 
 const floatY = keyframes`
@@ -30,7 +29,6 @@ const floatY = keyframes`
     100% { transform: translateY(0); }
 `;
 
-/* ✅ 핵심: 이미지 “박스”를 고정 */
 export const foxBox = css`
     width: 10rem;
     height: 10rem;
@@ -41,7 +39,6 @@ export const foxBox = css`
     animation: ${floatY} 1.6s ease-in-out infinite;
 `;
 
-/* ✅ img는 박스 안에서만 contain */
 export const foxImage = css`
     width: 100%;
     height: 100%;

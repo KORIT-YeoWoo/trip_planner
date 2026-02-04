@@ -19,9 +19,7 @@ function LoginModal() {
         <div css={s.overlay} onClick={closeLoginModal}>
             <div css={s.container} onClick={(e) => e.stopPropagation()}>
                 <button css={s.closeBtn} onClick={closeLoginModal}>&times;</button>
-
                 <div css={s.leftBackground} />
-
                 <div css={s.rightBackground}>
                     <h1>여행의 우선순위,여우</h1>
                     <p>여행코스 플랫폼<br/>여우에 로그인하세요.</p>

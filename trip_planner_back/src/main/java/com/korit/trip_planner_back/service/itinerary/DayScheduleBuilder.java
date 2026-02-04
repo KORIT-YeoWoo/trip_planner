@@ -21,9 +21,7 @@ public class DayScheduleBuilder {
 
     private final KakaoNaviService kakaoNaviService;
 
-    /**
-     * 관광지 순서대로 Day 일정 생성 (Kakao API 사용)
-     */
+    // 관광지 순서대로 Day 일정 생성 (Kakao API 사용)
     public DayScheduleDto build(
             int day,
             LocalDate date,

@@ -36,14 +36,10 @@ public class DayScheduleDto {
     private TravelInfoDto startToFirstTravel;
 
     public void calculateTotals() {
-        log.debug("calculateTotals() 시작 - Day {}, items 크기: {}",
-                getDay(), items != null ? items.size() : "null");
-
         if (items == null || items.isEmpty()) {
             this.totalDistance = 0.0;
             this.totalDuration = 0;
             this.totalCost = 0;
-            log.debug("items가 비어있음 → 총합 0으로 초기화");
             return;
         }
 

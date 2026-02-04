@@ -22,7 +22,7 @@
     </insert>
     <select id="findByItineraryId" resultType="dailyLocation">
         select
-            id,
+            daily_location_id,
             itinerary_id,
             day_number,
             start_name,
@@ -43,7 +43,7 @@
     </select>
     <select id="findByItineraryIdAndDay" resultType="dailyLocation">
         select
-            id,
+            daily_location_id,
             itinerary_id,
             day_number,
             start_name,
@@ -73,11 +73,11 @@
             end_lat = #{endLat},
             end_lon = #{endLon}
         where
-            id = #{id}
+            daily_location_id = #{dailyLocationId}
     </update>
     <delete id="deleteById">
         delete from daily_locations
-        where id = #{id}
+        where daily_location_id = #{dailyLocationId}
     </delete>
     <delete id="deleteByItineraryId">
         delete from daily_locations

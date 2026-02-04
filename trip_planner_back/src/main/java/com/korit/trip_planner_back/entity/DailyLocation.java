@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class DailyLocation {
 
-    private Integer id;
+    private Integer dailyLocationId;
     private Integer itineraryId;
     private Integer dayNumber;
 

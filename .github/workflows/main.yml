@@ -23,6 +23,7 @@ jobs:
             echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_MINSEOK}}" >> $GITHUB_ENV
             echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_MINSEOK}}" >> $GITHUB_ENV
             echo "REACT_ENV=${{secrets.REACT_ENV_MINSEOK}}" >> $GITHUB_ENV
+            echo "ACTIVE_PROFILE=minseok" >> $GITHUB_ENV
   
           elif [ ${{github.ref}} == 'refs/heads/deploy-mina' ]; then
           
@@ -35,6 +36,7 @@ jobs:
             echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_MINA}}" >> $GITHUB_ENV
             echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_MINA}}" >> $GITHUB_ENV
             echo "REACT_ENV=${{secrets.REACT_ENV_MINA}}" >> $GITHUB_ENV
+            echo "ACTIVE_PROFILE=mina" >> $GITHUB_ENV
   
           elif [ ${{github.ref}} == 'refs/heads/deploy-hyeok' ]; then
           
@@ -47,7 +49,8 @@ jobs:
             echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_HYEOK}}" >> $GITHUB_ENV
             echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_HYEOK}}" >> $GITHUB_ENV
             echo "REACT_ENV=${{secrets.REACT_ENV_HYEOK}}" >> $GITHUB_ENV
-  
+            echo "ACTIVE_PROFILE=hyeok" >> $GITHUB_ENV
+            
           elif [ ${{github.ref}} == 'refs/heads/deploy-sungeun' ]; then
           
             echo "GCP_VM_HOST=${{secrets.GCP_VM_HOST_SUNGEUN}}" >> $GITHUB_ENV
@@ -59,6 +62,7 @@ jobs:
             echo "DOCKER_PASSWORD=${{secrets.DOCKER_PASSWORD_SUNGEUN}}" >> $GITHUB_ENV
             echo "APPLICATION_SECRET=${{secrets.APPLICATION_SECRET_SUNGEUN}}" >> $GITHUB_ENV
             echo "REACT_ENV=${{secrets.REACT_ENV_SUNGEUN}}" >> $GITHUB_ENV
+            echo "ACTIVE_PROFILE=sungeun" >> $GITHUB_ENV
             
           fi
       - name: checkout
@@ -77,7 +81,7 @@ jobs:
           cd trip_planner_back
           echo ${{env.APPLICATION_SECRET}} | base64 --decode > ./src/main/resources/application-secret-prod.yml
           chmod 777 ./mvnw
-          ./mvnw clean package -Dtestskip
+          ./mvnw clean package -Dtestskip -Dactive.profile=${{env.ACTIVE_PROFILE}}
 
       - name: Springboot Docker image build
         run: |

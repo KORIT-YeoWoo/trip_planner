@@ -7,7 +7,7 @@ on:
     branches: [deploy-minseok, deploy-hyeok, deploy-mina, deploy-sungeun]
 
 jobs:
-  build-deplot-minseok:
+  build-deploy-minseok:
     runs-on: ubuntu-22.04
     steps:
       - name: "환경변수 세팅"
